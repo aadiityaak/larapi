@@ -30,7 +30,8 @@ class CustomerController extends Controller
      */
     public function show(Customer $customer)
     {
-        //
+        $customer = Customer::find($customer->id);
+        return response()->json($customer);
     }
 
     /**
@@ -38,7 +39,9 @@ class CustomerController extends Controller
      */
     public function update(Request $request, Customer $customer)
     {
-        //
+        $customer = Customer::find($customer->id);
+        $customer->update($request->all());
+        return response()->json($customer);
     }
 
     /**
@@ -46,6 +49,8 @@ class CustomerController extends Controller
      */
     public function destroy(Customer $customer)
     {
-        //
+        $customer = Customer::find($customer->id);
+        $customer->delete();
+        return response()->json($customer);
     }
 }
