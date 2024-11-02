@@ -12,7 +12,7 @@ class CustomerSeeder extends Seeder
     {
         $faker = Faker::create();
 
-        foreach (range(1, 20) as $index) {
+        foreach (range(1, 100) as $index) {
             Customer::create([
                 'name' => $faker->name,
                 'phone' => $faker->phoneNumber,
