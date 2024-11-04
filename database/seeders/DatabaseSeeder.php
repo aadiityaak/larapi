@@ -16,10 +16,14 @@ class DatabaseSeeder extends Seeder
         // Create 10 random users
         User::factory(10)->create();
 
-        // Create a specific user
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@larapi.test',
+            'is_admin' => false,
+            'avatar' => null,
+            'phone' => '08123456789',
+            'address' => 'Jl. Kebon Jeruk No. 1',
+            'position' => 'Manager',
             'password' => Hash::make('password'),
         ]);
 

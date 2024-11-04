@@ -14,5 +14,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         return $request->user();
     });
     Route::put('profile', [ProfileController::class, 'update']);
+    Route::get('users', [ProfileController::class, 'index']);
     Route::apiResource('customers', CustomerController::class);
 });
