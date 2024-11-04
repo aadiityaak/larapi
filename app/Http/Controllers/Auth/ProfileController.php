@@ -16,6 +16,12 @@ class ProfileController extends Controller
         $user = User::all();
         return response()->json($user);
     }
+
+    public function show($id)
+    {
+        $user = User::find($id);
+        return response()->json($user);
+    }
     public function update(ProfileUpdateRequest $request)
     {
         $user = $request->user();

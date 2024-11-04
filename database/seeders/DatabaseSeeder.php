@@ -26,8 +26,5 @@ class DatabaseSeeder extends Seeder
             'position' => 'Manager',
             'password' => Hash::make('password'),
         ]);
-
-        // Create 100 random customers
-        $this->call(CustomerSeeder::class);
     }
 }
