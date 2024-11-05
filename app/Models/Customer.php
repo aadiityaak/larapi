@@ -14,6 +14,7 @@ class Customer extends Model
         'phone',
         'alamat',
         'kategori',
+        'bank',
         'pekerjaan',
         'sertifikat',
         'nilai_transaksi',
@@ -21,5 +22,9 @@ class Customer extends Model
         'harga_kesepakatan',
         'data_pajak_pembeli',
         'data_pajak_penjual',
+    ];
+
+    protected $casts = [
+        'pekerjaan' => 'array',
     ];
 }

@@ -22,7 +22,22 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
-        $customer = Customer::create($request->all());
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'required|string|max:15',
+            'alamat' => 'required|string',
+            'bank' => 'max:255',
+            'kategori' => 'required|string',
+            'pekerjaan' => 'max:255',
+            'sertifikat' => 'required|string',
+            'nilai_transaksi' => 'required|numeric',
+            'harga_real' => 'required|numeric',
+            'harga_kesepakatan' => 'required|numeric',
+            'data_pajak_pembeli' => 'required|numeric',
+            'data_pajak_penjual' => 'required|numeric',
+        ]);
+
+        $customer = Customer::create($validatedData);
         return response()->json($customer);
     }
 

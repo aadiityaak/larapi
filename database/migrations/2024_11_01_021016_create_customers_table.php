@@ -17,7 +17,8 @@ return new class extends Migration
             $table->string('phone', 15);
             $table->string('alamat', 255)->nullable();
             $table->string('kategori', 100)->nullable();
-            $table->string('pekerjaan', 200)->nullable();
+            $table->text('pekerjaan')->nullable();
+            $table->string('bank', 100)->nullable();
             $table->string('sertifikat', 50)->nullable();
             $table->decimal('nilai_transaksi')->nullable();
             $table->decimal('harga_real')->nullable();
