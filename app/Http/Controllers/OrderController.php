@@ -9,6 +9,14 @@ use Illuminate\Http\Request;
 class OrderController extends Controller
 {
 
+    private $validate = [
+        'order_date' => 'required',
+        'service' => 'required',
+        'price' => 'required',
+        'paid' => 'required',
+        'payment_method' => 'required',
+        'document' => 'required'
+    ];
     public function index()
     {
         $orders = Order::all()->load('customer');
@@ -18,6 +26,14 @@ class OrderController extends Controller
     public function show(Order $order)
     {
         $order = Order::find($order->id)->load('customer');
+        return response()->json($order);
+    }
+
+    public function update(Request $request, Order $order)
+    {
+        $order = Order::find($order->id);
+        $validatedData = $request->validate($this->validate);
+        $order->update($validatedData);
         return response()->json($order);
     }
 }

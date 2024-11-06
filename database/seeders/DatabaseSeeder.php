@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
         ]);
 
-        Customer::factory(500)->create();
+        Customer::factory(150)->create();
         Order::factory(50)->create();
     }
 }
