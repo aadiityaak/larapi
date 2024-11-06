@@ -19,7 +19,7 @@ class OrderController extends Controller
     ];
     public function index()
     {
-        $orders = Order::all()->load('customer');
+        $orders = Order::with('customer')->paginate(25);
         return response()->json($orders);
     }
 
