@@ -2,9 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Models\Customer;
 use App\Models\User;
+use App\Models\Order;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Pest\ArchPresets\Custom;
 
 class DatabaseSeeder extends Seeder
 {
@@ -26,5 +29,8 @@ class DatabaseSeeder extends Seeder
             'position' => 'Manager',
             'password' => Hash::make('password'),
         ]);
+
+        Customer::factory(500)->create();
+        Order::factory(50)->create();
     }
 }
