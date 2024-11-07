@@ -37,4 +37,12 @@ class KaryawanController extends Controller
         $user->update($validatedData);
         return response()->json($user);
     }
+
+    public function destroy($id)
+    {
+        $user = User::findOrFail($id);
+        $this->authorize('delete', $user);
+        $user->delete();
+        return response()->json($user);
+    }
 }

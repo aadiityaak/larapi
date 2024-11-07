@@ -16,11 +16,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create 10 random users
-        User::factory(100)->create();
-        Customer::factory(150)->create();
-        Order::factory(150)->create();
-
         User::factory()->create([
             'name' => 'Test Admin',
             'email' => 'test@larapi.test',
@@ -41,5 +36,9 @@ class DatabaseSeeder extends Seeder
             'position' => 'Manager',
             'password' => Hash::make('password'),
         ]);
+
+        User::factory(100)->create();
+        Customer::factory(150)->create();
+        Order::factory(150)->create();
     }
 }

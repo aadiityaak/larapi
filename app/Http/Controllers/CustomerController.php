@@ -69,6 +69,8 @@ class CustomerController extends Controller
     public function destroy(Customer $customer)
     {
         $customer = Customer::find($customer->id);
+        // saat hapus customer harus hapus semua order nya
+        $customer->orders()->delete();
         $customer->delete();
         return response()->json($customer);
     }

@@ -20,4 +20,11 @@ class UserPolicy
         // atau jika pengguna tersebut adalah admin
         return $authUser->id === $user->id || $authUser->is_admin === 1;
     }
+
+    public function delete(User $authUser, User $user)
+    {
+        // Memeriksa apakah pengguna yang sedang login adalah pengguna yang sama
+        // atau jika pengguna tersebut adalah admin
+        return $authUser->id === $user->id || $authUser->is_admin === 1;
+    }
 }
