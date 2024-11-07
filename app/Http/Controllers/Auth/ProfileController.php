@@ -12,7 +12,7 @@ class ProfileController extends Controller
 
     public function index()
     {
-        $user = User::all();
+        $user = User::paginate(25);
         return response()->json($user);
     }
 

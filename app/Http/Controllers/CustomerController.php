@@ -13,7 +13,7 @@ class CustomerController extends Controller
      */
     public $validate = [
         'name' => 'required|string|max:255',
-        'phone' => 'required|string|max:15',
+        'phone' => 'required|string|max:20',
         'alamat' => 'required|string',
         'bank' => 'max:255',
         'kategori' => 'required|string',

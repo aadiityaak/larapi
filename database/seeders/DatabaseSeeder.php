@@ -17,11 +17,23 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Create 10 random users
-        User::factory(10)->create();
+        User::factory(100)->create();
+        Customer::factory(150)->create();
+        Order::factory(150)->create();
 
         User::factory()->create([
-            'name' => 'Test User',
+            'name' => 'Test Admin',
             'email' => 'test@larapi.test',
+            'is_admin' => true,
+            'avatar' => null,
+            'phone' => '08123456789',
+            'address' => 'Jl. Kebon Jeruk No. 1',
+            'position' => 'Manager',
+            'password' => Hash::make('password'),
+        ]);
+        User::factory()->create([
+            'name' => 'Test Manager',
+            'email' => 'manager@larapi.test',
             'is_admin' => false,
             'avatar' => null,
             'phone' => '08123456789',
@@ -29,8 +41,5 @@ class DatabaseSeeder extends Seeder
             'position' => 'Manager',
             'password' => Hash::make('password'),
         ]);
-
-        Customer::factory(150)->create();
-        Order::factory(150)->create();
     }
 }

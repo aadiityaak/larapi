@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\Auth\ProfileController;
@@ -15,9 +16,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         return $request->user();
     });
     Route::put('profile', [ProfileController::class, 'update']);
-    Route::get('karyawans', [ProfileController::class, 'index']);
-    Route::get('karyawans/{id}', [ProfileController::class, 'show']);
 
-    Route::apiResource('orders', OrderController::class);
-    Route::apiResource('customers', CustomerController::class);
+    Route::apiResources([
+        'karyawans' => KaryawanController::class,
+        'orders' => OrderController::class,
+        'customers' => CustomerController::class
+    ]);
 });

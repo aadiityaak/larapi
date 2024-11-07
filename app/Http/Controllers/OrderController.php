@@ -36,4 +36,18 @@ class OrderController extends Controller
         $order->update($validatedData);
         return response()->json($order);
     }
+
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate($this->validate);
+        $order = Order::create($validatedData);
+        return response()->json($order);
+    }
+
+    public function destroy(Order $order)
+    {
+        $order = Order::find($order->id);
+        $order->delete();
+        return response()->json($order);
+    }
 }
