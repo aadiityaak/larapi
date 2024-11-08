@@ -26,6 +26,7 @@ class KaryawanController extends Controller
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
+        $requested_user = $request->user();
         $this->authorize('update', $user);
 
         // Validasi manual
@@ -36,11 +37,13 @@ class KaryawanController extends Controller
             'address' => 'required|string',
             'position' => 'nullable|string',
             'password' => 'nullable|string|min:8|confirmed',
-            'avatar' => 'nullable|image|max:2048|mimes:jpeg,png,jpg',
+            'avatar' => 'nullable',
         ]);
 
-        // Menangani avatar
-        if ($request->hasFile('avatar')) {
+        // Abaikan 'avatar' jika merupakan string, hanya lanjutkan jika file
+        if (is_string($request->avatar)) {
+            unset($validated['avatar']);
+        } elseif ($request->hasFile('avatar')) {
             $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
 
             // Hapus avatar lama jika ada
@@ -59,9 +62,20 @@ class KaryawanController extends Controller
             unset($validated['password']);
         }
 
+        // Cek jika user bukan admin dan coba mengupdate position, maka abaikan perubahan position
+        if ($requested_user->is_admin !== 1 && isset($validated['position'])) {
+            $validated['position'] = $user->position;
+            $message = 'Data tersimpan, position tidak bisa diupdate';
+        } else {
+            $message = 'Data tersimpan';
+        }
+
+        // Update user dengan data yang tervalidasi
         $user->update($validated);
+
         return response()->json([
             'user' => $user,
+            'message' => $message,
             'success' => true
         ], 200);
     }

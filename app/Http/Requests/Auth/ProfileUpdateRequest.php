@@ -31,6 +31,9 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 'unique:' . User::class . ',email,' . $this->user()->id
             ],
+            'phone' => ['required', 'string'],
+            'address' => ['required', 'string'],
+            'position' => ['nullable', 'string'],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
             'avatar' => ['nullable'],
         ];
