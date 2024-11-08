@@ -23,7 +23,7 @@ class ProfileUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => [
                 'required',
@@ -32,7 +32,15 @@ class ProfileUpdateRequest extends FormRequest
                 'unique:' . User::class . ',email,' . $this->user()->id
             ],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
-            'avatar' => ['nullable', 'image', 'max:2048', 'mimes:jpeg,png,jpg'],
+            'avatar' => ['nullable'],
         ];
+
+        if (is_string($this->avatar)) {
+            unset($rules['avatar']);
+        } elseif ($this->hasFile('avatar')) {
+            $rules['avatar'] = ['image', 'max:2048', 'mimes:jpeg,png,jpg'];
+        }
+
+        return $rules;
     }
 }

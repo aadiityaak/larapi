@@ -25,6 +25,7 @@ class UserPolicy
     {
         // Memeriksa apakah pengguna yang sedang login adalah pengguna yang sama
         // atau jika pengguna tersebut adalah admin
-        return $authUser->id === $user->id || $authUser->is_admin === 1;
+        // dan jika user yang dihapus bukan admin
+        return ($authUser->id === $user->id || $authUser->is_admin === 1) && $user->is_admin !== 1;
     }
 }

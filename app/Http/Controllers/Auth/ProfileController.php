@@ -26,16 +26,28 @@ class ProfileController extends Controller
         $user = $request->user();
         $validated = $request->validated();
 
+        // Menangani avatar
         if ($request->hasFile('avatar')) {
+            $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
+
+            // Hapus avatar lama jika ada
             if ($user->avatar) {
                 Storage::disk('public')->delete($user->avatar);
             }
-
-            $avatarPath = $request->file('avatar')->store('avatars', 'public');
-            $validated['avatar'] = $avatarPath;
+        } else {
+            // Jika tidak ada file avatar, gunakan avatar yang ada
+            $validated['avatar'] = $user->avatar;
         }
 
-        // Update the user's profile
+        // Hanya update password jika diisi
+        if (isset($validated['password']) && !empty($validated['password'])) {
+            $validated['password'] = bcrypt($validated['password']);
+        } else {
+            // Hapus password dari array validasi agar tidak diupdate
+            unset($validated['password']);
+        }
+
+        // Update profil pengguna
         $user->update($validated);
         $user = $user->refresh();
 
