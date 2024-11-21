@@ -32,4 +32,9 @@ class Customer extends Model
     {
         return $this->hasMany(Order::class);
     }
+
+    public function jobDesks()
+    {
+        return $this->hasMany(JobDesk::class);
+    }
 }

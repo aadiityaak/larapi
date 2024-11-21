@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('orders', function (Blueprint $table) {
+        Schema::create('job_desk', function (Blueprint $table) {
             $table->id();
             $table->string('customer_id');
-            $table->date('order_date');
-            $table->string('service');
-            $table->integer('price')->nullable();
-            $table->string('payment_method')->nullable();
-            $table->integer('paid')->nullable();
-            $table->text('document')->nullable();
+            $table->string('order_id');
+            $table->string('user_id');
+            $table->string('jobdesk');
+            $table->date('tanggal_pengerjaan')->nullable();
+            $table->date('tanggal_selesai')->nullable();
+            $table->string('status')->nullable();
             $table->timestamps();
         });
     }
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('orders');
+        Schema::dropIfExists('job_desk');
     }
 };
