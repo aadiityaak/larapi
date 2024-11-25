@@ -2,12 +2,14 @@
 
 namespace Database\Factories;
 
+use App\Models\Order;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\JobDesk>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Jobdesk>
  */
-class JobDeskFactory extends Factory
+class JobdeskFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -17,7 +19,12 @@ class JobDeskFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'order_id' => fake()->numberBetween(1, 10),
+            'user_id' => fake()->numberBetween(1, 10),
+            'customer_id' => fake()->numberBetween(1, 10),
+            'jobdesk' => fake()->randomElement(['Pengumpulan berkas', 'Pengerjaan tahap 1', 'Pengerjaan tahap 2', 'Pengerjaan tahap 3']),
+            'tanggal_pengerjaan' => fake()->date(),
+            'status' => fake()->randomElement(['Pending', 'Progress', 'Selesai']),
         ];
     }
 }

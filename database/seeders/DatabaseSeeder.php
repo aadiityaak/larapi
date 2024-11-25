@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Customer;
+use App\Models\Jobdesk;
 use App\Models\User;
 use App\Models\Order;
 use Illuminate\Database\Seeder;
@@ -40,5 +41,6 @@ class DatabaseSeeder extends Seeder
         User::factory(100)->create();
         Customer::factory(150)->create();
         Order::factory(150)->create();
+        Jobdesk::factory(100)->create();
     }
 }

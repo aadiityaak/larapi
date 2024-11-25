@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
-use App\Models\Customer;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -19,7 +18,7 @@ class OrderController extends Controller
     ];
     public function index()
     {
-        $orders = Order::with('customer')->paginate(25);
+        $orders = Order::with('customer', 'jobdesks')->paginate(25);
         return response()->json($orders);
     }
 

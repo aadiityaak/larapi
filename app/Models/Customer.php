@@ -35,6 +35,6 @@ class Customer extends Model
 
     public function jobDesks()
     {
-        return $this->hasMany(JobDesk::class);
+        return $this->hasMany(Jobdesk::class);
     }
 }
