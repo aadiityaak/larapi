@@ -16,9 +16,21 @@ class OrderController extends Controller
         'payment_method' => 'required',
         'document' => 'required'
     ];
-    public function index()
+    public function index(Request $request)
     {
-        $orders = Order::with('customer', 'jobdesks')->paginate(25);
+        // Ambil parameter 'customer' dari query string
+        $customerId = $request->query('customer');
+
+        // Jika ada ID customer, lakukan filter berdasarkan ID tersebut
+        if ($customerId) {
+            $orders = Order::with('customer', 'jobdesks')
+                ->where('customer_id', $customerId)
+                ->paginate(25);
+        } else {
+            // Jika tidak ada parameter, ambil semua pesanan
+            $orders = Order::with('customer', 'jobdesks')->paginate(25);
+        }
+
         return response()->json($orders);
     }
 
