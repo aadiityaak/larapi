@@ -38,9 +38,29 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
         ]);
 
-        User::factory(100)->create();
-        Customer::factory(150)->create();
-        Order::factory(150)->create();
-        Jobdesk::factory(100)->create();
+        // Membuat 30 pengguna
+        User::factory(30)->create();
+
+        // Membuat 5 customer
+        $customers = Customer::factory(5)->create();
+
+        foreach ($customers as $customer) {
+            // Membuat antara 2 hingga 10 order untuk setiap customer
+            $ordersCount = rand(2, 10);
+            $orders = Order::factory($ordersCount)->create(['customer_id' => $customer->id]);
+
+            foreach ($orders as $order) {
+                // Membuat antara 2 hingga 10 jobdesk untuk setiap order
+                $jobdesksCount = rand(2, 10);
+                Jobdesk::factory($jobdesksCount)->create([
+                    'order_id' => $order->id,
+                    'customer_id' => $customer->id
+                ]);
+            }
+        }
+        // User::factory(30)->create();
+        // Customer::factory(50)->create();
+        // Order::factory(10)->create();
+        // Jobdesk::factory(10)->create();
     }
 }

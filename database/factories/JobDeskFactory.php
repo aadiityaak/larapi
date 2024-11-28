@@ -23,7 +23,7 @@ class JobdeskFactory extends Factory
             'user_id' => fake()->numberBetween(1, 10),
             'customer_id' => fake()->numberBetween(1, 10),
             'jobdesk' => fake()->randomElement(['Pengumpulan berkas', 'Pengerjaan tahap 1', 'Pengerjaan tahap 2', 'Pengerjaan tahap 3']),
-            'tanggal_pengerjaan' => fake()->date(),
+            'tanggal_pengerjaan' => now(),
             'status' => fake()->randomElement(['Pending', 'Progress', 'Selesai']),
         ];
     }
