@@ -26,9 +26,24 @@ class CustomerController extends Controller
         'data_pajak_penjual' => 'required|numeric',
     ];
 
-    public function index()
+    public function index(Request $request)
     {
-        $customers = Customer::with('orders')->paginate(25);
+        // Initialize the query
+        $query = Customer::with('orders');
+
+        // Filter by name if provided and longer than 3 characters
+        if ($request->has('name') && strlen($request->input('name')) > 3) {
+            $query->where('name', 'like', '%' . $request->input('name') . '%');
+        }
+
+        // Filter by phone if provided and longer than 3 characters
+        if ($request->has('phone') && strlen($request->input('phone')) > 3) {
+            $query->where('phone', 'like', '%' . $request->input('phone') . '%');
+        }
+
+        // Paginate the results
+        $customers = $query->paginate(25);
+
         return response()->json($customers);
     }
 

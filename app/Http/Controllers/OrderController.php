@@ -14,7 +14,8 @@ class OrderController extends Controller
         'price' => 'required',
         'paid' => 'required',
         'payment_method' => 'required',
-        'document' => 'required'
+        'document' => 'required',
+        'customer_id' => 'required|exists:customers,id',
     ];
     public function index(Request $request)
     {
@@ -50,8 +51,13 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
+        // Validate the incoming request
         $validatedData = $request->validate($this->validate);
+
+        // Create the order with validated data
         $order = Order::create($validatedData);
+
+        // Return the created order as a JSON response
         return response()->json($order);
     }
 
