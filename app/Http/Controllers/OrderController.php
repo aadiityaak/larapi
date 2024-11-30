@@ -20,7 +20,7 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         // Ambil parameter 'customer' dari query string
-        $customerId = $request->query('customer');
+        $customerId = $request->query('customer_id');
 
         // Jika ada ID customer, lakukan filter berdasarkan ID tersebut
         if ($customerId) {
