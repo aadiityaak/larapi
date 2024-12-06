@@ -32,7 +32,7 @@ class CustomerController extends Controller
         $query = Customer::with('orders');
 
         // Filter by name if provided and longer than 3 characters
-        if ($request->has('name') && strlen($request->input('name')) > 3) {
+        if ($request->has('name') && strlen($request->input('name')) > 2) {
             $query->where('name', 'like', '%' . $request->input('name') . '%');
         }
 

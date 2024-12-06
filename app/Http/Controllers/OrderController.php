@@ -22,14 +22,27 @@ class OrderController extends Controller
         // Ambil parameter 'customer' dari query string
         $customerId = $request->query('customer_id');
 
+        // if ($request->has('name') && strlen($request->input('name')) > 3) {
+        //     $query->where('name', 'like', '%' . $request->input('name') . '%');
+        // }
+
         // Jika ada ID customer, lakukan filter berdasarkan ID tersebut
         if ($customerId) {
             $orders = Order::with('customer', 'jobdesks')
                 ->where('customer_id', $customerId)
                 ->paginate(25);
         } else {
-            // Jika tidak ada parameter, ambil semua pesanan
-            $orders = Order::with('customer', 'jobdesks')->paginate(25);
+            if ($request->has('name') && strlen($request->input('name')) > 2) {
+                $name = $request->input('name');
+                $orders = Order::with('customer', 'jobdesks')
+                    ->whereHas('customer', function ($query) use ($name) {
+                        $query->where('name', 'like', '%' . $name . '%');
+                    })
+                    ->paginate(25);
+            } else {
+                // Jika tidak ada parameter, ambil semua pesanan
+                $orders = Order::with('customer', 'jobdesks')->paginate(25);
+            }
         }
 
         return response()->json($orders);
