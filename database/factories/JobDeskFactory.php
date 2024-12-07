@@ -18,13 +18,15 @@ class JobdeskFactory extends Factory
      */
     public function definition(): array
     {
+        $status = fake()->randomElement(['Pending', 'Progress', 'Selesai']);
         return [
             'order_id' => fake()->numberBetween(1, 10),
             'user_id' => fake()->numberBetween(1, 10),
             'customer_id' => fake()->numberBetween(1, 10),
             'jobdesk' => fake()->randomElement(['Pengumpulan berkas', 'Pengerjaan tahap 1', 'Pengerjaan tahap 2', 'Pengerjaan tahap 3']),
-            'tanggal_pengerjaan' => now(),
-            'status' => fake()->randomElement(['Pending', 'Progress', 'Selesai']),
+            'tanggal_pengerjaan' => now()->subDays(fake()->numberBetween(5, 10)),
+            'tanggal_selesai' => $status === 'Selesai' ? now() : null,
+            'status' => $status
         ];
     }
 }
