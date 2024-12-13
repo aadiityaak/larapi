@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Jobdesk;
-use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
@@ -16,20 +15,26 @@ class DashboardController extends Controller
     {
         $totalCustomers = Customer::count();
         $totalOrders = Order::count();
-        $totalJobdesks = Jobdesk::count();
-        // Jobdesk status == 'Masuk'
-        $totalJobdesksMasuk = Jobdesk::where('status', 'Masuk')->count();
 
-        // Menghitung total pendapatan dari semua order
-        // $totalRevenue = Order::sum('total_price');
+        $totalPendapatan = intval(Order::sum('paid'));
+        $totalBelumbayar = intval(Order::sum('price')) - intval(Order::sum('paid'));
+
+        // Menghitung jobdesk berdasarkan status
+        $totalJobdesk = Jobdesk::select('status', \DB::raw('count(*) as count'))
+            ->groupBy('status')
+            ->pluck('count', 'status');
 
         // Menyiapkan data untuk response
         $data = [
             'total_customers' => $totalCustomers,
             'total_orders' => $totalOrders,
-            'total_jobdesks' => $totalJobdesks,
-            'total_jobdesks_masuk' => $totalJobdesksMasuk,
-            // 'total_revenue' => $totalRevenue,
+            'total_pendapatan' => $totalPendapatan,
+            'total_belumbayar' => $totalBelumbayar,
+            'total_jobdesks' => [
+                'Masuk' => $totalJobdesk->get('Masuk', 0),
+                'Progress' => $totalJobdesk->get('Progress', 0),
+                'Selesai' => $totalJobdesk->get('Selesai', 0),
+            ],
         ];
 
         return response()->json($data);

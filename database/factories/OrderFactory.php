@@ -24,13 +24,15 @@ class OrderFactory extends Factory
             'Pembuatan Surat Kuasa',
             'Jasa Legalitas'
         ];
+        $price = fake()->numberBetween(1000000, 10000000);
+        $paid = fake()->numberBetween(1000000, $price);
         return [
             'customer_id' => fake()->numberBetween(1, 10),
             'order_date' => now(),
             'service' => fake()->randomElement($layanan_notaris),
-            'price' => fake()->numberBetween(100000, 10000000),
+            'price' => $price,
             'payment_method' => fake()->randomElement(['Tunai', 'Transfer']),
-            'paid' => fake()->numberBetween(100000, 10000000),
+            'paid' => $paid,
             'document' => ['KTP', 'PBB', 'KK']
         ];
     }
