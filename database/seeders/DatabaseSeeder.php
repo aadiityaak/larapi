@@ -39,10 +39,10 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Membuat 30 pengguna
-        User::factory(30)->create();
+        User::factory(25)->create();
 
         // Membuat 5 customer
-        $customers = Customer::factory(5)->create();
+        $customers = Customer::factory(35)->create();
 
         foreach ($customers as $customer) {
             // Membuat antara 2 hingga 10 order untuk setiap customer

@@ -18,7 +18,8 @@ class JobdeskFactory extends Factory
      */
     public function definition(): array
     {
-        $status = fake()->randomElement(['Masuk', 'Progress', 'Selesai']);
+        $status = random_int(1, 100) <= 80 ? 'Selesai' : fake()->randomElement(['Masuk', 'Progress']);
+
         return [
             'order_id' => fake()->numberBetween(1, 10),
             'user_id' => fake()->numberBetween(1, 10),
