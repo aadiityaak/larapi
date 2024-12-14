@@ -7,6 +7,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\JobdeskController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\Auth\ProfileController;
 
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
@@ -18,12 +19,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         return $request->user();
     });
     Route::put('profile', [ProfileController::class, 'update']);
-
     Route::get('dashboard', [DashboardController::class, 'index']);
     Route::apiResources([
         'karyawans' => KaryawanController::class,
         'orders' => OrderController::class,
         'jobdesks' => JobdeskController::class,
-        'customers' => CustomerController::class
+        'customers' => CustomerController::class,
+        'settings' => SettingController::class
     ]);
 });
