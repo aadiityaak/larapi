@@ -26,9 +26,10 @@ class OrderFactory extends Factory
         ];
         $price = fake()->numberBetween(1000000, 10000000);
         $paid = fake()->numberBetween(1000000, $price);
+        $order_date = fake()->dateTimeBetween('-6 months', 'now');
         return [
             'customer_id' => fake()->numberBetween(1, 10),
-            'order_date' => now(),
+            'order_date' => $order_date,
             'service' => fake()->randomElement($layanan_notaris),
             'price' => $price,
             'payment_method' => fake()->randomElement(['Tunai', 'Transfer']),

@@ -19,7 +19,10 @@ class DashboardController extends Controller
         $totalKaryawan = User::count();
 
         $totalPendapatan = intval(Order::sum('paid'));
-        $totalBelumbayar = intval(Order::sum('price')) - intval(Order::sum('paid'));
+        $pendapatanBulanIni = intval(Order::whereMonth('order_date', now()->month)->sum('paid'));
+        $totalTagihan = intval(Order::sum('price'));
+        $totalTagihanBulanIni = intval(Order::whereMonth('order_date', now()->month)->sum('price'));
+        $totalBelumbayar = $totalTagihan - $totalPendapatan;
 
         // Menghitung jobdesk berdasarkan status
         $totalJobdesk = Jobdesk::select('status', \DB::raw('count(*) as count'))
@@ -31,7 +34,9 @@ class DashboardController extends Controller
             'total_customers' => $totalCustomers,
             'total_orders' => $totalOrders,
             'total_pendapatan' => $totalPendapatan,
-            'total_belumbayar' => $totalBelumbayar,
+            'pendapatan_bulan_ini' => $pendapatanBulanIni,
+            'total_tagihan' => $totalTagihan,
+            'total_tagihan_bulan_ini' => $totalTagihanBulanIni,
             'total_karyawan' => $totalKaryawan,
             'total_jobdesks' => [
                 'Masuk' => $totalJobdesk->get('Masuk', 0),
