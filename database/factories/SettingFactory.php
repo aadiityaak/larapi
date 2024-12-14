@@ -17,7 +17,6 @@ class SettingFactory extends Factory
     public function definition(): array
     {
         return [
-            ['setting_key' => 'favicon', 'setting_value' => 'path/to/favicon.ico'],
             ['setting_key' => 'app_name', 'setting_value' => 'NOTANUXT'],
             ['setting_key' => 'app_description', 'setting_value' => 'NOTANUXT | Asisten Notaris Online'],
             ['setting_key' => 'alamat', 'setting_value' => 'Jl. Kebon Jeruk, Jakarta Timur'],

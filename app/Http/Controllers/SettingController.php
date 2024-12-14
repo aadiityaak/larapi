@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Models\Setting;
-use App\Http\Requests\StoreSettingRequest;
-use App\Http\Requests\UpdateSettingRequest;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
 
 class SettingController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Display the settings.
      */
@@ -21,16 +23,21 @@ class SettingController extends Controller
     /**
      * Store or update settings in storage.
      */
-    public function store(StoreSettingRequest $request)
+    public function store(Request $request)
     {
-        $validatedData = $request->validated();
-        $settingsToSave = [];
+        // Define validation rules
+        $validatedData = $request->validate([
+            'app_name' => 'nullable|string|max:255',
+            'app_description' => 'nullable|string|max:500',
+            'alamat' => 'nullable|string|max:255',
+            'pdf_sample' => 'nullable',
+            'email' => 'nullable|email|max:255',
+        ]);
 
-        // Handle file uploads
-        if ($request->hasFile('favicon')) {
-            $faviconPath = $request->file('favicon')->store('favicons', 'public');
-            $settingsToSave['favicon'] = $faviconPath;
+        if (is_string($request->pdf_sample)) {
+            unset($validatedData['pdf_sample']);
         }
+        $settingsToSave = [];
 
         if ($request->hasFile('pdf_sample')) {
             $pdfPath = $request->file('pdf_sample')->store('pdf_samples', 'public');
@@ -70,7 +77,7 @@ class SettingController extends Controller
     /**
      * Update the specified setting in storage.
      */
-    public function update(UpdateSettingRequest $request, $key)
+    public function update(Request $request, $key)
     {
         $setting = Setting::where('setting_key', $key)->first();
 
@@ -78,17 +85,20 @@ class SettingController extends Controller
             return response()->json(['success' => false, 'message' => 'Setting not found.'], 404);
         }
 
-        $validatedData = $request->validated();
-        $settingsToUpdate = [];
+        // Define validation rules
+        $validatedData = $request->validate([
+            'app_name' => 'nullable|string|max:255',
+            'app_description' => 'nullable|string|max:500',
+            'alamat' => 'nullable|string|max:255',
+            'pdf_sample' => 'nullable|file|mimes:pdf|max:2048',
+            'email' => 'nullable|email|max:255',
+        ]);
 
-        // Handle file uploads
-        if ($request->hasFile('favicon')) {
-            if ($setting->setting_key === 'favicon') {
-                Storage::disk('public')->delete($setting->setting_value);
-            }
-            $faviconPath = $request->file('favicon')->store('favicons', 'public');
-            $settingsToUpdate['favicon'] = $faviconPath;
+        if (is_string($request->pdf_sample)) {
+            unset($validatedData['pdf_sample']);
         }
+
+        $settingsToUpdate = [];
 
         if ($request->hasFile('pdf_sample')) {
             if ($setting->setting_key === 'pdf_sample') {
