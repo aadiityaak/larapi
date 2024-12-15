@@ -23,6 +23,7 @@ class OrderController extends Controller
         $customerId = $request->query('customer_id');
         $name = $request->query('name');
         $status = $request->query('status');
+        $status = ($status === 'Arsip') ? 'Selesai' : $status;
 
         // Mulai query dasar
         $query = Order::with('customer', 'jobdesks');
@@ -40,12 +41,10 @@ class OrderController extends Controller
         }
 
         if ($status) {
-            // Jika semua status di dalam jobdesk sudah selesai
-            $query->whereHas('jobdesks', function ($query) use ($status) {
-                $query->where('status', $status);
+            $query->whereDoesntHave('jobdesks', function ($query) use ($status) {
+                $query->where('status', '!=', $status);
             });
         } else {
-            // Jika semua status di dalam jobdesk belum selesai
             $query->whereHas('jobdesks', function ($query) {
                 $query->where('status', '!=', 'Selesai');
             });
