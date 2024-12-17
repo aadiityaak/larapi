@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('customer_id');
             $table->string('order_id');
-            $table->string('user_id');
+            $table->string('user_id')->nullable();
             $table->string('jobdesk');
             $table->date('tanggal_pengerjaan')->nullable();
             $table->date('tanggal_selesai')->nullable();

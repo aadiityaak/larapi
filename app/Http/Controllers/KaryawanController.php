@@ -14,9 +14,14 @@ class KaryawanController extends Controller
 {
     use AuthorizesRequests;
 
-    public function index()
+    public function index(Request $request)
     {
-        $user = User::paginate(25);
+        $page = $request->query('page');
+        if ($page === 'all') {
+            $user = User::all();
+        } else {
+            $user = User::paginate(25);
+        }
         return response()->json($user);
     }
 
