@@ -18,7 +18,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('profile', function (Request $request) {
         return $request->user();
     });
-    Route::post('/send-jobdesk-reminder', [KaryawanController::class, 'sendJobdeskReminder']);
+    Route::post('jobdesk-reminder', [KaryawanController::class, 'sendJobdeskReminder']);
     Route::put('profile', [ProfileController::class, 'update']);
     Route::get('dashboard', [DashboardController::class, 'index']);
     Route::apiResources([

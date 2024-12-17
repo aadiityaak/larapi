@@ -87,17 +87,17 @@ class KaryawanController extends Controller
     {
         $request->validate([
             'jobdesk_id' => 'required|integer|exists:jobdesks,id',
-            'title' => 'required|string|max:255',
         ]);
 
-        $user = User::find($request->user()->id);
-        $jobdesk = [
-            'id' => $request->jobdesk_id,
-            'title' => $request->title,
+        $jobdesk = Jobdesk::find($request->jobdesk_id);
+        $user = User::find($jobdesk->user_id);
+        $data = [
+            'jobdesk_id' => $request->jobdesk_id,
+            'user_id' => $user->id,
         ];
 
         // Kirim notifikasi
-        $user->notify(new PendingJobdesk($jobdesk));
+        $user->notify(new PendingJobdesk($data));
 
         return response()->json(['message' => 'Notifikasi jobdesk telah dikirim!']);
     }

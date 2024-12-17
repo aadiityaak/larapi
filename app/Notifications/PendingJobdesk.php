@@ -14,11 +14,11 @@ class PendingJobdesk extends Notification
     /**
      * Create a new notification instance.
      */
-    protected $jobdesk;
+    protected $data;
 
-    public function __construct($jobdesk)
+    public function __construct($data)
     {
-        $this->jobdesk = $jobdesk;
+        $this->data = $data;
     }
 
     /**
@@ -28,7 +28,7 @@ class PendingJobdesk extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', 'database'];
     }
 
     /**
@@ -40,9 +40,8 @@ class PendingJobdesk extends Notification
             ->subject('Pemberitahuan: Jobdesk Belum Diambil')
             ->greeting('Halo ' . $notifiable->name . '!')
             ->line('Kami ingin mengingatkan Anda bahwa ada jobdesk yang belum Anda ambil:')
-            ->line('Jobdesk: ' . $this->jobdesk['title'])
-            ->line('Deskripsi: ' . $this->jobdesk['description'])
-            ->action('Ambil Jobdesk', url('/jobdesk/' . $this->jobdesk['id']))
+            ->line('Jobdesk: ' . $this->data['jobdesk_id'])
+            ->action('Ambil Jobdesk', url('/jobdesk/' . $this->data['jobdesk_id']))
             ->line('Terima kasih atas perhatian Anda!');
     }
 
@@ -54,7 +53,8 @@ class PendingJobdesk extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'jobdesk' => $this->data['jobdesk_id'],
+            'message' => 'Pemberitahuan: Jobdesk #' . $this->data['jobdesk_id'] . ' Belum Diambil'
         ];
     }
 }
