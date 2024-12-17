@@ -6,6 +6,9 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
+use App\Models\Jobdesk;
+use App\Notifications\PendingJobdesk;
+
 
 class KaryawanController extends Controller
 {
@@ -78,6 +81,25 @@ class KaryawanController extends Controller
             'message' => $message,
             'success' => true
         ], 200);
+    }
+
+    public function sendJobdeskReminder(Request $request)
+    {
+        $request->validate([
+            'jobdesk_id' => 'required|integer|exists:jobdesks,id',
+            'title' => 'required|string|max:255',
+        ]);
+
+        $user = User::find($request->user()->id);
+        $jobdesk = [
+            'id' => $request->jobdesk_id,
+            'title' => $request->title,
+        ];
+
+        // Kirim notifikasi
+        $user->notify(new PendingJobdesk($jobdesk));
+
+        return response()->json(['message' => 'Notifikasi jobdesk telah dikirim!']);
     }
 
     public function destroy($id)

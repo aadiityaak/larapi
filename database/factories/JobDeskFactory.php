@@ -25,7 +25,7 @@ class JobdeskFactory extends Factory
             'user_id' => fake()->numberBetween(1, 10),
             'customer_id' => fake()->numberBetween(1, 10),
             'jobdesk' => fake()->randomElement(['Pengumpulan berkas', 'Pengerjaan tahap 1', 'Pengerjaan tahap 2', 'Pengerjaan tahap 3']),
-            'tanggal_pengerjaan' => now()->subDays(fake()->numberBetween(5, 10)),
+            'tanggal_pengerjaan' => $status !== 'Masuk' ? now()->subDays(fake()->numberBetween(5, 10)) : null,
             'tanggal_selesai' => $status === 'Selesai' ? now() : null,
             'status' => $status
         ];

@@ -14,9 +14,11 @@ class PendingJobdesk extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    protected $jobdesk;
+
+    public function __construct($jobdesk)
     {
-        //
+        $this->jobdesk = $jobdesk;
     }
 
     /**
@@ -32,12 +34,16 @@ class PendingJobdesk extends Notification
     /**
      * Get the mail representation of the notification.
      */
-    public function toMail(object $notifiable): MailMessage
+    public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+            ->subject('Pemberitahuan: Jobdesk Belum Diambil')
+            ->greeting('Halo ' . $notifiable->name . '!')
+            ->line('Kami ingin mengingatkan Anda bahwa ada jobdesk yang belum Anda ambil:')
+            ->line('Jobdesk: ' . $this->jobdesk['title'])
+            ->line('Deskripsi: ' . $this->jobdesk['description'])
+            ->action('Ambil Jobdesk', url('/jobdesk/' . $this->jobdesk['id']))
+            ->line('Terima kasih atas perhatian Anda!');
     }
 
     /**
