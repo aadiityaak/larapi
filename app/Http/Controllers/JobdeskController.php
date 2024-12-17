@@ -24,8 +24,36 @@ class JobdeskController extends Controller
         return response()->json($jobdesk);
     }
 
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'order_id' => 'required|exists:orders,id',
+            'user_id' => 'required|exists:users,id',
+            'tanggal_pengerjaan' => 'required|date',
+            'tanggal_selesai' => 'required|date',
+            'status' => 'required',
+        ]);
+        $jobdesk = Jobdesk::create($validatedData);
+        return response()->json($jobdesk);
+    }
+
+    public function update(Request $request, Jobdesk $jobdesk)
+    {
+        $jobdesk = Jobdesk::find($jobdesk->id);
+        $validatedData = $request->validate([
+            'order_id' => 'required|exists:orders,id',
+            'user_id' => 'required|exists:users,id',
+            'tanggal_pengerjaan' => 'required|date',
+            'tanggal_selesai' => 'required|date',
+            'status' => 'required',
+        ]);
+        $jobdesk->update($validatedData);
+        return response()->json($jobdesk);
+    }
+
     public function show(Jobdesk $jobdesk)
     {
+        $jobdesk = Jobdesk::find($jobdesk->id)->load('customer', 'order', 'user');
         return response()->json($jobdesk);
     }
 }
