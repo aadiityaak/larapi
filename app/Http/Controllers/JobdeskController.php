@@ -43,10 +43,16 @@ class JobdeskController extends Controller
         $validatedData = $request->validate([
             'order_id' => 'required|exists:orders,id',
             'user_id' => 'required|exists:users,id',
-            'tanggal_pengerjaan' => 'required|date',
-            'tanggal_selesai' => 'required|date',
+            'tanggal_pengerjaan' => 'nullable',
+            'tanggal_selesai' => 'nullable',
             'status' => 'required',
         ]);
+        if (isset($validatedData['tanggal_pengerjaan'])) {
+            $validatedData['tanggal_pengerjaan'] = date('Y-m-d', strtotime($validatedData['tanggal_pengerjaan']));
+        }
+        if (isset($validatedData['tanggal_selesai'])) {
+            $validatedData['tanggal_selesai'] = date('Y-m-d', strtotime($validatedData['tanggal_selesai']));
+        }
         $jobdesk = Jobdesk::create($validatedData);
         return response()->json($jobdesk);
     }
@@ -57,10 +63,17 @@ class JobdeskController extends Controller
         $validatedData = $request->validate([
             'order_id' => 'required|exists:orders,id',
             'user_id' => 'required|exists:users,id',
-            'tanggal_pengerjaan' => 'required|date',
-            'tanggal_selesai' => 'required|date',
+            'tanggal_pengerjaan' => 'nullable',
+            'tanggal_selesai' => 'nullable',
             'status' => 'required',
         ]);
+        if (isset($validatedData['tanggal_pengerjaan'])) {
+            $validatedData['tanggal_pengerjaan'] = date('Y-m-d', strtotime($validatedData['tanggal_pengerjaan']));
+        }
+
+        if (isset($validatedData['tanggal_selesai'])) {
+            $validatedData['tanggal_selesai'] = date('Y-m-d', strtotime($validatedData['tanggal_selesai']));
+        }
         $jobdesk->update($validatedData);
         return response()->json($jobdesk);
     }

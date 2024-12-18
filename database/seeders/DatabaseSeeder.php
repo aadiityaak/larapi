@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Jobdesk;
 use App\Models\User;
 use App\Models\Order;
+use App\Models\Setting;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Pest\ArchPresets\Custom;
@@ -58,9 +59,11 @@ class DatabaseSeeder extends Seeder
                 ]);
             }
         }
-        // User::factory(30)->create();
-        // Customer::factory(50)->create();
-        // Order::factory(10)->create();
-        // Jobdesk::factory(10)->create();
+
+        Setting::create(['setting_key' => 'app_name', 'setting_value' => 'NOTANUXT']);
+        Setting::create(['setting_key' => 'app_description', 'setting_value' => 'NOTANUXT | Asisten Notaris Online']);
+        Setting::create(['setting_key' => 'alamat', 'setting_value' => 'Jl. Kebon Jeruk, Jakarta Timur']);
+        Setting::create(['setting_key' => 'pdf_sample', 'setting_value' => 'path/to/sample.pdf']);
+        Setting::create(['setting_key' => 'email', 'setting_value' => 'admin@asistennotaris.com']);
     }
 }
