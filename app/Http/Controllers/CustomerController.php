@@ -28,17 +28,23 @@ class CustomerController extends Controller
 
     public function index(Request $request)
     {
+        // Validate input
+        $validated = $request->validate([
+            'name' => 'nullable|string|min:3',
+            'phone' => 'nullable|string|min:4',
+        ]);
+
         // Initialize the query
         $query = Customer::with('orders');
 
-        // Filter by name if provided and longer than 3 characters
-        if ($request->has('name') && strlen($request->input('name')) > 2) {
-            $query->where('name', 'like', '%' . $request->input('name') . '%');
+        // Filter by name if provided
+        if (!empty($validated['name'])) {
+            $query->where('name', 'like', '%' . $validated['name'] . '%');
         }
 
-        // Filter by phone if provided and longer than 3 characters
-        if ($request->has('phone') && strlen($request->input('phone')) > 3) {
-            $query->where('phone', 'like', '%' . $request->input('phone') . '%');
+        // Filter by phone if provided
+        if (!empty($validated['phone'])) {
+            $query->where('phone', 'like', '%' . $validated['phone'] . '%');
         }
 
         // Paginate the results
