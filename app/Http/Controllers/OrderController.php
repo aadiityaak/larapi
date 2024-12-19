@@ -44,10 +44,11 @@ class OrderController extends Controller
             $query->whereDoesntHave('jobdesks', function ($query) use ($status) {
                 $query->where('status', '!=', $status);
             });
+            $query->whereHas('jobdesks');
         } else {
             $query->whereHas('jobdesks', function ($query) {
                 $query->where('status', '!=', 'Selesai');
-            });
+            })->orWhereDoesntHave('jobdesks');
         }
 
         // Paginate hasil
@@ -85,6 +86,7 @@ class OrderController extends Controller
     public function destroy(Order $order)
     {
         $order = Order::find($order->id);
+        $order->jobdesks()->delete();
         $order->delete();
         return response()->json($order);
     }
