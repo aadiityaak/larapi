@@ -24,7 +24,7 @@ class OrderController extends Controller
         $customerId = $request->query('customer_id');
         $name = $request->query('name');
         $status = $request->query('status');
-        $status = ($status === 'Arsip') ? 'Selesai' : $status;
+        $status = isset($status) ? $status : null;
 
         // Mulai query dasar
         $query = Order::with('customer', 'jobdesks');
@@ -43,8 +43,14 @@ class OrderController extends Controller
 
         if ($status) {
             $query->whereDoesntHave('jobdesks', function ($query) use ($status) {
-                $query->where('status', '!=', $status);
+                $query->where('status', '!=', 'Selesai');
             });
+            if ($status === 'Selesai') {
+                $query->whereNotNull('lampiran');
+            }
+            if ($status === 'Arsip') {
+                $query->whereNull('lampiran');
+            }
             $query->whereHas('jobdesks');
         } else {
             $query->whereHas('jobdesks', function ($query) {
