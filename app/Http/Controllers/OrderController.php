@@ -65,8 +65,29 @@ class OrderController extends Controller
 
     public function update(Request $request, Order $order)
     {
-        $order = Order::find($order->id);
+        // Validasi dokumen jika ada
+        if ($request->hasFile('document')) {
+            $this->validate = [
+                'document' => 'required|mimes:pdf',
+            ];
+        }
+
+        // Validasi data yang diterima
         $validatedData = $request->validate($this->validate);
+
+        // Cek dan hapus dokumen lama jika ada
+        if ($order->document) {
+            // Hapus dokumen lama dari storage
+            Storage::disk('public')->delete($order->document);
+        }
+
+        // Menyimpan dokumen baru jika ada
+        if ($request->hasFile('document')) {
+            $filePath = $request->file('document')->store('documents', 'public');
+            $validatedData['document'] = $filePath; // Simpan path file ke validated data
+        }
+
+        // Update order dengan data yang sudah divalidasi
         $order->update($validatedData);
         return response()->json($order);
     }
