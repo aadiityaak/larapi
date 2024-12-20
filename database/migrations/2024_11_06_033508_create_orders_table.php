@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('payment_method')->nullable();
             $table->integer('paid')->nullable();
             $table->text('document')->nullable();
+            $table->text('lampiran')->nullable();
             $table->timestamps();
         });
     }

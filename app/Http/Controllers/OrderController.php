@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class OrderController extends Controller
 {
@@ -66,29 +67,32 @@ class OrderController extends Controller
     public function update(Request $request, Order $order)
     {
         // Validasi dokumen jika ada
-        if ($request->hasFile('document')) {
+        if ($request->hasFile('lampiran')) {
+            // unset all validated data
+            $this->validate = [];
             $this->validate = [
-                'document' => 'required|mimes:pdf',
+                'lampiran' => 'required|mimes:pdf',
             ];
         }
 
         // Validasi data yang diterima
         $validatedData = $request->validate($this->validate);
 
-        // Cek dan hapus dokumen lama jika ada
-        if ($order->document) {
-            // Hapus dokumen lama dari storage
-            Storage::disk('public')->delete($order->document);
+        // Validasi dokumen jika ada
+        if ($request->hasFile('lampiran')) {
+            $this->validate['lampiran'] = 'required|mimes:pdf';
+            $filePath = $request->file('lampiran')->store('lampiran', 'public');
+            $validatedData['lampiran'] = $filePath;
         }
 
-        // Menyimpan dokumen baru jika ada
-        if ($request->hasFile('document')) {
-            $filePath = $request->file('document')->store('documents', 'public');
-            $validatedData['document'] = $filePath; // Simpan path file ke validated data
+        // Cek dan hapus dokumen lama jika ada
+        if ($order->lampiran) {
+            Storage::disk('public')->delete($order->lampiran);
         }
 
         // Update order dengan data yang sudah divalidasi
         $order->update($validatedData);
+
         return response()->json($order);
     }
 
