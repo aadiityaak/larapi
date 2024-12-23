@@ -11,7 +11,8 @@ class JobdeskController extends Controller
     {
         $orderId = $request->query('order_id');
         $status = $request->query('status');
-        $name = $request->query('name'); // New parameter for employee name
+        $name = $request->query('name');
+        $user_id = $request->query('user_id');
 
         // Initialize the query
         $query = Jobdesk::with('customer', 'order', 'user');
@@ -24,6 +25,11 @@ class JobdeskController extends Controller
         // Filter by status if provided
         if ($status) {
             $query->where('status', $status);
+        }
+
+        // Filter by user_id if provided
+        if ($user_id) {
+            $query->where('user_id', $user_id);
         }
 
         if ($name && strlen($name) > 2) {

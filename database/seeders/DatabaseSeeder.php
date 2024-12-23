@@ -38,6 +38,26 @@ class DatabaseSeeder extends Seeder
             'position' => 'Manager',
             'password' => Hash::make('password'),
         ]);
+        User::factory()->create([
+            'name' => 'Test Keuangan',
+            'email' => 'keuangan@larapi.test',
+            'is_admin' => false,
+            'avatar' => null,
+            'phone' => '08123456789',
+            'address' => 'Jl. Kebon Jeruk No. 1',
+            'position' => 'Keuangan',
+            'password' => Hash::make('password'),
+        ]);
+        User::factory()->create([
+            'name' => 'Test ',
+            'email' => 'staff@larapi.test',
+            'is_admin' => false,
+            'avatar' => null,
+            'phone' => '08123456789',
+            'address' => 'Jl. Kebon Jeruk No. 1',
+            'position' => 'Staff',
+            'password' => Hash::make('password'),
+        ]);
 
         // Membuat 30 pengguna
         User::factory(25)->create();
