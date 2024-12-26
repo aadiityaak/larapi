@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('cache', function (Blueprint $table) {
-            $table->string('key')->primary();
-            $table->mediumText('value');
-            $table->integer('expiration');
+            $table->string('key', 191)->primary(); // Use VARCHAR(191)
+            $table->mediumText('value'); // Keep as mediumText
+            $table->integer('expiration'); // Keep as is
         });
 
         Schema::create('cache_locks', function (Blueprint $table) {
-            $table->string('key')->primary();
+            $table->string('key',191)->primary();
             $table->string('owner');
             $table->integer('expiration');
         });
