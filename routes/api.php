@@ -20,7 +20,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
     Route::post('jobdesk-reminder', [KaryawanController::class, 'sendJobdeskReminder']);
     Route::put('profile', [ProfileController::class, 'update']);
-    Route::get('dashboard', [DashboardController::class, 'index']);
+    Route::get('home', [DashboardController::class, 'index']);
     Route::apiResources([
         'karyawans' => KaryawanController::class,
         'orders' => OrderController::class,

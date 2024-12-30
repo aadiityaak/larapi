@@ -89,4 +89,11 @@ class JobdeskController extends Controller
         $jobdesk = Jobdesk::find($jobdesk->id)->load('customer', 'order', 'user');
         return response()->json($jobdesk);
     }
+
+    public function destroy(Jobdesk $jobdesk)
+    {
+        $jobdesk = Jobdesk::find($jobdesk->id);
+        $jobdesk->delete();
+        return response()->json(['message' => 'Jobdesk deleted successfully']);
+    }
 }
