@@ -88,6 +88,35 @@ class KaryawanController extends Controller
         ], 200);
     }
 
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
+            'phone' => 'required|string',
+            'address' => 'required|string',
+            'position' => 'nullable|string',
+            'password' => 'required|string|min:8|confirmed',
+            'avatar' => 'nullable',
+        ]);
+
+        // Abaikan 'avatar' jika merupakan string, hanya lanjutkan jika file
+        if (is_string($request->avatar)) {
+            unset($validated['avatar']);
+        } elseif ($request->hasFile('avatar')) {
+            $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
+        }
+
+        $validated['password'] = bcrypt($validated['password']);
+        $user = User::create($validated);
+
+        return response()->json([
+            'user' => $user,
+            'message' => 'Data tersimpan',
+            'success' => true
+        ], 200);
+    }
+
     public function sendJobdeskReminder(Request $request)
     {
         $request->validate([
