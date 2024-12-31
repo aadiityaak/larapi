@@ -17,12 +17,21 @@ class KaryawanController extends Controller
     public function index(Request $request)
     {
         $page = $request->query('page');
-        if ($page === 'all') {
-            $user = User::all();
-        } else {
-            $user = User::paginate(25);
+        $name = $request->query('name');
+
+        // Query dasar semua user
+        $query = User::query();
+
+        // Filter berdasarkan name jika ada
+        if ($name && strlen($name) > 2) {
+            $query->where('name', 'like', '%' . $name . '%');
         }
-        return response()->json($user);
+        // shorting descending
+        $query->orderBy('created_at', 'desc');
+
+        // Paginate the results
+        $users = $query->paginate(25);
+        return response()->json($users);
     }
 
     public function show($id)
