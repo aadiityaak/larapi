@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('settings', function (Blueprint $table) {
             $table->id();
-            $table->string('setting_key')->unique(); // Unique key for the setting
-            $table->text('setting_value')->nullable(); // Value of the setting
+            $table->string('setting_key')->unique();
+            $table->text('setting_value')->nullable();
             $table->timestamps();
         });
     }

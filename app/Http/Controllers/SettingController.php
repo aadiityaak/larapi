@@ -30,6 +30,8 @@ class SettingController extends Controller
             'app_name' => 'nullable|string|max:255',
             'app_description' => 'nullable|string|max:500',
             'alamat' => 'nullable|string|max:255',
+            'banks' => 'nullable|string|max:2000',
+            'pekerjaan' => 'nullable|string|max:2000',
             'pdf_sample' => 'nullable',
             'email' => 'nullable|email|max:255',
         ]);
@@ -90,6 +92,8 @@ class SettingController extends Controller
             'app_name' => 'nullable|string|max:255',
             'app_description' => 'nullable|string|max:500',
             'alamat' => 'nullable|string|max:255',
+            'banks' => 'nullable|string|max:2000',
+            'pekerjaan' => 'nullable|string|max:2000',
             'pdf_sample' => 'nullable|file|mimes:pdf|max:2048',
             'email' => 'nullable|email|max:255',
         ]);

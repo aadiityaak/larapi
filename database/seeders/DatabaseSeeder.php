@@ -79,11 +79,31 @@ class DatabaseSeeder extends Seeder
                 ]);
             }
         }
-
+        // { name: 'SKMHT' },
+        // { name: 'APHT'},
+        // { name: 'Fidusia' },
+        // { name: 'Jual beli' },
+        // { name: 'Hibah' },
+        // { name: 'Turun waris' },
+        // { name: 'Aphb' },
+        // { name: 'Pendirian PT' },
+        // { name: 'Pendirian CV' },
+        // { name: 'Pendirian yayasan' },
+        // { name: 'Pendirian PT perorangan' },
+        // { name: 'Pendirian akta cabang' },
+        // { name: 'Perubahan PT' },
+        // { name: 'Perub CV' },
+        // { name: 'Perub Yayasan' },
+        // { name: 'Pecah sertifikat' },
+        // { name: 'Pengeringan' },
+        // { name: 'PBG' },
+        // { name: 'Peningkatan Hak' },
         Setting::create(['setting_key' => 'app_name', 'setting_value' => 'NOTANUXT']);
         Setting::create(['setting_key' => 'app_description', 'setting_value' => 'NOTANUXT | Asisten Notaris Online']);
         Setting::create(['setting_key' => 'alamat', 'setting_value' => 'Jl. Kebon Jeruk, Jakarta Timur']);
         Setting::create(['setting_key' => 'pdf_sample', 'setting_value' => 'path/to/sample.pdf']);
         Setting::create(['setting_key' => 'email', 'setting_value' => 'admin@asistennotaris.com']);
+        Setting::create(['setting_key' => 'banks', 'setting_value' => 'BPR BBA, BPR Pala Pusat, BPR Pala Cabang, BPR Danamas Prime, BPR Arum Mandiri, BPRS Madina Mandiri, BMT Sejahtera Ummat']);
+        Setting::create(['setting_key' => 'pekerjaan', 'setting_value' => 'SKMHT, APHT, Fidusia, Jual beli, Hibah, Turun waris, Aphb, Pendirian PT, Pendirian CV, Pendirian yayasan, Pendirian PT perorangan, Pendirian akta cabang, Perubahan PT, Perub CV, Perub Yayasan, Pecah sertifikat, Pengeringan, PBG, Peningkatan Hak']);
     }
 }
