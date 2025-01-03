@@ -14,9 +14,19 @@ class SettingController extends Controller
     /**
      * Display the settings.
      */
-    public function index()
+    public function index(request $request)
     {
-        $settings = Setting::all(); // Retrieve all settings
+        $setting_key = $request->get('setting_key');
+        $query = Setting::query();
+
+        if ($setting_key) {
+            $query->where('setting_key', $setting_key);
+        } else {
+            $query->orderBy('setting_key', 'asc');
+        }
+
+        $settings = $query->get();
+
         return response()->json($settings);
     }
 

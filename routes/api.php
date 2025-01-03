@@ -11,10 +11,6 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Auth\ProfileController;
 
-// Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
-//     return $request->user();
-// });
-
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('profile', function (Request $request) {
         return $request->user();
