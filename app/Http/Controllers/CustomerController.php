@@ -15,15 +15,6 @@ class CustomerController extends Controller
         'name' => 'required|string|max:255',
         'phone' => 'required|string|max:20',
         'alamat' => 'required|string',
-        'bank' => 'max:255',
-        'kategori' => 'required|string',
-        'pekerjaan' => 'max:255',
-        'sertifikat' => 'required|string',
-        'nilai_transaksi' => 'required|numeric',
-        'harga_real' => 'required|numeric',
-        'harga_kesepakatan' => 'required|numeric',
-        'data_pajak_pembeli' => 'required|numeric',
-        'data_pajak_penjual' => 'required|numeric',
     ];
 
     public function index(Request $request)

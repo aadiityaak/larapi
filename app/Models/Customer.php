@@ -13,19 +13,6 @@ class Customer extends Model
         'name',
         'phone',
         'alamat',
-        'kategori',
-        'bank',
-        'pekerjaan',
-        'sertifikat',
-        'nilai_transaksi',
-        'harga_real',
-        'harga_kesepakatan',
-        'data_pajak_pembeli',
-        'data_pajak_penjual',
-    ];
-
-    protected $casts = [
-        'pekerjaan' => 'array',
     ];
 
     public function orders()
