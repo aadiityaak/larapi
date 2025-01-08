@@ -527,7 +527,8 @@ class DatabaseSeeder extends Seeder
         foreach ($products as $key => $product) {
             Product::factory()->create([
                 'name' => $product['title'],
-                'price' => rand(100000, 1000000),
+                'price' => rand(100000, 5000000),
+                'description' => '',
                 'data' => implode(',', $product['data']),
             ]);
         }
@@ -535,7 +536,7 @@ class DatabaseSeeder extends Seeder
         foreach ($datas as $key => $val) {
             Data::factory()->create([
                 'key' => $key,
-                'name' => $val['title'],
+                'value' => $val['title'],
                 'type' => $val['type']
             ]);
         }

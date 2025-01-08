@@ -7,11 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Data extends Model
 {
-  use HasFactory;
+    /** @use HasFactory<\Database\Factories\DataFactory> */
+    use HasFactory;
 
-  protected $fillable = [
-    'key',
-    'name',
-    'type',
-  ];
+    protected $table = 'data';
+
+    protected $fillable = [
+        'key',
+        'value',
+        'type'
+    ];
 }
