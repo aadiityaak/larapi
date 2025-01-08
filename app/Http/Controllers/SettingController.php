@@ -14,20 +14,21 @@ class SettingController extends Controller
     /**
      * Display the settings.
      */
-    public function index(request $request)
+    public function index(Request $request)
     {
         $setting_key = $request->get('setting_key');
-        $query = Setting::query();
+        $settings = Setting::all();
 
-        if ($setting_key) {
-            $query->where('setting_key', $setting_key);
-        } else {
-            $query->orderBy('setting_key', 'asc');
+        $datas = [];
+        foreach ($settings as $setting) {
+            $datas[$setting->setting_key] = $setting->setting_value; // Gunakan 'setting_key' dari objek setting
         }
 
-        $settings = $query->get();
+        if ($setting_key && isset($datas[$setting_key])) {
+            return response()->json([$setting_key => $datas[$setting_key]]);
+        }
 
-        return response()->json($settings);
+        return response()->json($datas);
     }
 
     /**
@@ -41,7 +42,7 @@ class SettingController extends Controller
             'app_description' => 'nullable|string|max:500',
             'alamat' => 'nullable|string|max:255',
             'banks' => 'nullable|string|max:2000',
-            'pekerjaan' => 'nullable|string|max:2000',
+            'pekerjaan' => 'nullable|string|max:10000',
             'pdf_sample' => 'nullable',
             'email' => 'nullable|email|max:255',
         ]);

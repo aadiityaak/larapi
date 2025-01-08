@@ -11,10 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('settings', function (Blueprint $table) {
+        Schema::create('product', function (Blueprint $table) {
             $table->id();
-            $table->string('setting_key')->unique();
-            $table->longText('setting_value')->nullable();
+            $table->string('name');
+            $table->string('customer_id');
+            $table->string('price');
+            $table->text('description');
+            $table->text('data');
             $table->timestamps();
         });
     }
@@ -24,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('settings');
+        Schema::dropIfExists('product');
     }
 };
