@@ -19,26 +19,24 @@ class CustomerController extends Controller
 
     public function index(Request $request)
     {
-        // Validate input
+
         $validated = $request->validate([
             'name' => 'nullable|string|min:3',
             'phone' => 'nullable|string|min:4',
         ]);
 
-        // Initialize the query
         $query = Customer::with('orders');
 
-        // Filter by name if provided
         if (!empty($validated['name'])) {
             $query->where('name', 'like', '%' . $validated['name'] . '%');
         }
 
-        // Filter by phone if provided
         if (!empty($validated['phone'])) {
             $query->where('phone', 'like', '%' . $validated['phone'] . '%');
         }
 
-        // Paginate the results
+        $query->orderBy('created_at', 'desc');
+
         $customers = $query->paginate(25);
 
         return response()->json($customers);
@@ -81,9 +79,12 @@ class CustomerController extends Controller
     public function destroy(Customer $customer)
     {
         $customer = Customer::find($customer->id);
-        $customer->orders()->jobdesks()->delete();
+        foreach ($customer->orders as $order) {
+            $order->jobdesks()->delete(); // Pastikan ada relasi jobdesks() di model Order
+        }
         $customer->orders()->delete();
         $customer->delete();
+
         return response()->json($customer);
     }
 }
