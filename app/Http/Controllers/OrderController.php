@@ -20,21 +20,18 @@ class OrderController extends Controller
     ];
     public function index(Request $request)
     {
-        // Ambil parameter query dari request
+
         $customerId = $request->query('customer_id');
         $name = $request->query('name');
         $status = $request->query('status');
         $status = isset($status) ? $status : null;
 
-        // Mulai query dasar
         $query = Order::with('customer', 'jobdesks');
 
-        // Filter berdasarkan customer_id jika ada
         if ($customerId) {
             $query->where('customer_id', $customerId);
         }
 
-        // Filter berdasarkan nama customer jika parameter name diberikan dan panjangnya > 2
         if ($name && strlen($name) > 2) {
             $query->whereHas('customer', function ($query) use ($name) {
                 $query->where('name', 'like', '%' . $name . '%');
@@ -58,7 +55,8 @@ class OrderController extends Controller
             })->orWhereDoesntHave('jobdesks');
         }
 
-        // Paginate hasil
+        $query->orderBy('created_at', 'desc');
+
         $orders = $query->paginate(25);
 
         return response()->json($orders);
