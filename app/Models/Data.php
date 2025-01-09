@@ -17,4 +17,9 @@ class Data extends Model
         'value',
         'type'
     ];
+
+    public function dataProducts()
+    {
+        return $this->hasMany(DataProduct::class, 'data_id');
+    }
 }

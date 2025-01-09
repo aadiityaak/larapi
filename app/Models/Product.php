@@ -16,12 +16,8 @@ class Product extends Model
     'data',
   ];
 
-  public function getDataKeys()
+  public function dataProducts()
   {
-    // Memecah string data menjadi array
-    $keys = explode(',', $this->data);
-
-    // Mengambil data yang sesuai dengan key yang dipisahkan koma
-    return Data::whereIn('key', $keys)->get();
+    return $this->hasMany(DataProduct::class, 'product_id');
   }
 }

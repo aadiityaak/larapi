@@ -13,18 +13,7 @@ class ProductController extends Controller
   public function index(Request $request)
   {
     // Mengambil produk dan memuat data terkait
-    $products = Product::paginate(25);
-
-    // Menambahkan data terkait ke setiap produk
-    $products->transform(function ($product) {
-      return [
-        'id' => $product->id,
-        'name' => $product->name,
-        'price' => $product->price,
-        'description' => $product->description,
-        'data' => $product->getDataKeys(), // Menyertakan data terkait
-      ];
-    });
+    $products = Product::with('dataProducts.data')->paginate(25);
 
     // Mengembalikan response dalam format JSON
     return response()->json($products);

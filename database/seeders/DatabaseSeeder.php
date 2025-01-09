@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\Setting;
 use App\Models\Product;
 use App\Models\Data;
+use App\Models\DataProduct;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -24,457 +25,446 @@ class DatabaseSeeder extends Seeder
             'perjanjian_kredit' => [
                 'title' => 'Perjanjian Kredit',
                 'data' => [
-                    'judul_akta',
-                    'nomor_akta',
-                    'tanggal_akta',
-                    'yang_mengerjakan',
-                    'jumlah_pinjaman',
-                    'lain_lain',
+                    1, // Judul Akta
+                    2, // Nomor Akta
+                    3, // Tanggal Akta
+                    4, // Yang Mengerjakan
+                    5, // Jumlah Pinjaman
+                    6, // Lain-lain
                 ],
             ],
             'skmht' => [
                 'title' => 'SKMHT',
                 'data' => [
-                    'nomor_akta',
-                    'tanggal_akta',
-                    'nomor_agunan',
-                    'nib',
-                    'nop',
-                    'nama_pemilik_agunan',
-                    'kode_sertifikat',
-                    'nomor_seri',
-                    'jumlah_pengikatan',
-                    'tanggal_habis_skmht',
+                    2, // Nomor Akta
+                    3, // Tanggal Akta
+                    8, // Nomor Agunan
+                    9, // NIB
+                    10, // NOP
+                    11, // Nama Pemilik Agunan
+                    12, // Kode Sertifikat
+                    13, // Nomor Seri
+                    14, // Jumlah Pengikatan
+                    7, // Tanggal Habis SKMHT
                 ],
             ],
             'apht' => [
                 'title' => 'APHT',
                 'data' => [
-                    'nomor_akta',
-                    'tanggal_akta',
-                    'nomor_agunan',
-                    'nib',
-                    'nop',
-                    'nama_pemilik_agunan',
-                    'kode_sertifikat',
-                    'nomor_seri',
-                    'jumlah_pengikatan',
+                    2, // Nomor Akta
+                    3, // Tanggal Akta
+                    8, // Nomor Agunan
+                    9, // NIB
+                    10, // NOP
+                    11, // Nama Pemilik Agunan
+                    12, // Kode Sertifikat
+                    13, // Nomor Seri
+                    14, // Jumlah Pengikatan
                 ],
             ],
             'fidusia' => [
                 'title' => 'Fidusia',
                 'data' => [
-                    'nomor_akta',
-                    'tanggal_akta',
-                    'jenis_agunan',
-                    'keterangan_objek',
-                    'bukti_kepemilikan_objek',
-                    'nilai_objek',
-                    'pemilik_agunan',
-                    'nilai_penjaminan',
-                    'npwp',
-                    'tanggal_habis_skmht',
+                    2, // Nomor Akta
+                    3, // Tanggal Akta
+                    15, // Jenis Agunan
+                    16, // Keterangan Objek
+                    17, // Bukti Kepemilikan Objek
+                    18, // Nilai Objek
+                    19, // Pemilik Agunan
+                    20, // Nilai Penjaminan
+                    21, // NPWP
+                    7, // Tanggal Habis SKMHT
                 ],
             ],
             'jual_beli' => [
                 'title' => 'Jual Beli',
                 'data' => [
-                    'nomor_akta',
-                    'tanggal_akta',
-                    'nama_penjual',
-                    'nama_pembeli',
-                    'sertifikat',
-                    'lokasi_tanah',
-                    'nilai_jual_beli',
-                    'nilai_ssb',
-                    'nilai_ssp',
-                    'keterangan_ppjb',
-                    'keterangan_kuasa_menjual',
-                    'harga_real',
-                    'harga_kesepakatan',
+                    2, // Nomor Akta
+                    3, // Tanggal Akta
+                    31, // Nama Penjual
+                    32, // Nama Pembeli
+                    33, // Sertifikat
+                    26, // Lokasi Tanah
+                    34, // Nilai Jual Beli
+                    35, // Nilai SSB
+                    36, // Nilai SSP
+                    37, // Keterangan PPJB
+                    38, // Keterangan Kuasa Menjual
+                    39, // Harga Real
+                    40, // Harga Kesepakatan
                 ],
             ],
             'hibah' => [
                 'title' => 'Hibah',
                 'data' => [
-                    'nomor_akta',
-                    'tanggal_akta',
-                    'nama_penjual',
-                    'nama_pembeli',
-                    'sertifikat',
-                    'lokasi_tanah',
-                    'nilai_jual_beli',
-                    'nilai_ssb',
-                    'nilai_ssp',
-                    'keterangan_ppjb',
-                    'keterangan_kuasa_menjual',
-                    'harga_real',
-                    'harga_kesepakatan',
+                    2, // Nomor Akta
+                    3, // Tanggal Akta
+                    31, // Nama Penjual
+                    32, // Nama Pembeli
+                    33, // Sertifikat
+                    26, // Lokasi Tanah
+                    34, // Nilai Jual Beli
+                    35, // Nilai SSB
+                    36, // Nilai SSP
+                    37, // Keterangan PPJB
+                    38, // Keterangan Kuasa Menjual
+                    39, // Harga Real
+                    40, // Harga Kesepakatan
                 ],
             ],
             'turun_waris' => [
                 'title' => 'Turun Waris',
                 'data' => [
-                    'berkas_masuk',
-                    'pewaris',
-                    'ahli_waris',
-                    'penerima_waris',
-                    'lokasi_tanah',
-                    'nilai_pajak',
-                    'berkas_kembali',
-                    'masuk_bpn',
-                    'tanggal_akad',
+                    22, // Berkas Masuk
+                    23, // Pewaris
+                    24, // Ahli Waris
+                    25, // Penerima Waris
+                    26, // Lokasi Tanah
+                    27, // Nilai Pajak
+                    28, // Berkas Kembali
+                    29, // Masuk BPN
+                    30, // Tanggal Akad
                 ],
             ],
             'pecah' => [
                 'title' => 'Pecah',
                 'data' => [
-                    'tanggal_masuk_berkas',
-                    'nama_pemilik_sertifikat',
-                    'jumlah_pecah',
-                    'keterangan_agunan',
-                    'keterangan_berkas',
-                    'tanggal_masuk_bpn',
+                    1, // Judul Akta
+                    44, // Nama Pemilik Sertifikat
+                    // Tambahkan elemen lain yang sesuai jika perlu
                 ],
             ],
             'pendirian_pt' => [
                 'title' => 'Pendirian PT',
                 'data' => [
-                    'judul_akta',
-                    'nomor_akta',
-                    'tanggal_akta',
-                    'nama_direktur',
-                    'nama_komisaris',
-                    'npwp_direktur',
-                    'npwp_komisaris',
-                    'nama_pemilik_manfaat',
-                    'kedudukan_pt',
-                    'biaya',
-                    'keterangan',
-                    'tanggal_upload',
+                    1, // Judul Akta
+                    2, // Nomor Akta
+                    3, // Tanggal Akta
+                    42, // Nama Direktur
+                    43, // Nama Komisaris
+                    21, // NPWP Direktur
+                    21, // NPWP Komisaris
+                    44, // Nama Pemilik Manfaat
+                    45, // Kedudukan PT
+                    41, // Biaya
+                    52, // Tanggal Upload
                 ],
             ],
             'pendirian_cv' => [
                 'title' => 'Pendirian CV',
                 'data' => [
-                    'judul_akta',
-                    'nomor_akta',
-                    'tanggal_akta',
-                    'nama_persero_aktif',
-                    'nama_persero_pasib',
-                    'npwp_persero_aktif',
-                    'npwp_persero_pasib',
-                    'kedudukan_pt',
-                    'biaya',
-                    'keterangan',
-                    'tanggal_upload',
+                    1, // Judul Akta
+                    2, // Nomor Akta
+                    3, // Tanggal Akta
+                    46, // Nama Persero Aktif
+                    47, // Nama Persero Pasif
+                    21, // NPWP Persero Aktif
+                    21, // NPWP Persero Pasif
+                    45, // Kedudukan PT
+                    41, // Biaya
+                    52, // Tanggal Upload
                 ],
             ],
             'pendirian_yayasan' => [
                 'title' => 'Pendirian Yayasan',
                 'data' => [
-                    'judul_akta',
-                    'nomor_akta',
-                    'tanggal_akta',
-                    'nama_pembina',
-                    'nama_ketua',
-                    'nama_wakil',
-                    'nama_bendahara',
-                    'lain_lain',
-                    'npwp_yayasan',
-                    'biaya',
-                    'keterangan',
-                    'tanggal_upload',
+                    1, // Judul Akta
+                    2, // Nomor Akta
+                    3, // Tanggal Akta
+                    48, // Nama Pembina
+                    49, // Nama Ketua
+                    50, // Nama Wakil
+                    51, // Nama Bendahara
+                    6, // Lain-lain
+                    21, // NPWP Yayasan
+                    41, // Biaya
+                    52, // Tanggal Upload
                 ],
             ],
             'pendirian_pt_perseorangan' => [
                 'title' => 'Pendirian PT Perseorangan',
                 'data' => [
-                    'judul_akta',
-                    'nomor_akta',
-                    'tanggal_akta',
-                    'nama_direktur',
-                    'npwp_direktur',
-                    'kedudukan_pt',
-                    'biaya',
-                    'keterangan',
-                    'tanggal_upload',
+                    1, // Judul Akta
+                    2, // Nomor Akta
+                    3, // Tanggal Akta
+                    42, // Nama Direktur
+                    21, // NPWP Direktur
+                    45, // Kedudukan PT
+                    41, // Biaya
+                    52, // Tanggal Upload
                 ],
             ],
             'perubahan_pt' => [
                 'title' => 'Perubahan PT',
                 'data' => [
-                    'judul_akta',
-                    'nomor_akta',
-                    'tanggal_akta',
-                    'nama_direktur',
-                    'nama_komisaris',
-                    'npwp_direktur',
-                    'npwp_komisaris',
-                    'nama_pemilik_manfaat',
-                    'kedudukan_pt',
-                    'biaya',
-                    'keterangan',
-                    'tanggal_upload',
+                    1, // Judul Akta
+                    2, // Nomor Akta
+                    3, // Tanggal Akta
+                    42, // Nama Direktur
+                    43, // Nama Komisaris
+                    21, // NPWP Direktur
+                    21, // NPWP Komisaris
+                    44, // Nama Pemilik Manfaat
+                    45, // Kedudukan PT
+                    41, // Biaya
+                    52, // Tanggal Upload
                 ],
             ],
             'perubahan_cv' => [
                 'title' => 'Perubahan CV',
                 'data' => [
-                    'judul_akta',
-                    'nomor_akta',
-                    'tanggal_akta',
-                    'nama_persero_aktif',
-                    'nama_persero_pasib',
-                    'npwp_persero_aktif',
-                    'npwp_persero_pasib',
-                    'kedudukan_pt',
-                    'biaya',
-                    'keterangan',
-                    'tanggal_upload',
+                    1, // Judul Akta
+                    2, // Nomor Akta
+                    3, // Tanggal Akta
+                    46, // Nama Persero Aktif
+                    47, // Nama Persero Pasif
+                    21, // NPWP Persero Aktif
+                    21, // NPWP Persero Pasif
+                    45, // Kedudukan PT
+                    41, // Biaya
+                    52, // Tanggal Upload
                 ],
             ],
             'perubahan_yayasan' => [
                 'title' => 'Perubahan Yayasan',
                 'data' => [
-                    'judul_akta',
-                    'nomor_akta',
-                    'tanggal_akta',
-                    'nama_pembina',
-                    'nama_ketua',
-                    'nama_wakil',
-                    'nama_bendahara',
-                    'lain_lain',
-                    'npwp_yayasan',
-                    'biaya',
-                    'keterangan',
-                    'tanggal_upload',
+                    1, // Judul Akta
+                    2, // Nomor Akta
+                    3, // Tanggal Akta
+                    48, // Nama Pembina
+                    49, // Nama Ketua
+                    50, // Nama Wakil
+                    51, // Nama Bendahara
+                    6, // Lain-lain
+                    21, // NPWP Yayasan
+                    41, // Biaya
+                    52, // Tanggal Upload
                 ],
             ],
             'perubahan_pt_perseorangan' => [
                 'title' => 'Perubahan PT Perseorangan',
                 'data' => [
-                    'judul_akta',
-                    'nomor_akta',
-                    'tanggal_akta',
-                    'nama_direktur',
-                    'npwp_direktur',
-                    'kedudukan_pt',
-                    'biaya',
-                    'keterangan',
-                    'tanggal_upload',
+                    1, // Judul Akta
+                    2, // Nomor Akta
+                    3, // Tanggal Akta
+                    42, // Nama Direktur
+                    21, // NPWP Direktur
+                    45, // Kedudukan PT
+                    41, // Biaya
+                    52, // Tanggal Upload
                 ],
             ],
         ];
         $datas = [
-            'judul_akta' => [
+            1 => [
                 'title' => 'Judul Akta',
                 'type' => 'text'
             ],
-            'nomor_akta' => [
+            2 => [
                 'title' => 'Nomor Akta',
                 'type' => 'text'
             ],
-            'tanggal_akta' => [
+            3 => [
                 'title' => 'Tanggal Akta',
                 'type' => 'date'
             ],
-            'yang_mengerjakan' => [
+            4 => [
                 'title' => 'Yang Mengerjakan',
                 'type' => 'text'
             ],
-            'jumlah_pinjaman' => [
+            5 => [
                 'title' => 'Jumlah Pinjaman',
                 'type' => 'number'
             ],
-            'lain_lain' => [
+            6 => [
                 'title' => 'Lain-lain',
                 'type' => 'text'
             ],
-            'tanggal_habis_skmht' => [
+            7 => [
                 'title' => 'Tanggal Habis SKMHT',
                 'type' => 'date'
             ],
-            'nomor_agunan' => [
+            8 => [
                 'title' => 'Nomor Agunan',
                 'type' => 'text'
             ],
-            'nib' => [
+            9 => [
                 'title' => 'NIB',
                 'type' => 'text'
             ],
-            'nop' => [
+            10 => [
                 'title' => 'NOP',
                 'type' => 'text'
             ],
-            'nama_pemilik_agunan' => [
+            11 => [
                 'title' => 'Nama Pemilik Agunan',
                 'type' => 'text'
             ],
-            'kode_sertifikat' => [
+            12 => [
                 'title' => 'Kode Sertifikat',
                 'type' => 'text'
             ],
-            'nomor_seri' => [
+            13 => [
                 'title' => 'Nomor Seri',
                 'type' => 'text'
             ],
-            'jumlah_pengikatan' => [
+            14 => [
                 'title' => 'Jumlah Pengikatan',
                 'type' => 'number'
             ],
-            'jenis_agunan' => [
+            15 => [
                 'title' => 'Jenis Agunan',
                 'type' => 'text'
             ],
-            'keterangan_objek' => [
+            16 => [
                 'title' => 'Keterangan Objek',
                 'type' => 'text'
             ],
-            'bukti_kepemilikan_objek' => [
+            17 => [
                 'title' => 'Bukti Kepemilikan Objek',
                 'type' => 'text'
             ],
-            'nilai_objek' => [
+            18 => [
                 'title' => 'Nilai Objek',
                 'type' => 'number'
             ],
-            'pemilik_agunan' => [
+            19 => [
                 'title' => 'Pemilik Agunan',
                 'type' => 'text'
             ],
-            'nilai_penjaminan' => [
+            20 => [
                 'title' => 'Nilai Penjaminan',
                 'type' => 'number'
             ],
-            'npwp' => [
+            21 => [
                 'title' => 'NPWP',
                 'type' => 'text'
             ],
-            'berkas_masuk' => [
+            22 => [
                 'title' => 'Berkas Masuk',
                 'type' => 'text'
             ],
-            'pewaris' => [
+            23 => [
                 'title' => 'Pewaris',
                 'type' => 'text'
             ],
-            'ahli_waris' => [
+            24 => [
                 'title' => 'Ahli Waris',
                 'type' => 'text'
             ],
-            'penerima_waris' => [
+            25 => [
                 'title' => 'Penerima Waris',
                 'type' => 'text'
             ],
-            'lokasi_tanah' => [
+            26 => [
                 'title' => 'Lokasi Tanah',
                 'type' => 'text'
             ],
-            'nilai_pajak' => [
+            27 => [
                 'title' => 'Nilai Pajak',
                 'type' => 'number'
             ],
-            'berkas_kembali' => [
+            28 => [
                 'title' => 'Berkas Kembali',
                 'type' => 'text'
             ],
-            'masuk_bpn' => [
+            29 => [
                 'title' => 'Masuk BPN',
                 'type' => 'text'
             ],
-            'tanggal_akad' => [
+            30 => [
                 'title' => 'Tanggal Akad',
                 'type' => 'date'
             ],
-            'nama_penjual' => [
+            31 => [
                 'title' => 'Nama Penjual',
                 'type' => 'text'
             ],
-            'nama_pembeli' => [
+            32 => [
                 'title' => 'Nama Pembeli',
                 'type' => 'text'
             ],
-            'sertifikat' => [
+            33 => [
                 'title' => 'Sertifikat',
                 'type' => 'text'
             ],
-            'nilai_jual_beli' => [
+            34 => [
                 'title' => 'Nilai Jual Beli',
                 'type' => 'number'
             ],
-            'nilai_ssb' => [
+            35 => [
                 'title' => 'Nilai SSB',
                 'type' => 'number'
             ],
-            'nilai_ssp' => [
+            36 => [
                 'title' => 'Nilai SSP',
                 'type' => 'number'
             ],
-            'keterangan_ppjb' => [
+            37 => [
                 'title' => 'Keterangan PPJB',
                 'type' => 'text'
             ],
-            'keterangan_kuasa_menjual' => [
+            38 => [
                 'title' => 'Keterangan Kuasa Menjual',
                 'type' => 'text'
             ],
-            'harga_real' => [
+            39 => [
                 'title' => 'Harga Real',
                 'type' => 'number'
             ],
-            'harga_kesepakatan' => [
+            40 => [
                 'title' => 'Harga Kesepakatan',
                 'type' => 'number'
             ],
-            'biaya' => [
+            41 => [
                 'title' => 'Biaya',
                 'type' => 'number'
             ],
-            'nama_direktur' => [
+            42 => [
                 'title' => 'Nama Direktur',
                 'type' => 'text'
             ],
-            'nama_komisaris' => [
+            43 => [
                 'title' => 'Nama Komisaris',
                 'type' => 'text'
             ],
-            'nama_pemilik_manfaat' => [
+            44 => [
                 'title' => 'Nama Pemilik Manfaat',
                 'type' => 'text'
             ],
-            'kedudukan_pt' => [
+            45 => [
                 'title' => 'Kedudukan PT',
                 'type' => 'text'
             ],
-            'nama_persero_aktif' => [
+            46 => [
                 'title' => 'Nama Persero Aktif',
                 'type' => 'text'
             ],
-            'nama_persero_pasib' => [
+            47 => [
                 'title' => 'Nama Persero Pasif',
                 'type' => 'text'
             ],
-            'nama_pembina' => [
+            48 => [
                 'title' => 'Nama Pembina',
                 'type' => 'text'
             ],
-            'nama_ketua' => [
+            49 => [
                 'title' => 'Nama Ketua',
                 'type' => 'text'
             ],
-            'nama_wakil' => [
+            50 => [
                 'title' => 'Nama Wakil',
                 'type' => 'text'
             ],
-            'nama_bendahara' => [
+            51 => [
                 'title' => 'Nama Bendahara',
                 'type' => 'text'
             ],
-            'tanggal_upload' => [
+            52 => [
                 'title' => 'Tanggal Upload',
                 'type' => 'date'
-            ],
+            ]
         ];
 
         User::factory()->create([
@@ -524,21 +514,34 @@ class DatabaseSeeder extends Seeder
         // Membuat 5 customer
         $customers = Customer::factory(35)->create();
 
-        foreach ($products as $key => $product) {
-            Product::factory()->create([
-                'name' => $product['title'],
-                'price' => rand(100000, 5000000),
-                'description' => '',
-                'data' => implode(',', $product['data']),
+        foreach ($datas as $id => $data) {
+            Data::factory()->create([
+                'id' => $id,
+                'key' => $data['title'],
+                'value' => $data['type'],
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
         }
 
-        foreach ($datas as $key => $val) {
-            Data::factory()->create([
-                'key' => $key,
-                'value' => $val['title'],
-                'type' => $val['type']
+        // Insert data ke tabel 'products' dan 'data_product'
+        foreach ($products as $slug => $product) {
+            $productId = Product::factory()->create([
+                'name' => $product['title'],
+                'price' => '0',
+                'description' => '',
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
+
+            foreach ($product['data'] as $dataId) {
+                DataProduct::factory()->create([
+                    'data_id' => $dataId,
+                    'product_id' => $productId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
         }
 
         foreach ($customers as $customer) {
