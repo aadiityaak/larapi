@@ -15,11 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('customer_id');
             $table->date('order_date');
-            $table->string('service');
+            $table->string('product_id');
             $table->integer('price')->nullable();
             $table->string('payment_method')->nullable();
             $table->integer('paid')->nullable();
-            $table->text('document')->nullable();
+            $table->text('data')->nullable();
             $table->text('lampiran')->nullable();
             $table->timestamps();
         });

@@ -16,25 +16,21 @@ class OrderFactory extends Factory
      */
     public function definition(): array
     {
-        $layanan_notaris = [
-            'Pembuatan Akta Otentik',
-            'Pembuatan Wasiat',
-            'Pengesahan Dokumen',
-            'Peralihan Hak Tanah',
-            'Pembuatan Surat Kuasa',
-            'Jasa Legalitas'
-        ];
         $price = fake()->numberBetween(1000000, 10000000);
         $paid = fake()->numberBetween(1000000, $price);
         $order_date = fake()->dateTimeBetween('-6 months', 'now');
         return [
             'customer_id' => fake()->numberBetween(1, 10),
             'order_date' => $order_date,
-            'service' => fake()->randomElement($layanan_notaris),
+            'product_id' => fake()->numberBetween(1, 10),
             'price' => $price,
             'payment_method' => fake()->randomElement(['Tunai', 'Transfer']),
             'paid' => $paid,
-            'document' => ['KTP', 'PBB', 'KK']
+            'data' => [
+                'ktp' => fake()->numberBetween(1, 10),
+                'kk' => fake()->numberBetween(1, 10),
+                'npwp' => fake()->numberBetween(1, 10),
+            ]
         ];
     }
 }

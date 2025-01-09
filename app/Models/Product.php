@@ -20,4 +20,9 @@ class Product extends Model
   {
     return $this->hasMany(DataProduct::class, 'product_id');
   }
+
+  public function order()
+  {
+    return $this->belongsTo(Order::class);
+  }
 }

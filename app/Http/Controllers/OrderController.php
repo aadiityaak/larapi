@@ -11,11 +11,11 @@ class OrderController extends Controller
 
     private $validate = [
         'order_date' => 'required',
-        'service' => 'required',
+        'product_id' => 'required',
         'price' => 'required',
         'paid' => 'required',
         'payment_method' => 'required',
-        'document' => 'required',
+        'data' => 'required',
         'customer_id' => 'required|exists:customers,id',
     ];
     public function index(Request $request)
@@ -26,7 +26,7 @@ class OrderController extends Controller
         $status = $request->query('status');
         $status = isset($status) ? $status : null;
 
-        $query = Order::with('customer', 'jobdesks');
+        $query = Order::with('customer', 'jobdesks', 'product');
 
         if ($customerId) {
             $query->where('customer_id', $customerId);

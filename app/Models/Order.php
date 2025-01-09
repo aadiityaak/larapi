@@ -12,21 +12,26 @@ class Order extends Model
     protected $fillable = [
         'customer_id',
         'order_date',
-        'service',
+        'product_id',
         'price',
         'payment_method',
         'paid',
-        'document',
+        'data',
         'lampiran',
     ];
 
     protected $casts = [
-        'document' => 'array',
+        'data' => 'array',
     ];
 
     public function customer()
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
     }
 
     public function jobdesks()

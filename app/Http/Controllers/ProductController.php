@@ -18,6 +18,8 @@ class ProductController extends Controller
     // Query dasar semua products
     $query = Product::query();
 
+    $query->with('dataProducts.data');
+
     // Filter berdasarkan name jika ada
     if ($name && strlen($name) > 2) {
       $query->where('name', 'like', '%' . $name . '%');
@@ -27,7 +29,12 @@ class ProductController extends Controller
     $query->orderBy('created_at', 'desc');
 
     // Paginate the results
-    $products = $query->paginate(25);
+    if ($page === 'all') {
+      $products = $query->get();
+    } else {
+      $products = $query->paginate(25);
+    }
+
 
     return response()->json($products);
   }
