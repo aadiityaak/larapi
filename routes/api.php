@@ -10,6 +10,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\DataController;
 use App\Http\Controllers\Auth\ProfileController;
 
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -26,6 +27,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         'jobdesks' => JobdeskController::class,
         'customers' => CustomerController::class,
         'settings' => SettingController::class,
-        'products' => ProductController::class
+        'products' => ProductController::class,
+        'data' => DataController::class
     ]);
 });

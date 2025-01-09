@@ -517,8 +517,8 @@ class DatabaseSeeder extends Seeder
         foreach ($datas as $id => $data) {
             Data::factory()->create([
                 'id' => $id,
-                'key' => $data['title'],
-                'value' => $data['type'],
+                'name' => $data['title'],
+                'type' => $data['type'],
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -528,8 +528,8 @@ class DatabaseSeeder extends Seeder
         foreach ($products as $slug => $product) {
             $productId = Product::factory()->create([
                 'name' => $product['title'],
-                'price' => '0',
-                'description' => '',
+                'price' => '500000',
+                'description' => '-',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

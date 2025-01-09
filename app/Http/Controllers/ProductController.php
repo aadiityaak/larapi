@@ -12,10 +12,23 @@ class ProductController extends Controller
    */
   public function index(Request $request)
   {
-    // Mengambil produk dan memuat data terkait
-    $products = Product::with('dataProducts.data')->paginate(25);
+    $page = $request->query('page');
+    $name = $request->query('name');
 
-    // Mengembalikan response dalam format JSON
+    // Query dasar semua products
+    $query = Product::query();
+
+    // Filter berdasarkan name jika ada
+    if ($name && strlen($name) > 2) {
+      $query->where('name', 'like', '%' . $name . '%');
+    }
+
+    // shorting descending
+    $query->orderBy('created_at', 'desc');
+
+    // Paginate the results
+    $products = $query->paginate(25);
+
     return response()->json($products);
   }
 
@@ -25,13 +38,21 @@ class ProductController extends Controller
   public function store(Request $request)
   {
     $request->validate([
-      'name' => 'required|string|max:255',
-      'price' => 'required|string|max:255',
-      'description' => 'required|string',
-      'data' => 'required|string',
+      'name' => 'string|max:255|nullable',
+      'price' => 'numeric|nullable',
+      'description' => 'string|nullable',
+      'data_products' => 'array|nullable',
     ]);
 
-    $product = Product::create($request->all());
+    $product = Product::create($request->only('name', 'price', 'description'));
+
+    // Simpan data_products
+    if ($request->has('data_products')) {
+      foreach ($request->input('data_products') as $dataId) {
+        $product->dataProducts()->create(['data_id' => $dataId]);
+      }
+    }
+
     return response()->json($product, 201);
   }
 
@@ -50,14 +71,24 @@ class ProductController extends Controller
   public function update(Request $request, $id)
   {
     $request->validate([
-      'name' => 'string|max:255',
-      'price' => 'string|max:255',
-      'description' => 'string',
-      'data' => 'string',
+      'name' => 'string|max:255|nullable',
+      'price' => 'numeric|nullable',
+      'description' => 'string|nullable',
+      'data_products' => 'array|nullable',
     ]);
 
-    $product = Product::findOrFail($id);
-    $product->update($request->all());
+    $product = Product::with('dataProducts.data')->findOrFail($id);
+
+    $product->update($request->only('name', 'price', 'description'));
+
+    // Update data_products
+    if ($request->has('data_products')) {
+      $product->dataProducts()->delete();
+      foreach ($request->input('data_products') as $dataId) {
+        $product->dataProducts()->create(['data_id' => $dataId]);
+      }
+    }
+
     return response()->json($product);
   }
 
@@ -68,6 +99,10 @@ class ProductController extends Controller
   {
     $product = Product::findOrFail($id);
     $product->delete();
+
+    // hapus data_products
+    $product->dataProducts()->delete();
+
     return response()->json(null, 204);
   }
 }

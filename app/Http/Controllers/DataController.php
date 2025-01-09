@@ -3,23 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Models\Data;
-use App\Http\Requests\StoreDataRequest;
-use App\Http\Requests\UpdateDataRequest;
+use Illuminate\Http\Request;
 
 class DataController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $data = Data::all();
+        return response()->json($data);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreDataRequest $request)
+    public function store(Request $request)
     {
         //
     }
@@ -35,7 +35,7 @@ class DataController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateDataRequest $request, Data $data)
+    public function update(Request $request, Data $data)
     {
         //
     }
