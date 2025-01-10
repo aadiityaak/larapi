@@ -24,8 +24,10 @@ class DataProductFactory extends Factory
   public function definition()
   {
     return [
-      'data_id' => Data::factory(), // Create or use an existing Data model
-      'product_id' => Product::factory(), // Create or use an existing Product model
+      'data_id' => Data::factory(),
+      'product_id' => Product::factory(),
+      'created_at' => now(),
+      'updated_at' => now(),
     ];
   }
 }

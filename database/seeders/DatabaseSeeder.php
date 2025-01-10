@@ -24,233 +24,120 @@ class DatabaseSeeder extends Seeder
         $products = [
             'perjanjian_kredit' => [
                 'title' => 'Perjanjian Kredit',
-                'data' => [
-                    1, // Judul Akta
-                    2, // Nomor Akta
-                    3, // Tanggal Akta
-                    4, // Yang Mengerjakan
-                    5, // Jumlah Pinjaman
-                    6, // Lain-lain
-                ],
+                'data' => [1, 2, 3, 4, 5, 6],
+                'category' => 'perorangan'
             ],
             'skmht' => [
                 'title' => 'SKMHT',
-                'data' => [
-                    2, // Nomor Akta
-                    3, // Tanggal Akta
-                    8, // Nomor Agunan
-                    9, // NIB
-                    10, // NOP
-                    11, // Nama Pemilik Agunan
-                    12, // Kode Sertifikat
-                    13, // Nomor Seri
-                    14, // Jumlah Pengikatan
-                    7, // Tanggal Habis SKMHT
-                ],
+                'data' => [2, 3, 8, 9, 10, 11, 12, 13, 14, 7],
+                'category' => 'perorangan'
             ],
             'apht' => [
                 'title' => 'APHT',
-                'data' => [
-                    2, // Nomor Akta
-                    3, // Tanggal Akta
-                    8, // Nomor Agunan
-                    9, // NIB
-                    10, // NOP
-                    11, // Nama Pemilik Agunan
-                    12, // Kode Sertifikat
-                    13, // Nomor Seri
-                    14, // Jumlah Pengikatan
-                ],
+                'data' => [2, 3, 8, 9, 10, 11, 12, 13, 14],
+                'category' => 'perorangan'
             ],
             'fidusia' => [
                 'title' => 'Fidusia',
-                'data' => [
-                    2, // Nomor Akta
-                    3, // Tanggal Akta
-                    15, // Jenis Agunan
-                    16, // Keterangan Objek
-                    17, // Bukti Kepemilikan Objek
-                    18, // Nilai Objek
-                    19, // Pemilik Agunan
-                    20, // Nilai Penjaminan
-                    21, // NPWP
-                    7, // Tanggal Habis SKMHT
-                ],
+                'data' => [2, 3, 15, 16, 17, 18, 19, 20, 21, 7],
+                'category' => 'perorangan'
             ],
             'jual_beli' => [
                 'title' => 'Jual Beli',
-                'data' => [
-                    2, // Nomor Akta
-                    3, // Tanggal Akta
-                    31, // Nama Penjual
-                    32, // Nama Pembeli
-                    33, // Sertifikat
-                    26, // Lokasi Tanah
-                    34, // Nilai Jual Beli
-                    35, // Nilai SSB
-                    36, // Nilai SSP
-                    37, // Keterangan PPJB
-                    38, // Keterangan Kuasa Menjual
-                ],
+                'data' => [2, 3, 31, 32, 33, 26, 34, 35, 36, 37, 38],
+                'category' => 'perorangan',
             ],
             'hibah' => [
                 'title' => 'Hibah',
-                'data' => [
-                    2, // Nomor Akta
-                    3, // Tanggal Akta
-                    31, // Nama Penjual
-                    32, // Nama Pembeli
-                    33, // Sertifikat
-                    26, // Lokasi Tanah
-                    34, // Nilai Jual Beli
-                    35, // Nilai SSB
-                    36, // Nilai SSP
-                    37, // Keterangan PPJB
-                    38, // Keterangan Kuasa Menjual
-                ],
+                'data' => [2, 3, 31, 32, 33, 26, 34, 35, 36, 37, 38],
+                'category' => 'perorangan',
             ],
             'turun_waris' => [
                 'title' => 'Turun Waris',
-                'data' => [
-                    22, // Berkas Masuk
-                    23, // Pewaris
-                    24, // Ahli Waris
-                    25, // Penerima Waris
-                    26, // Lokasi Tanah
-                    27, // Nilai Pajak
-                    28, // Berkas Kembali
-                    29, // Masuk BPN
-                    30, // Tanggal Akad
-                ],
+                'data' => [22, 23, 24, 25, 26, 27, 28, 29, 30],
+                'category' => 'perorangan',
             ],
             'pecah' => [
                 'title' => 'Pecah',
-                'data' => [
-                    1, // Judul Akta
-                    44, // Nama Pemilik Sertifikat
-                    // Tambahkan elemen lain yang sesuai jika perlu
-                ],
+                'data' => [1, 44],
+                'category' => 'perorangan',
             ],
             'pendirian_pt' => [
                 'title' => 'Pendirian PT',
-                'data' => [
-                    1, // Judul Akta
-                    2, // Nomor Akta
-                    3, // Tanggal Akta
-                    42, // Nama Direktur
-                    43, // Nama Komisaris
-                    21, // NPWP Direktur
-                    21, // NPWP Komisaris
-                    44, // Nama Pemilik Manfaat
-                    45, // Kedudukan PT
-                    41, // Biaya
-                    52, // Tanggal Upload
-                ],
+                'data' => [1, 2, 3, 42, 43, 21, 21, 44, 45, 41, 52],
+                'category' => 'perorangan',
             ],
             'pendirian_cv' => [
                 'title' => 'Pendirian CV',
-                'data' => [
-                    1, // Judul Akta
-                    2, // Nomor Akta
-                    3, // Tanggal Akta
-                    46, // Nama Persero Aktif
-                    47, // Nama Persero Pasif
-                    21, // NPWP Persero Aktif
-                    21, // NPWP Persero Pasif
-                    45, // Kedudukan PT
-                    41, // Biaya
-                    52, // Tanggal Upload
-                ],
+                'data' => [1, 2, 3, 46, 47, 21, 21, 45, 41, 52],
+                'category' => 'perorangan',
             ],
             'pendirian_yayasan' => [
                 'title' => 'Pendirian Yayasan',
-                'data' => [
-                    1, // Judul Akta
-                    2, // Nomor Akta
-                    3, // Tanggal Akta
-                    48, // Nama Pembina
-                    49, // Nama Ketua
-                    50, // Nama Wakil
-                    51, // Nama Bendahara
-                    6, // Lain-lain
-                    21, // NPWP Yayasan
-                    41, // Biaya
-                    52, // Tanggal Upload
-                ],
+                'data' => [1, 2, 3, 48, 49, 50, 51, 6, 21, 41, 52],
+                'category' => 'perorangan',
             ],
             'pendirian_pt_perseorangan' => [
                 'title' => 'Pendirian PT Perseorangan',
-                'data' => [
-                    1, // Judul Akta
-                    2, // Nomor Akta
-                    3, // Tanggal Akta
-                    42, // Nama Direktur
-                    21, // NPWP Direktur
-                    45, // Kedudukan PT
-                    41, // Biaya
-                    52, // Tanggal Upload
-                ],
+                'data' => [1, 2, 3, 42, 21, 45, 41, 52],
+                'category' => 'perorangan',
             ],
             'perubahan_pt' => [
                 'title' => 'Perubahan PT',
-                'data' => [
-                    1, // Judul Akta
-                    2, // Nomor Akta
-                    3, // Tanggal Akta
-                    42, // Nama Direktur
-                    43, // Nama Komisaris
-                    21, // NPWP Direktur
-                    21, // NPWP Komisaris
-                    44, // Nama Pemilik Manfaat
-                    45, // Kedudukan PT
-                    41, // Biaya
-                    52, // Tanggal Upload
-                ],
+                'data' => [1, 2, 3, 42, 43, 21, 21, 44, 45, 41, 52],
+                'category' => 'perorangan',
             ],
             'perubahan_cv' => [
                 'title' => 'Perubahan CV',
-                'data' => [
-                    1, // Judul Akta
-                    2, // Nomor Akta
-                    3, // Tanggal Akta
-                    46, // Nama Persero Aktif
-                    47, // Nama Persero Pasif
-                    21, // NPWP Persero Aktif
-                    21, // NPWP Persero Pasif
-                    45, // Kedudukan PT
-                    41, // Biaya
-                    52, // Tanggal Upload
-                ],
+                'data' => [1, 2, 3, 46, 47, 21, 21, 45, 41, 52],
+                'category' => 'perorangan',
             ],
             'perubahan_yayasan' => [
                 'title' => 'Perubahan Yayasan',
-                'data' => [
-                    1, // Judul Akta
-                    2, // Nomor Akta
-                    3, // Tanggal Akta
-                    48, // Nama Pembina
-                    49, // Nama Ketua
-                    50, // Nama Wakil
-                    51, // Nama Bendahara
-                    6, // Lain-lain
-                    21, // NPWP Yayasan
-                    41, // Biaya
-                    52, // Tanggal Upload
-                ],
+                'data' => [1, 2, 3, 48, 49, 50, 51, 6, 21, 41, 52],
+                'category' => 'perorangan',
             ],
             'perubahan_pt_perseorangan' => [
                 'title' => 'Perubahan PT Perseorangan',
-                'data' => [
-                    1, // Judul Akta
-                    2, // Nomor Akta
-                    3, // Tanggal Akta
-                    42, // Nama Direktur
-                    21, // NPWP Direktur
-                    45, // Kedudukan PT
-                    41, // Biaya
-                    52, // Tanggal Upload
-                ],
+                'data' => [1, 2, 3, 42, 21, 45, 41, 52],
+                'category' => 'perorangan',
             ],
+            // BPR BBA, BPR Pala Pusat, BPR Pala Cabang, BPR Danamas Prime, BPR Arum Mandiri, BPRS Madina Mandiri, BMT Sejahtera Ummat'
+            'bpr_bba' => [
+                'title' => 'BPR BBA',
+                'data' => [],
+                'category' => 'bank',
+            ],
+            'bpr_pala_pusat' => [
+                'title' => 'BPR Pala Pusat',
+                'data' => [],
+                'category' => 'bank',
+            ],
+            'bpr_pala_cabang' => [
+                'title' => 'BPR Pala Cabang',
+                'data' => [],
+                'category' => 'bank',
+            ],
+            'bpr_danamas_prime' => [
+                'title' => 'BPR Danamas Prime',
+                'data' => [],
+                'category' => 'bank',
+            ],
+            'bpr_arum_mandiri' => [
+                'title' => 'BPR Arum Mandiri',
+                'data' => [],
+                'category' => 'bank',
+            ],
+            'bprs_madina_mandiri' => [
+                'title' => 'BPRS Madina Mandiri',
+                'data' => [],
+                'category' => 'bank',
+            ],
+            'bmt_sejahtera_ummat' => [
+                'title' => 'BMT Sejahtera Ummat',
+                'data' => [],
+                'category' => 'bank',
+            ]
         ];
         $datas = [
             1 => [
@@ -514,9 +401,7 @@ class DatabaseSeeder extends Seeder
             Data::factory()->create([
                 'id' => $id,
                 'name' => $data['title'],
-                'type' => $data['type'],
-                'created_at' => now(),
-                'updated_at' => now(),
+                'type' => $data['type']
             ]);
         }
 
@@ -526,16 +411,13 @@ class DatabaseSeeder extends Seeder
                 'name' => $product['title'],
                 'price' => '500000',
                 'description' => '-',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'category' => $product['category']
             ]);
 
             foreach ($product['data'] as $dataId) {
                 DataProduct::factory()->create([
                     'data_id' => $dataId,
-                    'product_id' => $productId,
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'product_id' => $productId
                 ]);
             }
         }

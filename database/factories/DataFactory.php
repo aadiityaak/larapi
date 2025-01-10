@@ -19,6 +19,8 @@ class DataFactory extends Factory
         return [
             'name' => $this->faker->name(),
             'type' => $this->faker->word(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
 }
