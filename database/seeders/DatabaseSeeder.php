@@ -91,8 +91,6 @@ class DatabaseSeeder extends Seeder
                     36, // Nilai SSP
                     37, // Keterangan PPJB
                     38, // Keterangan Kuasa Menjual
-                    39, // Harga Real
-                    40, // Harga Kesepakatan
                 ],
             ],
             'hibah' => [
@@ -109,8 +107,6 @@ class DatabaseSeeder extends Seeder
                     36, // Nilai SSP
                     37, // Keterangan PPJB
                     38, // Keterangan Kuasa Menjual
-                    39, // Harga Real
-                    40, // Harga Kesepakatan
                 ],
             ],
             'turun_waris' => [
