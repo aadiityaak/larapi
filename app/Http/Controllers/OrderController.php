@@ -26,7 +26,7 @@ class OrderController extends Controller
         $status = $request->query('status');
         $status = isset($status) ? $status : null;
 
-        $query = Order::with('customer', 'jobdesks', 'product');
+        $query = Order::with('customer', 'jobdesks', 'product', 'product.dataProducts.data');
 
         if ($customerId) {
             $query->where('customer_id', $customerId);
