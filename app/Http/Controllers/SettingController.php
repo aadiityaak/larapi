@@ -16,19 +16,13 @@ class SettingController extends Controller
      */
     public function index(Request $request)
     {
-        $setting_key = $request->get('setting_key');
-        $settings = Setting::all();
+        $settings = Setting::all()->pluck('setting_value', 'setting_key')->toArray();
 
-        $datas = [];
-        foreach ($settings as $setting) {
-            $datas[$setting->setting_key] = $setting->setting_value; // Gunakan 'setting_key' dari objek setting
+        if ($settingKey = $request->get('setting_key')) {
+            return response()->json([$settingKey => $settings[$settingKey] ?? null]);
         }
 
-        if ($setting_key && isset($datas[$setting_key])) {
-            return response()->json([$setting_key => $datas[$setting_key]]);
-        }
-
-        return response()->json($datas);
+        return response()->json($settings);
     }
 
     /**
@@ -37,40 +31,17 @@ class SettingController extends Controller
     public function store(Request $request)
     {
         // Define validation rules
-        $validatedData = $request->validate([
-            'app_name' => 'nullable|string|max:255',
-            'app_description' => 'nullable|string|max:500',
-            'alamat' => 'nullable|string|max:255',
-            'banks' => 'nullable|string|max:2000',
-            'pekerjaan' => 'nullable|string|max:10000',
-            'pdf_sample' => 'nullable',
-            'email' => 'nullable|email|max:255',
-        ]);
+        $validatedData = $request->validate($this->validationRules());
 
-        if (is_string($request->pdf_sample)) {
-            unset($validatedData['pdf_sample']);
-        }
-        $settingsToSave = [];
-
+        // Handle file upload if exists
         if ($request->hasFile('pdf_sample')) {
-            $pdfPath = $request->file('pdf_sample')->store('pdf_samples', 'public');
-            $settingsToSave['pdf_sample'] = $pdfPath;
+            $validatedData['pdf_sample'] = $request->file('pdf_sample')->store('pdf_samples', 'public');
         }
 
-        // Save or update each setting
-        foreach ($validatedData as $key => $value) {
-            $settingsToSave[$key] = $value; // Add other validated settings
-            Setting::updateOrCreate(
-                ['setting_key' => $key],
-                ['setting_value' => $value]
-            );
-        }
+        // Save or update settings
+        $this->saveSettings($validatedData);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Settings saved successfully.',
-            'data' => $settingsToSave
-        ], 201);
+        return $this->responseSuccess('Settings saved successfully.', $validatedData);
     }
 
     /**
@@ -78,11 +49,7 @@ class SettingController extends Controller
      */
     public function show($key)
     {
-        $setting = Setting::where('setting_key', $key)->first();
-
-        if (!$setting) {
-            return response()->json(['success' => false, 'message' => 'Setting not found.'], 404);
-        }
+        $setting = Setting::where('setting_key', $key)->firstOrFail();
 
         return response()->json($setting);
     }
@@ -92,48 +59,21 @@ class SettingController extends Controller
      */
     public function update(Request $request, $key)
     {
-        $setting = Setting::where('setting_key', $key)->first();
-
-        if (!$setting) {
-            return response()->json(['success' => false, 'message' => 'Setting not found.'], 404);
-        }
+        $setting = Setting::where('setting_key', $key)->firstOrFail();
 
         // Define validation rules
-        $validatedData = $request->validate([
-            'app_name' => 'nullable|string|max:255',
-            'app_description' => 'nullable|string|max:500',
-            'alamat' => 'nullable|string|max:255',
-            'banks' => 'nullable|string|max:2000',
-            'pekerjaan' => 'nullable|string|max:2000',
-            'pdf_sample' => 'nullable|file|mimes:pdf|max:2048',
-            'email' => 'nullable|email|max:255',
-        ]);
+        $validatedData = $request->validate($this->validationRules());
 
-        if (is_string($request->pdf_sample)) {
-            unset($validatedData['pdf_sample']);
-        }
-
-        $settingsToUpdate = [];
-
+        // Handle file upload and delete previous file if necessary
         if ($request->hasFile('pdf_sample')) {
-            if ($setting->setting_key === 'pdf_sample') {
-                Storage::disk('public')->delete($setting->setting_value);
-            }
-            $pdfPath = $request->file('pdf_sample')->store('pdf_samples', 'public');
-            $settingsToUpdate['pdf_sample'] = $pdfPath;
+            Storage::disk('public')->delete($setting->setting_value);
+            $validatedData['pdf_sample'] = $request->file('pdf_sample')->store('pdf_samples', 'public');
         }
 
-        // Update the setting value
-        foreach ($validatedData as $key => $value) {
-            $settingsToUpdate[$key] = $value;
-            $setting->update(['setting_value' => $value]);
-        }
+        // Update the setting
+        $setting->update($validatedData);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Setting updated successfully.',
-            'data' => $setting
-        ], 200);
+        return $this->responseSuccess('Setting updated successfully.', $setting);
     }
 
     /**
@@ -141,11 +81,7 @@ class SettingController extends Controller
      */
     public function destroy($key)
     {
-        $setting = Setting::where('setting_key', $key)->first();
-
-        if (!$setting) {
-            return response()->json(['success' => false, 'message' => 'Setting not found.'], 404);
-        }
+        $setting = Setting::where('setting_key', $key)->firstOrFail();
 
         // Delete associated file if exists
         if ($setting->setting_value) {
@@ -155,9 +91,47 @@ class SettingController extends Controller
         // Delete the setting record
         $setting->delete();
 
+        return $this->responseSuccess('Setting deleted successfully.');
+    }
+
+    /**
+     * Validation rules for storing/updating settings.
+     */
+    protected function validationRules()
+    {
+        return [
+            'app_name' => 'nullable|string|max:255',
+            'app_description' => 'nullable|string|max:500',
+            'alamat' => 'nullable|string|max:255',
+            'banks' => 'nullable|string|max:2000',
+            'pekerjaan' => 'nullable|string|max:10000',
+            'pdf_sample' => 'nullable',
+            'email' => 'nullable|email|max:255',
+        ];
+    }
+
+    /**
+     * Save settings to the database.
+     */
+    protected function saveSettings(array $settings)
+    {
+        foreach ($settings as $key => $value) {
+            Setting::updateOrCreate(
+                ['setting_key' => $key],
+                ['setting_value' => $value]
+            );
+        }
+    }
+
+    /**
+     * Create a success response.
+     */
+    protected function responseSuccess(string $message, $data = null)
+    {
         return response()->json([
             'success' => true,
-            'message' => 'Setting deleted successfully.'
+            'message' => $message,
+            'data' => $data
         ], 200);
     }
 }
