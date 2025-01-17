@@ -133,25 +133,6 @@ class KaryawanController extends Controller
         ], 200);
     }
 
-    public function sendJobdeskReminder(Request $request)
-    {
-        $request->validate([
-            'jobdesk_id' => 'required|integer|exists:jobdesks,id',
-        ]);
-
-        $jobdesk = Jobdesk::find($request->jobdesk_id);
-        $user = User::find($jobdesk->user_id);
-        $data = [
-            'jobdesk_id' => $request->jobdesk_id,
-            'user_id' => $user->id,
-        ];
-
-        // Kirim notifikasi
-        $user->notify(new PendingJobdesk($data));
-
-        return response()->json(['message' => 'Notifikasi jobdesk telah dikirim!']);
-    }
-
     public function destroy($id)
     {
         $user = User::findOrFail($id);

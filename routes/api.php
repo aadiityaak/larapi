@@ -12,13 +12,14 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\DataController;
 use App\Http\Controllers\Auth\ProfileController;
+use Illuminate\Notifications\NotificationController;
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('profile', function (Request $request) {
         return $request->user();
     });
     Route::get('user', [UserController::class, 'index']);
-    Route::post('jobdesk-reminder', [KaryawanController::class, 'sendJobdeskReminder']);
+    Route::post('jobdesk-reminder', [NotificationController::class, 'sendJobdeskReminder']);
     Route::put('profile', [ProfileController::class, 'update']);
     Route::get('home', [DashboardController::class, 'index']);
     Route::apiResources([
