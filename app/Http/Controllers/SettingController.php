@@ -107,6 +107,9 @@ class SettingController extends Controller
             'pekerjaan' => 'nullable|string|max:10000',
             'pdf_sample' => 'nullable',
             'email' => 'nullable|email|max:255',
+            'new_order' => 'nullable|string',
+            'project_assignment' => 'nullable|string',
+            'followup_project' => 'nullable|string',
         ];
     }
 
