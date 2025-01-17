@@ -11,8 +11,9 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\DataController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Auth\ProfileController;
-use Illuminate\Notifications\NotificationController;
+
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('profile', function (Request $request) {

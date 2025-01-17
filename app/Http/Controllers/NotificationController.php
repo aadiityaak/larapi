@@ -21,7 +21,7 @@ class NotificationController extends Controller
     // Validasi input
     $request->validate([
       'jobdesk_id' => 'required|integer|exists:jobdesks,id',
-      'message' => 'required|string|max:255',
+      'message' => 'nullable|string',
     ]);
 
     // Ambil jobdesk dan pengguna terkait
