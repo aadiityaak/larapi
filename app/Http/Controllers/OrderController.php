@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class OrderController extends Controller
 {
@@ -15,7 +16,7 @@ class OrderController extends Controller
         'price' => 'required',
         'paid' => 'required',
         'payment_method' => 'required',
-        'data' => 'required',
+        'data' => 'nullable',
         'customer_id' => 'required|exists:customers,id',
     ];
     public function index(Request $request)
@@ -109,13 +110,25 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
-        // Validate the incoming request
-        $validatedData = $request->validate($this->validate);
+        $validator = Validator::make($request->all(), [
+            'order_date' => 'required',
+            'product_id' => 'required',
+            'price' => 'required',
+            'paid' => 'required',
+            'payment_method' => 'required',
+            'data' => 'required',
+            'customer_id' => 'required|exists:customers,id',
+        ]);
 
-        // Create the order with validated data
-        $order = Order::create($validatedData);
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation errors',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
 
-        // Return the created order as a JSON response
+        $order = Order::create($validator->validated());
+
         return response()->json($order);
     }
 
