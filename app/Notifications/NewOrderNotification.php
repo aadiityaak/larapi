@@ -30,7 +30,6 @@ class NewOrderNotification extends Notification implements ShouldQueue
         // Simpan informasi order
         $this->order = $order;
 
-        // replace [xxxx] with actual values
         $this->message = str_replace(
             [
                 '[nama_klien]',
@@ -42,13 +41,13 @@ class NewOrderNotification extends Notification implements ShouldQueue
                 '[tim_manajemen]',
             ],
             [
-                $order->customer->name . ' ' . $order,
+                $order->customer->name,
                 $order->order_date,
                 $order->customer->phone,
                 $order->customer->alamat,
                 $order->order_number,
                 $order->product->name . ' (' . $order->product->category . ')',
-                'Tim Manajemen' . Setting::where('setting_key', 'app_name')->value('setting_value'),
+                'Tim Manajemen ' . Setting::where('setting_key', 'app_name')->value('setting_value'),
             ],
             $this->message
         );
@@ -89,15 +88,9 @@ class NewOrderNotification extends Notification implements ShouldQueue
      */
     public function toDatabase($notifiable)
     {
-        $data = [
-            'message' => $this->message,
-            'user_id' => $notifiable->id,
-            'order_id' => $this->order->id,
-            'jobdesk_id' => $this->order->jobdesk_id
+        return [
+            'message' => 'Pemberitahuan: Pesanan Baru',
+            'notifiable' => $notifiable
         ];
-
-        Log::info('Sending notification data to database:', $data);
-
-        return $data;
     }
 }

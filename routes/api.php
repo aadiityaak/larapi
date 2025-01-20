@@ -11,8 +11,9 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\DataController;
-use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\SendNotificationController;
 use App\Http\Controllers\Auth\ProfileController;
+use App\Http\Controllers\NotificationController;
 
 
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -20,9 +21,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         return $request->user();
     });
     Route::get('user', [UserController::class, 'index']);
-    Route::post('jobdesk-reminder', [NotificationController::class, 'sendJobdeskReminder']);
+    Route::post('jobdesk-reminder', [SendNotificationController::class, 'sendJobdeskReminder']);
     Route::put('profile', [ProfileController::class, 'update']);
     Route::get('home', [DashboardController::class, 'index']);
+    Route::get('notifications', [NotificationController::class, 'index']);
     Route::apiResources([
         'karyawans' => KaryawanController::class,
         'orders' => OrderController::class,
