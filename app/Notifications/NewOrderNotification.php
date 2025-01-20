@@ -89,8 +89,8 @@ class NewOrderNotification extends Notification implements ShouldQueue
     public function toDatabase($notifiable)
     {
         return [
-            'message' => 'Pemberitahuan: Pesanan Baru',
-            'notifiable' => $notifiable
+            'message' => 'Pesanan baru telah diterima dari ' . $this->order->customer->name,
+            'order_id' => $this->order->id,
         ];
     }
 }
