@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use App\Notifications\NewOrderNotification;
+use Illuminate\Support\Facades\Notification;
 
 class OrderController extends Controller
 {
@@ -116,7 +119,7 @@ class OrderController extends Controller
             'price' => 'required',
             'paid' => 'required',
             'payment_method' => 'required',
-            'data' => 'required',
+            'data' => 'nullable',
             'customer_id' => 'required|exists:customers,id',
         ]);
 
@@ -128,7 +131,8 @@ class OrderController extends Controller
         }
 
         $order = Order::create($validator->validated());
-
+        $users = User::where('is_admin', 1)->orWhere('position', 'owner')->get();
+        Notification::send($users, new NewOrderNotification($order));
         return response()->json($order);
     }
 

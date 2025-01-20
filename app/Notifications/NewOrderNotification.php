@@ -6,23 +6,52 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use App\Models\Setting; // Import model Setting
+use App\Models\Setting;
+
+use Illuminate\Support\Facades\Log;
 
 class NewOrderNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
     protected $message;
+    protected $order;
 
     /**
      * Buat instance notifikasi baru.
      *
      * Ambil pesan dari pengaturan.
      */
-    public function __construct()
+    public function __construct($order)
     {
         // Ambil pesan dari pengaturan
         $this->message = Setting::where('setting_key', 'new_order')->value('setting_value') ?? 'Pesan default jika tidak ada setting';
+
+        // Simpan informasi order
+        $this->order = $order;
+
+        // replace [xxxx] with actual values
+        $this->message = str_replace(
+            [
+                '[nama_klien]',
+                '[tanggal_order]',
+                '[no_telp]',
+                '[alamat]',
+                '[order_number]',
+                '[product]',
+                '[tim_manajemen]',
+            ],
+            [
+                $order->customer->name . ' ' . $order,
+                $order->order_date,
+                $order->customer->phone,
+                $order->customer->alamat,
+                $order->order_number,
+                $order->product->name . ' (' . $order->product->category . ')',
+                'Tim Manajemen' . Setting::where('setting_key', 'app_name')->value('setting_value'),
+            ],
+            $this->message
+        );
     }
 
     /**
@@ -33,7 +62,7 @@ class NewOrderNotification extends Notification implements ShouldQueue
      */
     public function via($notifiable)
     {
-        return ['mail']; // Anda bisa menambahkan saluran lain seperti database, broadcast, dsb.
+        return ['mail', 'database']; // Anda bisa menambahkan saluran lain seperti database, broadcast, dsb.
     }
 
     /**
@@ -47,7 +76,28 @@ class NewOrderNotification extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject('Notifikasi Pesanan Baru')
             ->line($this->message)
-            ->action('Lihat Pesanan', url('/orders')) // Sesuaikan URL sesuai kebutuhan Anda
+            ->line('Tanggal Pesanan: ' . $this->order->order_date)
+            ->action('Lihat Pesanan', url('/orders'))
             ->line('Terima kasih telah menggunakan aplikasi kami!');
+    }
+
+    /**
+     * Siapkan pesan database untuk notifikasi.
+     *
+     * @param mixed $notifiable
+     * @return array
+     */
+    public function toDatabase($notifiable)
+    {
+        $data = [
+            'message' => $this->message,
+            'user_id' => $notifiable->id,
+            'order_id' => $this->order->id,
+            'jobdesk_id' => $this->order->jobdesk_id
+        ];
+
+        Log::info('Sending notification data to database:', $data);
+
+        return $data;
     }
 }

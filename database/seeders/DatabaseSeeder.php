@@ -41,9 +41,8 @@ class DatabaseSeeder extends Seeder
             <br/>
             <b>Detail Order:</b><br/>
             ======================================<br/>
-            Nama Klien: <b>[Nama Klien]</b><br/>
+            Nama Klien: <b>[nama_klien]</b><br/>
             Nomor Telepon: <b>[no_telp]</b><br/>
-            Email: <b>[email]</b><br/>
             Jenis Layanan Notaris: <b>[product]</b><br/>
             ======================================<br/>
             <br/>
