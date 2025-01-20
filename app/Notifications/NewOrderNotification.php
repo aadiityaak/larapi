@@ -90,7 +90,7 @@ class NewOrderNotification extends Notification implements ShouldQueue
     {
         return [
             'message' => 'Pesanan baru telah diterima dari ' . $this->order->customer->name,
-            'order_id' => $this->order->id,
+            'notifiable' => $notifiable,
         ];
     }
 }

@@ -25,6 +25,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('profile', [ProfileController::class, 'update']);
     Route::get('home', [DashboardController::class, 'index']);
     Route::get('notifications', [NotificationController::class, 'index']);
+    Route::put('notifications/{id}', [NotificationController::class, 'update']);
     Route::apiResources([
         'karyawans' => KaryawanController::class,
         'orders' => OrderController::class,

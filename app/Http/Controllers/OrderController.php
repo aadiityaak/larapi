@@ -27,6 +27,7 @@ class OrderController extends Controller
         $customerId = $request->query('customer_id');
         $paginanate = $request->query('paginanate');
         $name = $request->query('name');
+        $product = $request->query('product');
         $status = $request->query('status');
         $status = isset($status) ? $status : null;
 
@@ -39,6 +40,12 @@ class OrderController extends Controller
         if ($name && strlen($name) > 2) {
             $query->whereHas('customer', function ($query) use ($name) {
                 $query->where('name', 'like', '%' . $name . '%');
+            });
+        }
+
+        if ($product && strlen($product) > 2) {
+            $query->whereHas('product', function ($query) use ($product) {
+                $query->where('name', 'like', '%' . $product . '%');
             });
         }
 
