@@ -6,9 +6,6 @@ use App\Models\Customer;
 use App\Models\Jobdesk;
 use App\Models\Order;
 use App\Models\Setting;
-use App\Models\Product;
-use App\Models\Data;
-use App\Models\DataProduct;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -33,7 +30,6 @@ class DatabaseSeeder extends Seeder
                 $jobdesksCount = rand(2, 10);
                 Jobdesk::factory($jobdesksCount)->create([
                     'order_id' => $order->id,
-                    'customer_id' => $customer->id
                 ]);
             }
         }

@@ -15,7 +15,7 @@ class JobdeskController extends Controller
         $user_id = $request->query('user_id');
 
         // Initialize the query
-        $query = Jobdesk::with('customer', 'order', 'user', 'order.product');
+        $query = Jobdesk::with('order', 'order.customer', 'user', 'order.product');
 
         // Filter by order_id if provided
         if ($orderId) {

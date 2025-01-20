@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('jobdesks', function (Blueprint $table) {
             $table->id();
-            $table->string('customer_id');
             $table->string('order_id');
             $table->string('user_id')->nullable();
             $table->date('tanggal_pengerjaan')->nullable();
