@@ -10,19 +10,13 @@ class Jobdesk extends Model
     use HasFactory;
 
     protected $fillable = [
-        'customer_id',
         'order_id',
+        'deskripsi',
         'user_id',
         'tanggal_pengerjaan',
         'tanggal_selesai',
         'status',
     ];
-
-    public function customer()
-    {
-        return $this->belongsTo(Customer::class);
-    }
-
     public function order()
     {
         return $this->belongsTo(Order::class);

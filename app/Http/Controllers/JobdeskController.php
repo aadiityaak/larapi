@@ -33,7 +33,7 @@ class JobdeskController extends Controller
         }
 
         if ($name && strlen($name) > 2) {
-            $query->whereHas('customer', function ($query) use ($name) {
+            $query->whereHas('order.customer', function ($query) use ($name) {
                 $query->where('name', 'like', '%' . $name . '%');
             });
         }
