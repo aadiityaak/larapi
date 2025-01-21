@@ -19,7 +19,7 @@ class CustomerController extends Controller
 
     public function index(Request $request)
     {
-
+        $paginate = $request->query('paginate');
         $validated = $request->validate([
             'name' => 'nullable|string|min:3',
             'phone' => 'nullable|string|min:4',
@@ -37,7 +37,11 @@ class CustomerController extends Controller
 
         $query->orderBy('created_at', 'desc');
 
-        $customers = $query->paginate(25);
+        if ($paginate === 'false') {
+            $customers = $query->get();
+        } else {
+            $customers = $query->paginate(25);
+        }
 
         return response()->json($customers);
     }
@@ -47,7 +51,19 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
-        $validatedData = $request->validate($this->validate);
+        $validatedData = $request->validate(
+            [
+                'name' => 'required|string|max:255',
+                'phone' => 'required|string|max:20|unique:customers,phone',
+                'alamat' => 'required|string',
+            ],
+            [
+                'name.required' => 'Nama harus diisi.',
+                'phone.required' => 'Nomor telepon harus diisi.',
+                'phone.unique' => 'Nomor telepon sudah ada.',
+                'alamat.required' => 'Alamat harus diisi.',
+            ]
+        );
 
         $customer = Customer::create($validatedData);
         return response()->json($customer);
@@ -68,7 +84,13 @@ class CustomerController extends Controller
     public function update(Request $request, Customer $customer)
     {
         $customer = Customer::find($customer->id);
-        $validatedData = $request->validate($this->validate);
+        $validatedData = $request->validate(
+            [
+                'name' => 'required|string|max:255',
+                'phone' => 'required|string|max:20|unique:customers,phone,' . $customer->id,
+                'alamat' => 'required|string',
+            ]
+        );
         $customer->update($validatedData);
         return response()->json($customer);
     }
