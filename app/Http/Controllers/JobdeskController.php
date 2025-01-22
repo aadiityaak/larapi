@@ -12,7 +12,7 @@ class JobdeskController extends Controller
         $orderId = $request->query('order_id');
         $status = $request->query('status');
         $name = $request->query('name');
-        $user_id = $request->query('user_id');
+        $userId = $request->query('user_id');
 
         // Initialize the query
         $query = Jobdesk::with('order', 'order.customer', 'user', 'order.product');
@@ -28,8 +28,8 @@ class JobdeskController extends Controller
         }
 
         // Filter by user_id if provided
-        if ($user_id) {
-            $query->where('user_id', $user_id);
+        if ($userId) {
+            $query->where('user_id', $userId);
         }
 
         if ($name && strlen($name) > 2) {
@@ -66,13 +66,21 @@ class JobdeskController extends Controller
     public function update(Request $request, Jobdesk $jobdesk)
     {
         $jobdesk = Jobdesk::find($jobdesk->id);
-        $validatedData = $request->validate([
-            'order_id' => 'required|exists:orders,id',
-            'user_id' => 'required|exists:users,id',
-            'tanggal_pengerjaan' => 'nullable',
-            'tanggal_selesai' => 'nullable',
-            'status' => 'required',
-        ]);
+        $validatedData = $request->validate(
+            [
+                'order_id' => 'required|exists:orders,id',
+                'user_id' => 'required|exists:users,id',
+                'deskripsi' => 'nullable',
+                'tanggal_pengerjaan' => 'nullable',
+                'tanggal_selesai' => 'nullable',
+                'status' => 'required',
+            ],
+            [
+                'order_id.required' => 'Pilih order yang akan dikerjakan.',
+                'user_id.required' => 'Pilih karyawan yang akan mengerjakan jobdesk.',
+                'status.required' => 'Status harus diisi.',
+            ]
+        );
         if (isset($validatedData['tanggal_pengerjaan'])) {
             $validatedData['tanggal_pengerjaan'] = date('Y-m-d', strtotime($validatedData['tanggal_pengerjaan']));
         }
