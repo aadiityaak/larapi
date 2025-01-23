@@ -25,7 +25,7 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $customerId = $request->query('customer_id');
-        $paginanate = $request->query('paginanate');
+        $paginate = $request->query('paginate');
         $name = $request->query('name');
         $product = $request->query('product');
         $status = $request->query('status');
@@ -69,7 +69,7 @@ class OrderController extends Controller
         $query->orderBy('created_at', 'desc');
 
         // Check if pagination should be disabled
-        if ($paginanate === 'false') {
+        if ($paginate === 'false') {
             // Get all records without pagination
             $orders = $query->get();
         } else {

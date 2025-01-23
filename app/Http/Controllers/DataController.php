@@ -12,9 +12,9 @@ class DataController extends Controller
      */
     public function index(Request $request)
     {
-        $paginanate = $request->query('paginanate');
+        $paginate = $request->query('paginate');
 
-        if ($paginanate === 'false') {
+        if ($paginate === 'false') {
             $data = Data::all();
         } else {
             $data = Data::paginate(25);

@@ -16,7 +16,7 @@ class KaryawanController extends Controller
 
     public function index(Request $request)
     {
-        $paginanate = $request->query('paginanate');
+        $paginate = $request->query('paginate');
         $name = $request->query('name');
 
         // Query dasar semua user
@@ -30,7 +30,7 @@ class KaryawanController extends Controller
         $query->orderBy('created_at', 'desc');
 
         // Check if pagination should be disabled
-        if ($paginanate === 'false') {
+        if ($paginate === 'false') {
             // Get all records without pagination
             $users = $query->get();
         } else {
