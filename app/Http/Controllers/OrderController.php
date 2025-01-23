@@ -37,7 +37,7 @@ class OrderController extends Controller
             $query->where('customer_id', $customerId);
         }
 
-        if ($name && strlen($name) > 2) {
+        if ($name && strlen($name) > 2 && !$customerId) {
             $query->whereHas('customer', function ($query) use ($name) {
                 $query->where('name', 'like', '%' . $name . '%');
             });
@@ -50,20 +50,21 @@ class OrderController extends Controller
         }
 
         if ($status) {
-            $query->whereDoesntHave('jobdesks', function ($query) use ($status) {
-                $query->where('status', '!=', 'Selesai');
+            // Filter berdasarkan status
+            $query->whereHas('jobdesks', function ($query) use ($status) {
+                // Jika status adalah 'Selesai', hanya ambil yang memiliki lampiran
+                if ($status === 'Selesai') {
+                    $query->where('status', 'Selesai')->whereNotNull('lampiran');
+                }
+                // Jika status adalah 'Arsip', hanya ambil yang tidak memiliki lampiran
+                elseif ($status === 'Arsip') {
+                    $query->where('status', 'Arsip')->whereNull('lampiran');
+                }
+                // Jika status bukan 'Selesai' atau 'Arsip', ambil yang tidak 'Selesai'
+                else {
+                    $query->where('status', '!=', 'Selesai');
+                }
             });
-            if ($status === 'Selesai') {
-                $query->whereNotNull('lampiran');
-            }
-            if ($status === 'Arsip') {
-                $query->whereNull('lampiran');
-            }
-            $query->whereHas('jobdesks');
-        } else {
-            $query->whereHas('jobdesks', function ($query) {
-                $query->where('status', '!=', 'Selesai');
-            })->orWhereDoesntHave('jobdesks');
         }
 
         $query->orderBy('created_at', 'desc');

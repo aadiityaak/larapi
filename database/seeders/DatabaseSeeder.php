@@ -7,7 +7,6 @@ use App\Models\Jobdesk;
 use App\Models\Order;
 use App\Models\Setting;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -16,24 +15,27 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Seed settings first
+        $this->seedSettings();
 
-
-        $customers = Customer::factory(35)->create();
+        // Seed customers and orders
+        $customers = Customer::factory(28)->create();
 
         foreach ($customers as $customer) {
-            // Membuat antara 2 hingga 10 order untuk setiap customer
-            $ordersCount = rand(2, 10);
+            $ordersCount = rand(2, 4);
             $orders = Order::factory($ordersCount)->create(['customer_id' => $customer->id]);
 
             foreach ($orders as $order) {
-                // Membuat antara 2 hingga 10 jobdesk untuk setiap order
-                $jobdesksCount = rand(2, 10);
+                $jobdesksCount = rand(2, 5);
                 Jobdesk::factory($jobdesksCount)->create([
                     'order_id' => $order->id,
                 ]);
             }
         }
+    }
 
+    protected function seedSettings()
+    {
         $template_order = '
             <b>Pemberitahuan Order Layanan Notaris Baru</b><br/>
             <br/>
@@ -87,14 +89,19 @@ class DatabaseSeeder extends Seeder
             <b>Terima kasih.</b><br/>
             [tim_manajemen]
         ';
-        Setting::create(['setting_key' => 'new_order', 'setting_value' => $template_order]);
-        Setting::create(['setting_key' => 'project_assignment', 'setting_value' => $template_project]);
-        Setting::create(['setting_key' => 'followup_project', 'setting_value' => $template_followup]);
-        Setting::create(['setting_key' => 'app_name', 'setting_value' => 'APP']);
-        Setting::create(['setting_key' => 'app_description', 'setting_value' => 'Asisten Notaris Online']);
-        Setting::create(['setting_key' => 'alamat', 'setting_value' => 'Jl. Kebon Jeruk, Jakarta Timur']);
-        Setting::create(['setting_key' => 'pdf_sample', 'setting_value' => 'path/to/sample.pdf']);
-        Setting::create(['setting_key' => 'email', 'setting_value' => 'admin@asistennotaris.com']);
-        Setting::create(['setting_key' => 'banks', 'setting_value' => 'BPR BBA, BPR Pala Pusat, BPR Pala Cabang, BPR Danamas Prime, BPR Arum Mandiri, BPRS Madina Mandiri, BMT Sejahtera Ummat']);
+        $templates = [
+            ['setting_key' => 'new_order', 'setting_value' => $template_order],
+            ['setting_key' => 'project_assignment', 'setting_value' => $template_project],
+            ['setting_key' => 'followup_project', 'setting_value' => $template_followup],
+
+            ['setting_key' => 'app_name', 'setting_value' => 'APP'],
+            ['setting_key' => 'app_code', 'setting_value' => 'AN'],
+            ['setting_key' => 'app_description', 'setting_value' => 'Asisten Notaris Online'],
+            ['setting_key' => 'alamat', 'setting_value' => 'Jl. Kebon Jeruk, Jakarta Timur'],
+            ['setting_key' => 'pdf_sample', 'setting_value' => 'path/to/sample.pdf'],
+            ['setting_key' => 'email', 'setting_value' => 'admin@asistennotaris.com'],
+        ];
+
+        Setting::insert($templates); // Batch insert
     }
 }

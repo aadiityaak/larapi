@@ -26,11 +26,7 @@ class OrderFactory extends Factory
             'price' => $price,
             'payment_method' => fake()->randomElement(['Tunai', 'Transfer']),
             'paid' => $paid,
-            'data' => [
-                'ktp' => fake()->numberBetween(1, 10),
-                'kk' => fake()->numberBetween(1, 10),
-                'npwp' => fake()->numberBetween(1, 10),
-            ]
+            'data' => null,
         ];
     }
 }
