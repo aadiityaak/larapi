@@ -19,7 +19,7 @@ class CustomerFactory extends Factory
         return [
             'name' => fake()->name(),
             'phone' => fake()->phoneNumber(),
-            'alamat' => fake()->address(),
+            'address' => fake()->address(),
 
         ];
     }

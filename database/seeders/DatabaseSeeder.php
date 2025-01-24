@@ -61,7 +61,7 @@ class DatabaseSeeder extends Seeder
             <b>Detail Proyek:</b><br/>
             ======================================<br/>
             Nama Proyek: <b>[nama_proyek]</b><br/>
-            Deskripsi: <b>[deskripsi_proyek]</b><br/>
+            Deskripsi: <b>[description_proyek]</b><br/>
             Batas Waktu: <b>[batas_waktu]</b><br/>
             Penanggung Jawab: <b>[nama_superadmin]</b><br/>
             ======================================<br/>
@@ -97,7 +97,7 @@ class DatabaseSeeder extends Seeder
             ['setting_key' => 'app_name', 'setting_value' => 'APP'],
             ['setting_key' => 'app_code', 'setting_value' => 'AN'],
             ['setting_key' => 'app_description', 'setting_value' => 'Asisten Notaris Online'],
-            ['setting_key' => 'alamat', 'setting_value' => 'Jl. Kebon Jeruk, Jakarta Timur'],
+            ['setting_key' => 'address', 'setting_value' => 'Jl. Kebon Jeruk, Jakarta Timur'],
             ['setting_key' => 'pdf_sample', 'setting_value' => 'path/to/sample.pdf'],
             ['setting_key' => 'email', 'setting_value' => 'admin@asistennotaris.com'],
         ];

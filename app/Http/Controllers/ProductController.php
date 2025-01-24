@@ -16,7 +16,7 @@ class ProductController extends Controller
     $name = $request->query('name');
 
     // Query dasar semua products
-    $query = Product::with('dataProducts.data', 'orders');
+    $query = Product::with('metaProducts.meta', 'orders');
 
     // Filter berdasarkan name jika ada
     if ($name && strlen($name) > 2) {
@@ -41,7 +41,7 @@ class ProductController extends Controller
         'price' => $data->price,
         'description' => $data->description,
         'category' => $data->category,
-        'data_products' => $data->dataProducts->pluck('data'),
+        'meta_id' => $data->metaProducts->pluck('data'),
         'order_count' => $data->orders->count(),
       ];
     });
@@ -58,15 +58,14 @@ class ProductController extends Controller
       'name' => 'string|max:255|nullable',
       'price' => 'numeric|nullable',
       'description' => 'string|nullable',
-      'data_products' => 'array|nullable',
+      'meta_products' => 'array|nullable',
     ]);
 
     $product = Product::create($request->only('name', 'price', 'description'));
 
-    // Simpan data_products
-    if ($request->has('data_products')) {
-      foreach ($request->input('data_products') as $dataId) {
-        $product->dataProducts()->create(['data_id' => $dataId]);
+    if ($request->has('meta_products')) {
+      foreach ($request->input('meta_products') as $metaId) {
+        $product->metaProducts()->create(['meta_id' => $metaId]);
       }
     }
 
@@ -91,18 +90,18 @@ class ProductController extends Controller
       'name' => 'string|max:255|nullable',
       'price' => 'numeric|nullable',
       'description' => 'string|nullable',
-      'data_products' => 'array|nullable',
+      'meta_id' => 'array|nullable',
     ]);
 
-    $product = Product::with('dataProducts.data', 'orders')->findOrFail($id);
+    $product = Product::with('metaProducts.meta', 'orders')->findOrFail($id);
 
     $product->update($request->only('name', 'price', 'description'));
 
-    // Update data_products
-    if ($request->has('data_products')) {
-      $product->dataProducts()->delete();
-      foreach ($request->input('data_products') as $dataId) {
-        $product->dataProducts()->create(['data_id' => $dataId]);
+    // Update meta_id
+    if ($request->has('meta_products')) {
+      $product->metaProducts()->delete();
+      foreach ($request->input('meta_products') as $metaId) {
+        $product->metaProducts()->create(['meta_id' => $metaId]);
       }
     }
 
@@ -117,8 +116,8 @@ class ProductController extends Controller
     $product = Product::findOrFail($id);
     $product->delete();
 
-    // hapus data_products
-    $product->dataProducts()->delete();
+    // hapus meta_id
+    $product->metaProducts()->delete();
 
     return response()->json(null, 204);
   }

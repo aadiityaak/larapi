@@ -72,7 +72,7 @@ class JobdeskController extends Controller
             [
                 'order_id' => 'required|exists:orders,id',
                 'user_id' => 'required|exists:users,id',
-                'deskripsi' => 'nullable',
+                'description' => 'nullable',
                 'tanggal_pengerjaan' => 'nullable',
                 'tanggal_selesai' => 'nullable',
                 'status' => 'required',

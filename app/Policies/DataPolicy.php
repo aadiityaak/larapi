@@ -2,11 +2,11 @@
 
 namespace App\Policies;
 
-use App\Models\Data;
+use App\Models\Meta;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
-class DataPolicy
+class MetaPolicy
 {
     /**
      * Determine whether the user can view any models.
@@ -19,7 +19,7 @@ class DataPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Data $data): bool
+    public function view(User $user, Meta $meta): bool
     {
         return false;
     }
@@ -35,7 +35,7 @@ class DataPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Data $data): bool
+    public function update(User $user, Meta $meta): bool
     {
         return false;
     }
@@ -43,7 +43,7 @@ class DataPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Data $data): bool
+    public function delete(User $user, Meta $meta): bool
     {
         return false;
     }
@@ -51,7 +51,7 @@ class DataPolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Data $data): bool
+    public function restore(User $user, Meta $meta): bool
     {
         return false;
     }
@@ -59,7 +59,7 @@ class DataPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Data $data): bool
+    public function forceDelete(User $user, Meta $meta): bool
     {
         return false;
     }

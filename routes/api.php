@@ -10,7 +10,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\DataController;
+use App\Http\Controllers\MetaController;
 use App\Http\Controllers\SendNotificationController;
 use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\NotificationController;
@@ -33,6 +33,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         'customers' => CustomerController::class,
         'settings' => SettingController::class,
         'products' => ProductController::class,
-        'data' => DataController::class
+        'meta' => MetaController::class
     ]);
 });

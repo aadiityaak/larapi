@@ -22,7 +22,7 @@ class JobdeskFactory extends Factory
 
         return [
             'order_id' => fake()->numberBetween(1, 10),
-            'deskripsi' => fake()->sentence(),
+            'description' => fake()->sentence(),
             'user_id' => $status !== 'Masuk' ? fake()->numberBetween(1, 10) : null,
             'tanggal_pengerjaan' => $status !== 'Masuk' ? now()->subDays(fake()->numberBetween(5, 10)) : null,
             'tanggal_selesai' => $status === 'Selesai' ? now() : null,

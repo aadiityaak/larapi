@@ -14,7 +14,7 @@ class CustomerController extends Controller
     public $validate = [
         'name' => 'required|string|max:255',
         'phone' => 'required|string|max:20',
-        'alamat' => 'required|string',
+        'address' => 'required|string',
     ];
 
     public function index(Request $request)
@@ -42,7 +42,15 @@ class CustomerController extends Controller
         } else {
             $customers = $query->paginate(25);
         }
-
+        $customers->getCollection()->transform(function ($data) {
+            return [
+                'id' => $data->id,
+                'name' => $data->name,
+                'phone' => $data->phone,
+                'address' => $data->address,
+                'order_count' => $data->orders->count(),
+            ];
+        });
         return response()->json($customers);
     }
 
@@ -55,13 +63,13 @@ class CustomerController extends Controller
             [
                 'name' => 'required|string|max:255',
                 'phone' => 'required|string|max:20|unique:customers,phone',
-                'alamat' => 'required|string',
+                'address' => 'required|string',
             ],
             [
                 'name.required' => 'Nama harus diisi.',
                 'phone.required' => 'Nomor telepon harus diisi.',
                 'phone.unique' => 'Nomor telepon sudah ada.',
-                'alamat.required' => 'Alamat harus diisi.',
+                'address.required' => 'Alamat harus diisi.',
             ]
         );
 
@@ -88,7 +96,7 @@ class CustomerController extends Controller
             [
                 'name' => 'required|string|max:255',
                 'phone' => 'required|string|max:20|unique:customers,phone,' . $customer->id,
-                'alamat' => 'required|string',
+                'address' => 'required|string',
             ]
         );
         $customer->update($validatedData);

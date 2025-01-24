@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('jobdesks', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('product_id')->unsigned();
-            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
-            $table->text('deskripsi');
+            $table->bigInteger('order_id')->unsigned()->nullable();
+            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
+            $table->bigInteger('product_id')->unsigned()->nullable();
+            $table->foreign('product_id')->references('id')->on('products')->onDelete('set null');
+            $table->text('description');
             $table->string('user_id')->nullable();
             $table->date('tanggal_pengerjaan')->nullable();
             $table->date('tanggal_selesai')->nullable();

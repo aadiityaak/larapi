@@ -12,7 +12,7 @@ class Customer extends Model
     protected $fillable = [
         'name',
         'phone',
-        'alamat',
+        'address',
     ];
 
     public function orders()

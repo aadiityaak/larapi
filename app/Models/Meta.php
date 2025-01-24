@@ -5,12 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Data extends Model
+class Meta extends Model
 {
     /** @use HasFactory<\Database\Factories\DataFactory> */
     use HasFactory;
-
-    protected $table = 'data';
 
     protected $fillable = [
         'name',
@@ -18,8 +16,8 @@ class Data extends Model
         'type'
     ];
 
-    public function dataProducts()
+    public function metaProducts()
     {
-        return $this->hasMany(DataProduct::class, 'data_id');
+        return $this->hasMany(MetaProduct::class, 'meta_id');
     }
 }

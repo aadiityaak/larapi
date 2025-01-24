@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class DataProduct extends Model
+class MetaProduct extends Model
 {
   use HasFactory;
 
@@ -14,7 +14,7 @@ class DataProduct extends Model
    *
    * @var string
    */
-  protected $table = 'data_product';
+  protected $table = 'meta_product';
 
   /**
    * The attributes that are mass assignable.
@@ -22,16 +22,16 @@ class DataProduct extends Model
    * @var array
    */
   protected $fillable = [
-    'data_id',
+    'meta_id',
     'product_id',
   ];
 
   /**
-   * Get the related data.
+   * Get the related meta.
    */
-  public function data()
+  public function meta()
   {
-    return $this->belongsTo(Data::class);
+    return $this->belongsTo(Meta::class);
   }
 
   /**

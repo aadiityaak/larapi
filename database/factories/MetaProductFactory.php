@@ -2,19 +2,19 @@
 
 namespace Database\Factories;
 
-use App\Models\DataProduct;
-use App\Models\Data;
+use App\Models\MetaProduct;
+use App\Models\Meta;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class DataProductFactory extends Factory
+class MetaProductFactory extends Factory
 {
   /**
    * The name of the factory's corresponding model.
    *
    * @var string
    */
-  protected $model = DataProduct::class;
+  protected $model = MetaProduct::class;
 
   /**
    * Define the model's default state.
@@ -24,7 +24,7 @@ class DataProductFactory extends Factory
   public function definition()
   {
     return [
-      'data_id' => Data::factory(),
+      'meta_id' => Meta::factory(),
       'product_id' => Product::factory(),
       'created_at' => now(),
       'updated_at' => now(),

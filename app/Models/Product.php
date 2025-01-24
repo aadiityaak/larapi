@@ -14,12 +14,12 @@ class Product extends Model
     'price',
     'description',
     'category',
-    'data',
+    'meta',
   ];
 
   public function dataProducts()
   {
-    return $this->hasMany(DataProduct::class, 'product_id');
+    return $this->hasMany(MetaProduct::class, 'product_id');
   }
 
   public function orders()
