@@ -12,29 +12,39 @@ class ProductController extends Controller
    */
   public function index(Request $request)
   {
-    $page = $request->query('page');
+    $paginate = $request->query('paginate');
     $name = $request->query('name');
 
     // Query dasar semua products
-    $query = Product::query();
-
-    $query->with('dataProducts.data');
+    $query = Product::with('dataProducts.data', 'orders');
 
     // Filter berdasarkan name jika ada
     if ($name && strlen($name) > 2) {
       $query->where('name', 'like', '%' . $name . '%');
     }
 
-    // shorting descending
+    // Shorting descending
     $query->orderBy('created_at', 'desc');
 
     // Paginate the results
-    if ($page === 'all') {
+    if ($paginate === 'false') {
       $products = $query->get();
     } else {
       $products = $query->paginate(25);
     }
 
+    // Transformasi data untuk response
+    $products->getCollection()->transform(function ($data) {
+      return [
+        'id' => $data->id,
+        'name' => $data->name,
+        'price' => $data->price,
+        'description' => $data->description,
+        'category' => $data->category,
+        'data_products' => $data->dataProducts->pluck('data'),
+        'order_count' => $data->orders->count(),
+      ];
+    });
 
     return response()->json($products);
   }
@@ -84,7 +94,7 @@ class ProductController extends Controller
       'data_products' => 'array|nullable',
     ]);
 
-    $product = Product::with('dataProducts.data')->findOrFail($id);
+    $product = Product::with('dataProducts.data', 'orders')->findOrFail($id);
 
     $product->update($request->only('name', 'price', 'description'));
 

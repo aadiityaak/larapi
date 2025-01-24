@@ -19,7 +19,9 @@ class JobdeskController extends Controller
 
         // Filter by order_id if provided
         if ($orderId) {
-            $query->where('order_id', $orderId);
+            $query->whereHas('order', function ($query) use ($orderId) {
+                $query->where('id', $orderId);
+            });
         }
 
         // Filter by status if provided

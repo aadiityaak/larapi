@@ -22,8 +22,8 @@ class Product extends Model
     return $this->hasMany(DataProduct::class, 'product_id');
   }
 
-  public function order()
+  public function orders()
   {
-    return $this->belongsTo(Order::class);
+    return $this->hasMany(Order::class);
   }
 }

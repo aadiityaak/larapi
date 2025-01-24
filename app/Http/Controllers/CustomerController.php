@@ -100,13 +100,7 @@ class CustomerController extends Controller
      */
     public function destroy(Customer $customer)
     {
-        $customer = Customer::find($customer->id);
-        foreach ($customer->orders as $order) {
-            $order->jobdesks()->delete(); // Pastikan ada relasi jobdesks() di model Order
-        }
-        $customer->orders()->delete();
         $customer->delete();
-
         return response()->json($customer);
     }
 }

@@ -14,9 +14,10 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->string('no_order')->unique();
-            $table->string('customer_id');
+            $table->bigInteger('customer_id')->unsigned();
+            $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
             $table->date('order_date');
-            $table->string('product_id');
+            $table->bigInteger('product_id')->unsigned();
             $table->integer('price')->nullable();
             $table->string('payment_method')->nullable();
             $table->integer('paid')->nullable();
