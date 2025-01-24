@@ -17,7 +17,7 @@ class Product extends Model
     'meta',
   ];
 
-  public function dataProducts()
+  public function metaProducts()
   {
     return $this->hasMany(MetaProduct::class, 'product_id');
   }

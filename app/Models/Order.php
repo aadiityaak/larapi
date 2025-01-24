@@ -47,12 +47,12 @@ class Order extends Model
         'price',
         'payment_method',
         'paid',
-        'data',
+        'meta',
         'lampiran',
     ];
 
     protected $casts = [
-        'data' => 'array',
+        'meta' => 'array',
     ];
 
     public function customer()

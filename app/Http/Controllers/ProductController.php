@@ -41,7 +41,7 @@ class ProductController extends Controller
         'price' => $data->price,
         'description' => $data->description,
         'category' => $data->category,
-        'meta_id' => $data->metaProducts->pluck('data'),
+        'meta' => $data->metaProducts->pluck('meta'),
         'order_count' => $data->orders->count(),
       ];
     });

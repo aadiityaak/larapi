@@ -19,7 +19,7 @@ class OrderController extends Controller
         'price' => 'required',
         'paid' => 'nullable',
         'payment_method' => 'required',
-        'data' => 'nullable',
+        'meta' => 'nullable',
         'customer_id' => 'required|exists:customers,id',
     ];
     public function index(Request $request)
@@ -31,7 +31,7 @@ class OrderController extends Controller
         $status = $request->query('status');
         $status = isset($status) ? $status : null;
 
-        $query = Order::with('customer', 'jobdesks', 'product', 'product.dataProducts.data');
+        $query = Order::with('customer', 'jobdesks', 'product', 'product.metaProducts.meta');
 
         if ($customerId) {
             $query->where('customer_id', $customerId);
@@ -76,42 +76,6 @@ class OrderController extends Controller
             // Paginate results
             $orders = $query->paginate(25);
         }
-        // {
-        //     "current_page": 1,
-        //     "data": [
-        //         {
-        //             "id": 85,
-        //             "no_order": "AN00085",
-        //             "customer_id": "29",
-        //             "order_date": "2025-01-23",
-        //             "product_id": "22",
-        //             "price": 100000,
-        //             "payment_method": "Tunai",
-        //             "paid": 50000,
-        //             "data": [],
-        //             "lampiran": null,
-        //             "created_at": "2025-01-23T06:30:49.000000Z",
-        //             "updated_at": "2025-01-24T07:37:35.000000Z",
-        //             "customer": {
-        //                 "id": 29,
-        //                 "name": "Aditya Kristyanto",
-        //                 "phone": "087715567339",
-        //                 "address": "Tunggul, Jarum, Bayat",
-        //                 "created_at": "2025-01-23T06:21:08.000000Z",
-        //                 "updated_at": "2025-01-24T05:59:50.000000Z"
-        //             },
-        //             "jobdesks": [],
-        //             "product": {
-        //                 "id": 22,
-        //                 "name": "BPRS Madina Mandiri",
-        //                 "price": "4761810",
-        //                 "category": "bank",
-        //                 "description": "-",
-        //                 "created_at": "2025-01-23T03:28:38.000000Z",
-        //                 "updated_at": "2025-01-23T03:28:38.000000Z",
-        //                 "data_products": []
-        //             }
-        //         },
         $orders->getCollection()->transform(function ($data) {
             return [
                 'id' => $data->id,
@@ -122,12 +86,24 @@ class OrderController extends Controller
                 'price' => $data->price,
                 'payment_method' => $data->payment_method,
                 'paid' => $data->paid,
-                'data' => $data->data,
+                'meta' => $data->meta,
                 'lampiran' => $data->lampiran,
                 'jobdesk_count' => $data->jobdesks()->count(),
-                'customer' => $data->customer,
+                'customer' => [
+                    'id' => $data->customer->id,
+                    'name' => $data->customer->name,
+                    'phone' => $data->customer->phone,
+                    'address' => $data->customer->address,
+                ],
                 'jobdesks' => $data->jobdesks,
-                'product' => $data->product
+                'product' => [
+                    'id' => $data->product->id,
+                    'name' => $data->product->name,
+                    'price' => $data->product->price,
+                    'category' => $data->product->category,
+                    'description' => $data->product->description,
+                    'meta_products' => $data->product->metaProducts->pluck('meta'),
+                ]
             ];
         });
 
@@ -152,7 +128,17 @@ class OrderController extends Controller
         }
 
         // Validasi data yang diterima
-        $validatedData = $request->validate($this->validate);
+        $validatedData = $request->validate(
+            [
+                'order_date' => 'required',
+                'product_id' => 'required',
+                'price' => 'required',
+                'paid' => 'nullable',
+                'payment_method' => 'required',
+                'meta' => 'nullable',
+                'customer_id' => 'required|exists:customers,id',
+            ]
+        );
 
         // Validasi dokumen jika ada
         if ($request->hasFile('lampiran')) {
@@ -180,7 +166,7 @@ class OrderController extends Controller
             'price' => 'required',
             'paid' => 'required',
             'payment_method' => 'required',
-            'data' => 'nullable',
+            'meta' => 'nullable',
             'customer_id' => 'required|exists:customers,id',
         ]);
 

@@ -21,7 +21,7 @@ return new class extends Migration
             $table->integer('price')->nullable();
             $table->string('payment_method')->nullable();
             $table->integer('paid')->nullable();
-            $table->text('data')->nullable();
+            $table->text('meta')->nullable();
             $table->text('lampiran')->nullable();
             $table->timestamps();
         });
