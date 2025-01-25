@@ -38,19 +38,29 @@ class CustomerController extends Controller
         $query->orderBy('created_at', 'desc');
 
         if ($paginate === 'false') {
-            $customers = $query->get();
+            $customers = $query->get()->map(function ($data) {
+                return [
+                    'id' => $data->id,
+                    'name' => $data->name,
+                    'phone' => $data->phone,
+                    'address' => $data->address,
+                    'order_count' => $data->orders->count(),
+                    'orders' => $data->orders
+                ];
+            });
         } else {
             $customers = $query->paginate(25);
+            $customers->getCollection()->transform(function ($data) {
+                return [
+                    'id' => $data->id,
+                    'name' => $data->name,
+                    'phone' => $data->phone,
+                    'address' => $data->address,
+                    'order_count' => $data->orders->count(),
+                    'orders' => $data->orders
+                ];
+            });
         }
-        $customers->getCollection()->transform(function ($data) {
-            return [
-                'id' => $data->id,
-                'name' => $data->name,
-                'phone' => $data->phone,
-                'address' => $data->address,
-                'order_count' => $data->orders->count(),
-            ];
-        });
         return response()->json($customers);
     }
 

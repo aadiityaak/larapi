@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Meta;
 use Illuminate\Http\Request;
 
-class DataController extends Controller
+class MetaController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -15,11 +15,11 @@ class DataController extends Controller
         $paginate = $request->query('paginate');
 
         if ($paginate === 'false') {
-            $data = Meta::all();
+            $meta = Meta::all();
         } else {
-            $data = Meta::paginate(25);
+            $meta = Meta::paginate(25);
         }
-        return response()->json($data);
+        return response()->json($meta);
     }
 
     /**
@@ -33,7 +33,7 @@ class DataController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Meta $data)
+    public function show(Meta $meta)
     {
         //
     }
@@ -41,7 +41,7 @@ class DataController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Meta $data)
+    public function update(Request $request, Meta $meta)
     {
         //
     }
@@ -49,7 +49,7 @@ class DataController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Meta $data)
+    public function destroy(Meta $meta)
     {
         //
     }

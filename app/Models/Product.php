@@ -14,7 +14,6 @@ class Product extends Model
     'price',
     'description',
     'category',
-    'meta',
   ];
 
   public function metaProducts()

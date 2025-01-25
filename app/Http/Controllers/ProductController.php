@@ -28,23 +28,32 @@ class ProductController extends Controller
 
     // Paginate the results
     if ($paginate === 'false') {
-      $products = $query->get();
+      $products = $query->get()->map(function ($data) {
+        return [
+          'id' => $data->id,
+          'name' => $data->name,
+          'price' => $data->price,
+          'description' => $data->description,
+          'category' => $data->category,
+          'meta' => $data->metaProducts->pluck('meta')->pluck('id'),
+          'meta_products' => $data->metaProducts->pluck('meta'),
+          'order_count' => $data->orders->count(),
+        ];
+      });
     } else {
       $products = $query->paginate(25);
+      $products->getCollection()->transform(function ($data) {
+        return [
+          'id' => $data->id,
+          'name' => $data->name,
+          'price' => $data->price,
+          'description' => $data->description,
+          'category' => $data->category,
+          'meta_products' => $data->metaProducts->pluck('meta')->pluck('id'),
+          'order_count' => $data->orders->count(),
+        ];
+      });
     }
-
-    // Transformasi data untuk response
-    $products->getCollection()->transform(function ($data) {
-      return [
-        'id' => $data->id,
-        'name' => $data->name,
-        'price' => $data->price,
-        'description' => $data->description,
-        'category' => $data->category,
-        'meta' => $data->metaProducts->pluck('meta'),
-        'order_count' => $data->orders->count(),
-      ];
-    });
 
     return response()->json($products);
   }
@@ -104,7 +113,7 @@ class ProductController extends Controller
         $product->metaProducts()->create(['meta_id' => $metaId]);
       }
     }
-
+    $product->load('metaProducts.meta', 'orders');
     return response()->json($product);
   }
 

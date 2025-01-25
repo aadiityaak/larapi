@@ -349,7 +349,7 @@ class ProductSeeder extends Seeder
       Meta::factory()->create([
         'id' => $id,
         'name' => $meta['title'],
-        'type' => $meta['type']
+        'type' => $meta['type'],
       ]);
     }
 

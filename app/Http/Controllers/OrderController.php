@@ -41,6 +41,23 @@ class OrderController extends Controller
             $query->whereHas('customer', function ($query) use ($name) {
                 $query->where('name', 'like', '%' . $name . '%');
             });
+        } else {
+            if ($status) {
+                $query->whereDoesntHave('jobdesks', function ($query) use ($status) {
+                    $query->where('status', '!=', 'Selesai');
+                });
+                if ($status === 'Selesai') {
+                    $query->whereNotNull('lampiran');
+                }
+                if ($status === 'Arsip') {
+                    $query->whereNull('lampiran');
+                }
+                $query->whereHas('jobdesks');
+            } else if (!($customerId || $name)) {
+                $query->whereHas('jobdesks', function ($query) {
+                    $query->where('status', '!=', 'Selesai');
+                })->orWhereDoesntHave('jobdesks');
+            }
         }
 
         if ($product && strlen($product) > 2) {
@@ -49,64 +66,77 @@ class OrderController extends Controller
             });
         }
 
-        if ($status) {
-            $query->whereDoesntHave('jobdesks', function ($query) use ($status) {
-                $query->where('status', '!=', 'Selesai');
-            });
-            if ($status === 'Selesai') {
-                $query->whereNotNull('lampiran');
-            }
-            if ($status === 'Arsip') {
-                $query->whereNull('lampiran');
-            }
-            $query->whereHas('jobdesks');
-        } else if (!($customerId || $name)) {
-            $query->whereHas('jobdesks', function ($query) {
-                $query->where('status', '!=', 'Selesai');
-            })->orWhereDoesntHave('jobdesks');
-        }
-
         $query->orderBy('created_at', 'desc');
 
         // Check if pagination should be disabled
         if ($paginate === 'false') {
             // Get all records without pagination
-            $orders = $query->get();
+            $orders = $query->get()->map(function ($data) {
+                return [
+                    'id' => $data->id,
+                    'no_order' => $data->no_order,
+                    'customer_id' => $data->customer->id,
+                    'order_date' => $data->order_date,
+                    'product_id' => $data->product->id,
+                    'price' => $data->price,
+                    'payment_method' => $data->payment_method,
+                    'paid' => $data->paid,
+                    'meta' => $data->meta,
+                    'lampiran' => $data->lampiran,
+                    'jobdesk_count' => $data->jobdesks()->count(),
+                    'created_at' => $data->created_at,
+                    'customer' => [
+                        'id' => $data->customer->id,
+                        'name' => $data->customer->name,
+                        'phone' => $data->customer->phone,
+                        'address' => $data->customer->address,
+                    ],
+                    'jobdesks' => $data->jobdesks,
+                    'product' => [
+                        'id' => $data->product->id,
+                        'name' => $data->product->name,
+                        'price' => $data->product->price,
+                        'category' => $data->product->category,
+                        'description' => $data->product->description,
+                        'meta_products' => $data->product->metaProducts->pluck('meta'),
+                    ]
+                ];
+            });
         } else {
             // Paginate results
             $orders = $query->paginate(25);
+            $orders->getCollection()->transform(function ($data) {
+                return [
+                    'id' => $data->id,
+                    'no_order' => $data->no_order,
+                    'customer_id' => $data->customer->id,
+                    'order_date' => $data->order_date,
+                    'product_id' => $data->product->id,
+                    'price' => $data->price,
+                    'payment_method' => $data->payment_method,
+                    'paid' => $data->paid,
+                    'meta' => $data->meta,
+                    'lampiran' => $data->lampiran,
+                    'jobdesk_count' => $data->jobdesks()->count(),
+                    'created_at' => $data->created_at,
+                    'customer' => [
+                        'id' => $data->customer->id,
+                        'name' => $data->customer->name,
+                        'phone' => $data->customer->phone,
+                        'address' => $data->customer->address,
+                    ],
+                    'jobdesks' => $data->jobdesks,
+                    'product' => [
+                        'id' => $data->product->id,
+                        'name' => $data->product->name,
+                        'price' => $data->product->price,
+                        'category' => $data->product->category,
+                        'description' => $data->product->description,
+                        'meta_products' => $data->product->metaProducts->pluck('meta'),
+                    ]
+                ];
+            });
         }
-        $orders->getCollection()->transform(function ($data) {
-            return [
-                'id' => $data->id,
-                'no_order' => $data->no_order,
-                'customer_id' => $data->customer->id,
-                'order_date' => $data->order_date,
-                'product_id' => $data->product->id,
-                'price' => $data->price,
-                'payment_method' => $data->payment_method,
-                'paid' => $data->paid,
-                'meta' => $data->meta,
-                'lampiran' => $data->lampiran,
-                'jobdesk_count' => $data->jobdesks()->count(),
-                'customer' => [
-                    'id' => $data->customer->id,
-                    'name' => $data->customer->name,
-                    'phone' => $data->customer->phone,
-                    'address' => $data->customer->address,
-                ],
-                'jobdesks' => $data->jobdesks,
-                'product' => [
-                    'id' => $data->product->id,
-                    'name' => $data->product->name,
-                    'price' => $data->product->price,
-                    'category' => $data->product->category,
-                    'description' => $data->product->description,
-                    'meta_products' => $data->product->metaProducts->pluck('meta'),
-                ]
-            ];
-        });
-
         return response()->json($orders);
     }
 
@@ -136,7 +166,7 @@ class OrderController extends Controller
                 'paid' => 'nullable',
                 'payment_method' => 'required',
                 'meta' => 'nullable',
-                'customer_id' => 'required|exists:customers,id',
+                'customer' => 'required',
             ]
         );
 
@@ -154,6 +184,7 @@ class OrderController extends Controller
 
         // Update order dengan data yang sudah divalidasi
         $order->update($validatedData);
+        $order->load('customer', 'jobdesks', 'product', 'product.metaProducts.meta');
 
         return response()->json($order);
     }
@@ -178,6 +209,8 @@ class OrderController extends Controller
         }
 
         $order = Order::create($validator->validated());
+        $order->load('customer', 'jobdesks', 'product', 'product.metaProducts.meta');
+
         $users = User::where('is_admin', 1)->orWhere('position', 'owner')->get();
         Notification::send($users, new NewOrderNotification($order));
         return response()->json($order);
