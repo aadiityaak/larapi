@@ -185,8 +185,36 @@ class OrderController extends Controller
         // Update order dengan data yang sudah divalidasi
         $order->update($validatedData);
         $order->load('customer', 'jobdesks', 'product', 'product.metaProducts.meta');
-
-        return response()->json($order);
+        $response = [
+            'id' => $order->id,
+            'no_order' => $order->no_order,
+            'customer_id' => $order->customer->id,
+            'order_date' => $order->order_date,
+            'product_id' => $order->product->id,
+            'price' => $order->price,
+            'payment_method' => $order->payment_method,
+            'paid' => $order->paid,
+            'meta' => $order->meta,
+            'lampiran' => $order->lampiran,
+            'jobdesk_count' => $order->jobdesks()->count(),
+            'created_at' => $order->created_at,
+            'customer' => [
+                'id' => $order->customer->id,
+                'name' => $order->customer->name,
+                'phone' => $order->customer->phone,
+                'address' => $order->customer->address,
+            ],
+            'jobdesks' => $order->jobdesks,
+            'product' => [
+                'id' => $order->product->id,
+                'name' => $order->product->name,
+                'price' => $order->product->price,
+                'category' => $order->product->category,
+                'description' => $order->product->description,
+                'meta_products' => $order->product->metaProducts->pluck('meta'),
+            ]
+        ];
+        return response()->json($response);
     }
 
     public function store(Request $request)
@@ -213,7 +241,36 @@ class OrderController extends Controller
 
         $users = User::where('is_admin', 1)->orWhere('position', 'owner')->get();
         Notification::send($users, new NewOrderNotification($order));
-        return response()->json($order);
+        $response = [
+            'id' => $order->id,
+            'no_order' => $order->no_order,
+            'customer_id' => $order->customer->id,
+            'order_date' => $order->order_date,
+            'product_id' => $order->product->id,
+            'price' => $order->price,
+            'payment_method' => $order->payment_method,
+            'paid' => $order->paid,
+            'meta' => $order->meta,
+            'lampiran' => $order->lampiran,
+            'jobdesk_count' => $order->jobdesks()->count(),
+            'created_at' => $order->created_at,
+            'customer' => [
+                'id' => $order->customer->id,
+                'name' => $order->customer->name,
+                'phone' => $order->customer->phone,
+                'address' => $order->customer->address,
+            ],
+            'jobdesks' => $order->jobdesks,
+            'product' => [
+                'id' => $order->product->id,
+                'name' => $order->product->name,
+                'price' => $order->product->price,
+                'category' => $order->product->category,
+                'description' => $order->product->description,
+                'meta_products' => $order->product->metaProducts->pluck('meta'),
+            ]
+        ];
+        return response()->json($response);
     }
 
     public function destroy(Order $order)
