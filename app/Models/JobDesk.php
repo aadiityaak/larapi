@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Jobdesk extends Model
 {
@@ -17,12 +18,18 @@ class Jobdesk extends Model
         'tanggal_selesai',
         'status',
     ];
-    public function order()
+
+    protected $casts = [
+        'tanggal_pengerjaan' => 'date', // Automatic casting to date
+        'tanggal_selesai' => 'date', // Automatic casting to date
+    ];
+
+    public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }

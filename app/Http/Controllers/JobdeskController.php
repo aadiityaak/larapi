@@ -48,23 +48,29 @@ class JobdeskController extends Controller
 
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'order_id' => 'required|exists:orders,id',
-            'user_id' => 'required|exists:users,id',
-            'tanggal_pengerjaan' => 'nullable',
-            'tanggal_selesai' => 'nullable',
-            'status' => 'required',
-        ]);
-        if (isset($validatedData['tanggal_pengerjaan'])) {
-            $validatedData['tanggal_pengerjaan'] = date('Y-m-d', strtotime($validatedData['tanggal_pengerjaan']));
-        }
-        if (isset($validatedData['tanggal_selesai'])) {
-            $validatedData['tanggal_selesai'] = date('Y-m-d', strtotime($validatedData['tanggal_selesai']));
-        }
-        $jobdesk = Jobdesk::create($validatedData);
-        return response()->json($jobdesk);
-    }
+        try {
+            $validatedData = $request->validate([
+                'order_id' => 'required|exists:orders,id',
+                'user_id' => 'required|exists:users,id',
+                'tanggal_pengerjaan' => 'nullable|date',
+                'tanggal_selesai' => 'nullable|date',
+                'status' => 'nullable|string',
+            ]);
 
+            if (isset($validatedData['tanggal_pengerjaan'])) {
+                $validatedData['tanggal_pengerjaan'] = date('Y-m-d', strtotime($validatedData['tanggal_pengerjaan']));
+            }
+            if (isset($validatedData['tanggal_selesai'])) {
+                $validatedData['tanggal_selesai'] = date('Y-m-d', strtotime($validatedData['tanggal_selesai']));
+            }
+            $jobdesk = Jobdesk::create($validatedData);
+            // relation
+            $jobdesk->load('order', 'order.customer', 'user', 'order.product');
+            return response()->json($jobdesk, 201);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Server Error', 'error' => $e->getMessage()], 500);
+        }
+    }
     public function update(Request $request, Jobdesk $jobdesk)
     {
         $jobdesk = Jobdesk::find($jobdesk->id);
@@ -91,12 +97,13 @@ class JobdeskController extends Controller
             $validatedData['tanggal_selesai'] = date('Y-m-d', strtotime($validatedData['tanggal_selesai']));
         }
         $jobdesk->update($validatedData);
+        $jobdesk->load('order', 'order.customer', 'user', 'order.product');
         return response()->json($jobdesk);
     }
 
     public function show(Jobdesk $jobdesk)
     {
-        $jobdesk = Jobdesk::find($jobdesk->id)->load('customer', 'order', 'user');
+        $jobdesk = Jobdesk::find($jobdesk->id)->load('order', 'order.customer', 'user', 'order.product');
         return response()->json($jobdesk);
     }
 
