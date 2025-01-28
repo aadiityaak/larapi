@@ -63,14 +63,15 @@ class ProductController extends Controller
    */
   public function store(Request $request)
   {
-    $request->validate([
+    $validatedData = $request->validate([
       'name' => 'string|max:255|nullable',
+      'category' => 'string',
       'price' => 'numeric|nullable',
       'description' => 'string|nullable',
       'meta_products' => 'array|nullable',
     ]);
 
-    $product = Product::create($request->only('name', 'price', 'description'));
+    $product = Product::create($validatedData);
 
     if ($request->has('meta_products')) {
       foreach ($request->input('meta_products') as $metaId) {
@@ -103,16 +104,18 @@ class ProductController extends Controller
    */
   public function update(Request $request, $id)
   {
-    $request->validate([
+    $validatedData = $request->validate([
       'name' => 'string|max:255|nullable',
+      'category' => 'string',
       'price' => 'numeric|nullable',
       'description' => 'string|nullable',
+      'meta_products' => 'array|nullable',
       'meta_id' => 'array|nullable',
     ]);
 
     $product = Product::with('metaProducts.meta', 'orders')->findOrFail($id);
 
-    $product->update($request->only('name', 'price', 'description'));
+    $product->update($validatedData);
 
     // Update meta_id
     if ($request->has('meta_products')) {

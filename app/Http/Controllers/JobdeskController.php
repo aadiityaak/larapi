@@ -23,7 +23,7 @@ class JobdeskController extends Controller
         }
 
         // Filter by status if provided
-        if ($status && $status !== 'Masuk') {
+        if ($status) {
             $query->where('status', $status);
         }
 

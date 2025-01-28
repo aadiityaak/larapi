@@ -41,7 +41,7 @@ class UserSeeder extends Seeder
       'password' => Hash::make('password'),
     ]);
     User::factory()->create([
-      'name' => 'Test ',
+      'name' => 'Test Staff',
       'email' => 'staff@larapi.test',
       'is_admin' => false,
       'avatar' => null,
@@ -52,6 +52,6 @@ class UserSeeder extends Seeder
     ]);
 
     // Membuat 30 pengguna
-    User::factory(25)->create();
+    User::factory(6)->create();
   }
 }
