@@ -55,7 +55,7 @@ class ProductController extends Controller
       });
     }
 
-    return response()->json($products);
+    return response()->json($products, 200);
   }
 
   /**
@@ -77,8 +77,16 @@ class ProductController extends Controller
         $product->metaProducts()->create(['meta_id' => $metaId]);
       }
     }
-
-    return response()->json($product, 201);
+    $response = [
+      'id' => $product->id,
+      'name' => $product->name,
+      'price' => $product->price,
+      'description' => $product->description,
+      'category' => $product->category,
+      'meta_products' => $product->metaProducts->pluck('meta')->pluck('id'),
+      'order_count' => $product->orders->count(),
+    ];
+    return response()->json($response, 201);
   }
 
   /**
@@ -114,7 +122,17 @@ class ProductController extends Controller
       }
     }
     $product->load('metaProducts.meta', 'orders');
-    return response()->json($product);
+
+    $response = [
+      'id' => $product->id,
+      'name' => $product->name,
+      'price' => $product->price,
+      'description' => $product->description,
+      'category' => $product->category,
+      'meta_products' => $product->metaProducts->pluck('meta')->pluck('id'),
+      'order_count' => $product->orders->count(),
+    ];
+    return response()->json($response, 200);
   }
 
   /**
