@@ -23,7 +23,7 @@ class JobdeskController extends Controller
         }
 
         // Filter by status if provided
-        if ($status) {
+        if ($status && $status !== 'Masuk') {
             $query->where('status', $status);
         }
 
@@ -50,6 +50,7 @@ class JobdeskController extends Controller
             $validatedData = $request->validate([
                 'order_id' => 'required|exists:orders,id',
                 'user_id' => 'required|exists:users,id',
+                'description' => 'required|string',
                 'tanggal_pengerjaan' => 'nullable|date',
                 'tanggal_selesai' => 'nullable|date',
                 'status' => 'nullable|string',
@@ -76,13 +77,14 @@ class JobdeskController extends Controller
             [
                 'order_id' => 'required|exists:orders,id',
                 'user_id' => 'required|exists:users,id',
-                'description' => 'nullable',
+                'description' => 'required|string',
                 'tanggal_pengerjaan' => 'nullable',
                 'tanggal_selesai' => 'nullable',
                 'status' => 'required',
             ],
             [
                 'order_id.required' => 'Pilih order yang akan dikerjakan.',
+                'description.required' => 'Deskripsi harus diisi.',
                 'user_id.required' => 'Pilih karyawan yang akan mengerjakan jobdesk.',
                 'status.required' => 'Status harus diisi.',
             ]
