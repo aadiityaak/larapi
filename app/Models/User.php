@@ -51,4 +51,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function jobdesk()
+    {
+        return $this->hasMany(Jobdesk::class);
+    }
 }

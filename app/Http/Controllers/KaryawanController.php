@@ -19,23 +19,53 @@ class KaryawanController extends Controller
         $paginate = $request->query('paginate');
         $name = $request->query('name');
 
-        // Query dasar semua user
-        $query = User::query();
+        // Query dasar semua user dengan relasi jobdesk
+        $query = User::with('jobdesk');
 
         // Filter berdasarkan name jika ada
         if ($name && strlen($name) > 2) {
             $query->where('name', 'like', '%' . $name . '%');
         }
-        // shorting descending
+
+        // Sorting descending berdasarkan created_at
         $query->orderBy('created_at', 'desc');
 
         // Check if pagination should be disabled
         if ($paginate === 'false') {
             // Get all records without pagination
-            $users = $query->get();
+            $users = $query->get()->map(function ($data) {
+                return [
+                    'id' => $data->id,
+                    'name' => $data->name,
+                    'email' => $data->email,
+                    'is_admin' => strval($data->is_admin),
+                    'avatar' => $data->avatar,
+                    'phone' => $data->phone,
+                    'address' => $data->address,
+                    'position' => $data->position,
+                    'total_jobdesk' => $data->jobdesk->count(),
+                    'jobdesk_on_progress' => $data->jobdesk->where('status', 'Progress')->count(),
+                    'jobdesk_selesai' => $data->jobdesk->where('status', 'Selesai')->count(),
+                ];
+            });
         } else {
             // Paginate results
             $users = $query->paginate(25);
+            $users->getCollection()->transform(function ($data) {
+                return [
+                    'id' => $data->id,
+                    'name' => $data->name,
+                    'email' => $data->email,
+                    'is_admin' => strval($data->is_admin),
+                    'avatar' => $data->avatar,
+                    'phone' => $data->phone,
+                    'address' => $data->address,
+                    'position' => $data->position,
+                    'total_jobdesk' => $data->jobdesk->count(),
+                    'jobdesk_on_progress' => $data->jobdesk->where('status', 'Progress')->count(),
+                    'jobdesk_selesai' => $data->jobdesk->where('status', 'Selesai')->count(),
+                ];
+            });
         }
 
         return response()->json($users);
@@ -95,13 +125,22 @@ class KaryawanController extends Controller
         }
 
         // Update user dengan data yang tervalidasi
-        $user->update($validated);
+        $data = $user->update($validated);
+        $response = [
+            'id' => $data->id,
+            'name' => $data->name,
+            'email' => $data->email,
+            'is_admin' => strval($data->is_admin),
+            'avatar' => $data->avatar,
+            'phone' => $data->phone,
+            'address' => $data->address,
+            'position' => $data->position,
+            'total_jobdesk' => $data->jobdesk->count(),
+            'jobdesk_on_progress' => $data->jobdesk->where('status', 'Progress')->count(),
+            'jobdesk_selesai' => $data->jobdesk->where('status', 'Selesai')->count(),
+        ];
 
-        return response()->json([
-            'user' => $user,
-            'message' => $message,
-            'success' => true
-        ], 200);
+        return response()->json($response, 200);
     }
 
     public function store(Request $request)
@@ -124,13 +163,23 @@ class KaryawanController extends Controller
         }
 
         $validated['password'] = bcrypt($validated['password']);
-        $user = User::create($validated);
+        $data = User::create($validated);
 
-        return response()->json([
-            'user' => $user,
-            'message' => 'Data tersimpan',
-            'success' => true
-        ], 200);
+        $response = [
+            'id' => $data->id,
+            'name' => $data->name,
+            'email' => $data->email,
+            'is_admin' => strval($data->is_admin),
+            'avatar' => $data->avatar,
+            'phone' => $data->phone,
+            'address' => $data->address,
+            'position' => $data->position,
+            'total_jobdesk' => $data->jobdesk->count(),
+            'jobdesk_on_progress' => $data->jobdesk->where('status', 'Progress')->count(),
+            'jobdesk_selesai' => $data->jobdesk->where('status', 'Selesai')->count(),
+        ];
+
+        return response()->json($response, 200);
     }
 
     public function destroy($id)
