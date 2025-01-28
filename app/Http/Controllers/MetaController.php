@@ -15,10 +15,11 @@ class MetaController extends Controller
         $paginate = $request->query('paginate');
 
         if ($paginate === 'false') {
-            $meta = Meta::all();
+            $meta = Meta::orderByDesc('id')->get();
         } else {
-            $meta = Meta::paginate(25);
+            $meta = Meta::orderByDesc('id')->paginate(25);
         }
+
         return response()->json($meta);
     }
 
@@ -27,7 +28,14 @@ class MetaController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'meta_key' => 'string|max:255|nullable',
+            'meta_value' => 'string|nullable',
+        ]);
+
+        $meta = Meta::create($request->all());
+
+        return response()->json($meta, 201);
     }
 
     /**
@@ -35,7 +43,7 @@ class MetaController extends Controller
      */
     public function show(Meta $meta)
     {
-        //
+        return response()->json($meta);
     }
 
     /**
@@ -43,7 +51,14 @@ class MetaController extends Controller
      */
     public function update(Request $request, Meta $meta)
     {
-        //
+        $request->validate([
+            'meta_key' => 'string|max:255|nullable',
+            'meta_value' => 'string|nullable',
+        ]);
+
+        $meta->update($request->all());
+
+        return response()->json($meta);
     }
 
     /**
@@ -51,6 +66,7 @@ class MetaController extends Controller
      */
     public function destroy(Meta $meta)
     {
-        //
+        $meta->delete();
+        return response()->json(null, 204);
     }
 }

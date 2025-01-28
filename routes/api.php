@@ -33,6 +33,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         'customers' => CustomerController::class,
         'settings' => SettingController::class,
         'products' => ProductController::class,
-        'meta' => MetaController::class
+        'metas' => MetaController::class
     ]);
 });
