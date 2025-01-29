@@ -12,8 +12,8 @@ class Jobdesk extends Model
 
     protected $fillable = [
         'order_id',
-        'description',
         'user_id',
+        'description',
         'tanggal_pengerjaan',
         'tanggal_selesai',
         'status',

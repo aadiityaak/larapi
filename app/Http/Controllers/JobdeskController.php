@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Jobdesk;
+use App\Models\JobDesk;
 use Illuminate\Http\Request;
 
 class JobdeskController extends Controller
@@ -15,7 +15,7 @@ class JobdeskController extends Controller
         $userId = $request->query('user_id');
 
         // Initialize the query
-        $query = Jobdesk::with('order', 'order.customer', 'user', 'order.product');
+        $query = JobDesk::with('order', 'order.customer', 'user', 'order.product');
 
         // Filter by order_id if provided
         if ($orderId) {
@@ -62,7 +62,7 @@ class JobdeskController extends Controller
             if (isset($validatedData['tanggal_selesai'])) {
                 $validatedData['tanggal_selesai'] = date('Y-m-d', strtotime($validatedData['tanggal_selesai']));
             }
-            $jobdesk = Jobdesk::create($validatedData);
+            $jobdesk = JobDesk::create($validatedData);
             // relation
             $jobdesk->load('order', 'order.customer', 'user', 'order.product');
             return response()->json($jobdesk, 201);
@@ -70,47 +70,36 @@ class JobdeskController extends Controller
             return response()->json(['message' => 'Server Error', 'error' => $e->getMessage()], 500);
         }
     }
-    public function update(Request $request, Jobdesk $jobdesk)
+    public function update(Request $request, $id)
     {
-        $jobdesk = Jobdesk::find($jobdesk->id);
-        $validatedData = $request->validate(
-            [
+        try {
+            $jobdesk = JobDesk::find($id);
+            $validatedData = $request->validate([
                 'order_id' => 'required|exists:orders,id',
                 'user_id' => 'required|exists:users,id',
                 'description' => 'required|string',
-                'tanggal_pengerjaan' => 'nullable',
-                'tanggal_selesai' => 'nullable',
-                'status' => 'required',
-            ],
-            [
-                'order_id.required' => 'Pilih order yang akan dikerjakan.',
-                'description.required' => 'Deskripsi harus diisi.',
-                'user_id.required' => 'Pilih karyawan yang akan mengerjakan jobdesk.',
-                'status.required' => 'Status harus diisi.',
-            ]
-        );
-        if (isset($validatedData['tanggal_pengerjaan'])) {
-            $validatedData['tanggal_pengerjaan'] = date('Y-m-d', strtotime($validatedData['tanggal_pengerjaan']));
+                'tanggal_pengerjaan' => 'nullable|date',
+                'tanggal_selesai' => 'nullable|date',
+                'status' => 'nullable|string',
+            ]);
+            $jobdesk->update($validatedData);
+            $jobdesk->load('order', 'order.customer', 'user', 'order.product');
+            return response()->json($jobdesk);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Server Error', 'error' => $e->getMessage()], 500);
         }
+    }
 
-        if (isset($validatedData['tanggal_selesai'])) {
-            $validatedData['tanggal_selesai'] = date('Y-m-d', strtotime($validatedData['tanggal_selesai']));
-        }
-        $jobdesk->update($validatedData);
-        $jobdesk->load('order', 'order.customer', 'user', 'order.product');
+    public function show(JobDesk $jobdesk)
+    {
+        $jobdesk = JobDesk::find($jobdesk->id)->load('order', 'order.customer', 'user', 'order.product');
         return response()->json($jobdesk);
     }
 
-    public function show(Jobdesk $jobdesk)
+    public function destroy(JobDesk $jobdesk)
     {
-        $jobdesk = Jobdesk::find($jobdesk->id)->load('order', 'order.customer', 'user', 'order.product');
-        return response()->json($jobdesk);
-    }
-
-    public function destroy(Jobdesk $jobdesk)
-    {
-        $jobdesk = Jobdesk::find($jobdesk->id);
+        $jobdesk = JobDesk::find($jobdesk->id);
         $jobdesk->delete();
-        return response()->json(['message' => 'Jobdesk deleted successfully']);
+        return response()->json(['message' => 'JobDesk deleted successfully']);
     }
 }
