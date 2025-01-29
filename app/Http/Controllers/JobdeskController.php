@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\JobDesk;
+use App\Models\Jobdesk;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class JobdeskController extends Controller
@@ -13,13 +14,18 @@ class JobdeskController extends Controller
         $status = $request->query('status');
         $name = $request->query('name');
         $userId = $request->query('user_id');
+        $user = $request->user();
 
         // Initialize the query
-        $query = JobDesk::with('order', 'order.customer', 'user', 'order.product');
+        $query = Jobdesk::with('order', 'order.customer', 'user', 'order.product');
 
         // Filter by order_id if provided
         if ($orderId) {
             $query->where('order_id', $orderId);
+        }
+
+        if (in_array($user->position, ['Staff'])) {
+            $query->where('user_id', $user->id);
         }
 
         // Filter by status if provided
@@ -62,7 +68,7 @@ class JobdeskController extends Controller
             if (isset($validatedData['tanggal_selesai'])) {
                 $validatedData['tanggal_selesai'] = date('Y-m-d', strtotime($validatedData['tanggal_selesai']));
             }
-            $jobdesk = JobDesk::create($validatedData);
+            $jobdesk = Jobdesk::create($validatedData);
             // relation
             $jobdesk->load('order', 'order.customer', 'user', 'order.product');
             return response()->json($jobdesk, 201);
@@ -73,7 +79,7 @@ class JobdeskController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $jobdesk = JobDesk::find($id);
+            $jobdesk = Jobdesk::find($id);
             $validatedData = $request->validate([
                 'order_id' => 'required|exists:orders,id',
                 'user_id' => 'required|exists:users,id',
@@ -90,16 +96,16 @@ class JobdeskController extends Controller
         }
     }
 
-    public function show(JobDesk $jobdesk)
+    public function show(Jobdesk $jobdesk)
     {
-        $jobdesk = JobDesk::find($jobdesk->id)->load('order', 'order.customer', 'user', 'order.product');
+        $jobdesk = Jobdesk::find($jobdesk->id)->load('order', 'order.customer', 'user', 'order.product');
         return response()->json($jobdesk);
     }
 
-    public function destroy(JobDesk $jobdesk)
+    public function destroy(Jobdesk $jobdesk)
     {
-        $jobdesk = JobDesk::find($jobdesk->id);
+        $jobdesk = Jobdesk::find($jobdesk->id);
         $jobdesk->delete();
-        return response()->json(['message' => 'JobDesk deleted successfully']);
+        return response()->json(['message' => 'Jobdesk deleted successfully']);
     }
 }

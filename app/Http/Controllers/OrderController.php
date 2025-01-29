@@ -22,6 +22,7 @@ class OrderController extends Controller
         'meta' => 'nullable',
         'customer_id' => 'required|exists:customers,id',
     ];
+
     public function index(Request $request)
     {
         $customerId = $request->query('customer_id');
@@ -30,6 +31,7 @@ class OrderController extends Controller
         $product = $request->query('product');
         $status = $request->query('status');
         $status = isset($status) ? $status : null;
+        $user = $request->user();
 
         $query = Order::with('customer', 'jobdesks', 'product', 'product.metaProducts.meta');
 
@@ -71,16 +73,16 @@ class OrderController extends Controller
         // Check if pagination should be disabled
         if ($paginate === 'false') {
             // Get all records without pagination
-            $orders = $query->get()->map(function ($data) {
+            $orders = $query->get()->map(function ($data) use ($user) {
                 return [
                     'id' => $data->id,
                     'no_order' => $data->no_order,
                     'customer_id' => $data->customer->id,
                     'order_date' => $data->order_date,
                     'product_id' => $data->product->id,
-                    'price' => $data->price,
+                    'price' => $user->position !== 'Staff' ? $data->price : 0,
                     'payment_method' => $data->payment_method,
-                    'paid' => $data->paid,
+                    'paid' => $user->position !== 'Staff' ? $data->paid : 0,
                     'meta' => $data->meta,
                     'lampiran' => $data->lampiran,
                     'jobdesk_count' => $data->jobdesks()->count(),
@@ -95,7 +97,7 @@ class OrderController extends Controller
                     'product' => [
                         'id' => $data->product->id,
                         'name' => $data->product->name,
-                        'price' => $data->product->price,
+                        'price' => $user->position !== 'Staff' ? $data->product->price : 0,
                         'category' => $data->product->category,
                         'description' => $data->product->description,
                         'meta_products' => $data->product->metaProducts->pluck('meta'),
@@ -105,16 +107,16 @@ class OrderController extends Controller
         } else {
             // Paginate results
             $orders = $query->paginate(25);
-            $orders->getCollection()->transform(function ($data) {
+            $orders->getCollection()->transform(function ($data) use ($user) {
                 return [
                     'id' => $data->id,
                     'no_order' => $data->no_order,
                     'customer_id' => $data->customer->id,
                     'order_date' => $data->order_date,
                     'product_id' => $data->product->id,
-                    'price' => $data->price,
+                    'price' => $user->position !== 'Staff' ? $data->price : 0,
                     'payment_method' => $data->payment_method,
-                    'paid' => $data->paid,
+                    'paid' => $user->position !== 'Staff' ? $data->paid : 0,
                     'meta' => $data->meta,
                     'lampiran' => $data->lampiran,
                     'jobdesk_count' => $data->jobdesks()->count(),
@@ -129,11 +131,12 @@ class OrderController extends Controller
                     'product' => [
                         'id' => $data->product->id,
                         'name' => $data->product->name,
-                        'price' => $data->product->price,
+                        'price' => $user->position !== 'Staff' ? $data->product->price : 0,
                         'category' => $data->product->category,
                         'description' => $data->product->description,
                         'meta_products' => $data->product->metaProducts->pluck('meta'),
-                    ]
+                    ],
+                    'position' => $user->position,
                 ];
             });
         }
@@ -148,6 +151,7 @@ class OrderController extends Controller
 
     public function update(Request $request, Order $order)
     {
+        $user = $request->user();
         // Validasi dokumen jika ada
         if ($request->hasFile('lampiran')) {
             // unset all validated data
@@ -191,9 +195,9 @@ class OrderController extends Controller
             'customer_id' => $order->customer->id,
             'order_date' => $order->order_date,
             'product_id' => $order->product->id,
-            'price' => $order->price,
+            'price' => $user->position !== 'Staff' ? $order->price : 0,
             'payment_method' => $order->payment_method,
-            'paid' => $order->paid,
+            'paid' => $user->position !== 'Staff' ? $order->paid : 0,
             'meta' => $order->meta,
             'lampiran' => $order->lampiran,
             'jobdesk_count' => $order->jobdesks()->count(),
@@ -208,7 +212,7 @@ class OrderController extends Controller
             'product' => [
                 'id' => $order->product->id,
                 'name' => $order->product->name,
-                'price' => $order->product->price,
+                'price' => $user->position !== 'Staff' ? $order->product->price : 0,
                 'category' => $order->product->category,
                 'description' => $order->product->description,
                 'meta_products' => $order->product->metaProducts->pluck('meta'),
@@ -219,6 +223,7 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
+        $user = $request->user();
         $validator = Validator::make($request->all(), [
             'order_date' => 'required',
             'product_id' => 'required',
@@ -247,9 +252,9 @@ class OrderController extends Controller
             'customer_id' => $order->customer->id,
             'order_date' => $order->order_date,
             'product_id' => $order->product->id,
-            'price' => $order->price,
+            'price' => $user->position !== 'Staff' ? $order->price : 0,
             'payment_method' => $order->payment_method,
-            'paid' => $order->paid,
+            'paid' => $user->position !== 'Staff' ? $order->paid : 0,
             'meta' => $order->meta,
             'lampiran' => $order->lampiran,
             'jobdesk_count' => $order->jobdesks()->count(),
@@ -264,7 +269,7 @@ class OrderController extends Controller
             'product' => [
                 'id' => $order->product->id,
                 'name' => $order->product->name,
-                'price' => $order->product->price,
+                'price' => $user->position !== 'Staff' ? $order->product->price : 0,
                 'category' => $order->product->category,
                 'description' => $order->product->description,
                 'meta_products' => $order->product->metaProducts->pluck('meta'),

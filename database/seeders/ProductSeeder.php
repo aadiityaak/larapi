@@ -17,7 +17,7 @@ class ProductSeeder extends Seeder
     $products = [
       'perjanjian_kredit' => [
         'title' => 'Perjanjian Kredit',
-        'meta' => [1, 2, 3, 4, 5, 6],
+        'meta' => [1, 2, 3, 5, 6],
         'category' => 'perorangan'
       ],
       'skmht' => [
@@ -47,7 +47,7 @@ class ProductSeeder extends Seeder
       ],
       'turun_waris' => [
         'title' => 'Turun Waris',
-        'meta' => [22, 23, 24, 25, 26, 27, 28, 29, 30],
+        'meta' => [23, 24, 25, 26, 27, 28, 29, 30],
         'category' => 'perorangan',
       ],
       'pecah' => [
@@ -57,45 +57,44 @@ class ProductSeeder extends Seeder
       ],
       'pendirian_pt' => [
         'title' => 'Pendirian PT',
-        'meta' => [1, 2, 3, 42, 43, 21, 44, 45, 41, 52],
+        'meta' => [1, 2, 3, 42, 43, 21, 44, 45, 52],
         'category' => 'perorangan',
       ],
       'pendirian_cv' => [
         'title' => 'Pendirian CV',
-        'meta' => [1, 2, 3, 46, 47, 21, 45, 41, 52],
+        'meta' => [1, 2, 3, 46, 47, 21, 45, 52],
         'category' => 'perorangan',
       ],
       'pendirian_yayasan' => [
         'title' => 'Pendirian Yayasan',
-        'meta' => [1, 2, 3, 48, 49, 50, 51, 6, 21, 41, 52],
+        'meta' => [1, 2, 3, 48, 49, 50, 51, 21, 52],
         'category' => 'perorangan',
       ],
       'pendirian_pt_perseorangan' => [
         'title' => 'Pendirian PT Perseorangan',
-        'meta' => [1, 2, 3, 42, 21, 45, 41, 52],
+        'meta' => [1, 2, 3, 42, 21, 45, 52],
         'category' => 'perorangan',
       ],
       'perubahan_pt' => [
         'title' => 'Perubahan PT',
-        'meta' => [1, 2, 3, 42, 43, 21, 44, 45, 41, 52],
+        'meta' => [1, 2, 3, 42, 43, 21, 44, 45, 52],
         'category' => 'perorangan',
       ],
       'perubahan_cv' => [
         'title' => 'Perubahan CV',
-        'meta' => [1, 2, 3, 46, 47, 21, 45, 41, 52],
+        'meta' => [1, 2, 3, 46, 47, 21, 45, 52],
         'category' => 'perorangan',
       ],
       'perubahan_yayasan' => [
         'title' => 'Perubahan Yayasan',
-        'meta' => [1, 2, 3, 48, 49, 50, 51, 6, 21, 41, 52],
+        'meta' => [1, 2, 3, 48, 49, 50, 51, 21, 52],
         'category' => 'perorangan',
       ],
       'perubahan_pt_perseorangan' => [
         'title' => 'Perubahan PT Perseorangan',
-        'meta' => [1, 2, 3, 42, 21, 45, 41, 52],
+        'meta' => [1, 2, 3, 42, 21, 45, 52],
         'category' => 'perorangan',
       ],
-      // BPR BBA, BPR Pala Pusat, BPR Pala Cabang, BPR Danamas Prime, BPR Arum Mandiri, BPRS Madina Mandiri, BMT Sejahtera Ummat'
       'bpr_bba' => [
         'title' => 'BPR BBA',
         'meta' => [],
@@ -145,17 +144,9 @@ class ProductSeeder extends Seeder
         'title' => 'Tanggal Akta',
         'type' => 'date'
       ],
-      4 => [
-        'title' => 'Yang Mengerjakan',
-        'type' => 'text'
-      ],
       5 => [
         'title' => 'Jumlah Pinjaman',
         'type' => 'number'
-      ],
-      6 => [
-        'title' => 'Lain-lain',
-        'type' => 'text'
       ],
       7 => [
         'title' => 'Tanggal Habis SKMHT',
@@ -215,10 +206,6 @@ class ProductSeeder extends Seeder
       ],
       21 => [
         'title' => 'NPWP',
-        'type' => 'text'
-      ],
-      22 => [
-        'title' => 'Berkas Masuk',
         'type' => 'text'
       ],
       23 => [
@@ -284,18 +271,6 @@ class ProductSeeder extends Seeder
       38 => [
         'title' => 'Keterangan Kuasa Menjual',
         'type' => 'text'
-      ],
-      39 => [
-        'title' => 'Harga Real',
-        'type' => 'number'
-      ],
-      40 => [
-        'title' => 'Harga Kesepakatan',
-        'type' => 'number'
-      ],
-      41 => [
-        'title' => 'Biaya',
-        'type' => 'number'
       ],
       42 => [
         'title' => 'Nama Direktur',
