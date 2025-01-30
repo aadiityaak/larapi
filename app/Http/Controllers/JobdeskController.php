@@ -45,7 +45,7 @@ class JobdeskController extends Controller
         }
 
         // Paginate the results
-        $jobdesk = $query->orderBy('id', 'desc')->paginate(25);
+        $jobdesk = $query->orderBy('id', 'asc')->paginate(25);
 
         return response()->json($jobdesk);
     }

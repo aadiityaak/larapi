@@ -68,7 +68,7 @@ class OrderController extends Controller
             });
         }
 
-        $query->orderBy('created_at', 'desc');
+        $query->orderBy('created_at', 'asc');
 
         // Check if pagination should be disabled
         if ($paginate === 'false') {

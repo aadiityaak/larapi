@@ -101,6 +101,7 @@ class SettingController extends Controller
     {
         return [
             'app_name' => 'nullable|string|max:255',
+            'app_code' => 'nullable|string|max:255',
             'app_description' => 'nullable|string|max:500',
             'address' => 'nullable|string|max:255',
             'banks' => 'nullable|string|max:2000',

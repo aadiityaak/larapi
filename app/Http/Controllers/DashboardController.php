@@ -42,9 +42,9 @@ class DashboardController extends Controller
             'total_tagihan_bulan_ini' => $user->position !== 'Staff' ? $totalTagihanBulanIni : 0,
             'total_karyawan' => $totalKaryawan,
             'total_jobdesks' => [
-                'Masuk' => $totalJobdesk->get('Masuk', 0),
-                'Progress' => $totalJobdesk->get('Progress', 0),
-                'Selesai' => $totalJobdesk->get('Selesai', 0),
+                'Masuk' => (int) $totalJobdesk->get('Masuk', 0),
+                'Progress' => (int) $totalJobdesk->get('Progress', 0),
+                'Selesai' => (int) $totalJobdesk->get('Selesai', 0),
             ],
         ];
 

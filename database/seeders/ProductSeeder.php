@@ -146,7 +146,7 @@ class ProductSeeder extends Seeder
       ],
       5 => [
         'title' => 'Jumlah Pinjaman',
-        'type' => 'number'
+        'type' => 'currency'
       ],
       7 => [
         'title' => 'Tanggal Habis SKMHT',
@@ -202,7 +202,7 @@ class ProductSeeder extends Seeder
       ],
       20 => [
         'title' => 'Nilai Penjaminan',
-        'type' => 'number'
+        'type' => 'currency'
       ],
       21 => [
         'title' => 'NPWP',
@@ -226,7 +226,7 @@ class ProductSeeder extends Seeder
       ],
       27 => [
         'title' => 'Nilai Pajak',
-        'type' => 'number'
+        'type' => 'currency'
       ],
       28 => [
         'title' => 'Berkas Kembali',
@@ -254,15 +254,15 @@ class ProductSeeder extends Seeder
       ],
       34 => [
         'title' => 'Nilai Jual Beli',
-        'type' => 'number'
+        'type' => 'currency'
       ],
       35 => [
         'title' => 'Nilai SSB',
-        'type' => 'number'
+        'type' => 'currency'
       ],
       36 => [
         'title' => 'Nilai SSP',
-        'type' => 'number'
+        'type' => 'currency'
       ],
       37 => [
         'title' => 'Keterangan PPJB',
