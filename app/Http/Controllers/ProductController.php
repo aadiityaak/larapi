@@ -32,7 +32,6 @@ class ProductController extends Controller
         return [
           'id' => $data->id,
           'name' => $data->name,
-          'price' => $data->price,
           'description' => $data->description,
           'category' => $data->category,
           'meta' => $data->metaProducts->pluck('meta')->pluck('id'),
@@ -46,7 +45,6 @@ class ProductController extends Controller
         return [
           'id' => $data->id,
           'name' => $data->name,
-          'price' => $data->price,
           'description' => $data->description,
           'category' => $data->category,
           'meta_products' => $data->metaProducts->pluck('meta')->pluck('id'),
@@ -66,7 +64,6 @@ class ProductController extends Controller
     $validatedData = $request->validate([
       'name' => 'string|max:255|nullable',
       'category' => 'string',
-      'price' => 'numeric|nullable',
       'description' => 'string|nullable',
       'meta_products' => 'array|nullable',
     ]);
@@ -81,7 +78,6 @@ class ProductController extends Controller
     $response = [
       'id' => $product->id,
       'name' => $product->name,
-      'price' => $product->price,
       'description' => $product->description,
       'category' => $product->category,
       'meta_products' => $product->metaProducts->pluck('meta')->pluck('id'),
@@ -107,7 +103,6 @@ class ProductController extends Controller
     $validatedData = $request->validate([
       'name' => 'string|max:255|nullable',
       'category' => 'string',
-      'price' => 'numeric|nullable',
       'description' => 'string|nullable',
       'meta_products' => 'array|nullable',
       'meta_id' => 'array|nullable',
@@ -129,7 +124,6 @@ class ProductController extends Controller
     $response = [
       'id' => $product->id,
       'name' => $product->name,
-      'price' => $product->price,
       'description' => $product->description,
       'category' => $product->category,
       'meta_products' => $product->metaProducts->pluck('meta')->pluck('id'),

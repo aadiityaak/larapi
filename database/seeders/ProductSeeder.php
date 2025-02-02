@@ -17,7 +17,7 @@ class ProductSeeder extends Seeder
     $products = [
       'perjanjian_kredit' => [
         'title' => 'Perjanjian Kredit',
-        'meta' => [1, 2, 3, 5, 6],
+        'meta' => [1, 2, 3, 5],
         'category' => 'perorangan'
       ],
       'skmht' => [
@@ -95,41 +95,31 @@ class ProductSeeder extends Seeder
         'meta' => [1, 2, 3, 42, 21, 45, 52],
         'category' => 'perorangan',
       ],
-      'bpr_bba' => [
-        'title' => 'BPR BBA',
+      'bank_a' => [
+        'title' => 'Bank A',
         'meta' => [],
         'category' => 'bank',
       ],
-      'bpr_pala_pusat' => [
-        'title' => 'BPR Pala Pusat',
+      'bank_b' => [
+        'title' => 'Bank B',
         'meta' => [],
         'category' => 'bank',
       ],
-      'bpr_pala_cabang' => [
-        'title' => 'BPR Pala Cabang',
+      'bank_c' => [
+        'title' => 'Bank C',
         'meta' => [],
         'category' => 'bank',
       ],
-      'bpr_danamas_prime' => [
-        'title' => 'BPR Danamas Prime',
+      'bank_d' => [
+        'title' => 'Bank D',
         'meta' => [],
         'category' => 'bank',
       ],
-      'bpr_arum_mandiri' => [
-        'title' => 'BPR Arum Mandiri',
+      'bank_e' => [
+        'title' => 'Bank E',
         'meta' => [],
         'category' => 'bank',
       ],
-      'bprs_madina_mandiri' => [
-        'title' => 'BPRS Madina Mandiri',
-        'meta' => [],
-        'category' => 'bank',
-      ],
-      'bmt_sejahtera_ummat' => [
-        'title' => 'BMT Sejahtera Ummat',
-        'meta' => [],
-        'category' => 'bank',
-      ]
     ];
     $metas = [
       1 => [
@@ -330,17 +320,25 @@ class ProductSeeder extends Seeder
 
     // Insert meta ke tabel 'products' dan 'meta_product'
     foreach ($products as $slug => $product) {
+      // Insert data ke tabel 'products'
       $productId = Product::factory()->create([
         'name' => $product['title'],
         'description' => '-',
         'category' => $product['category']
       ]);
 
+      // Insert data ke tabel 'meta_product'
       foreach ($product['meta'] as $metaId) {
-        MetaProduct::factory()->create([
-          'meta_id' => $metaId,
-          'product_id' => $productId
-        ]);
+        // Pastikan meta_id ada di tabel 'metas'
+        if (Meta::where('id', $metaId)->exists()) {
+          MetaProduct::factory()->create([
+            'meta_id' => $metaId,
+            'product_id' => $productId
+          ]);
+        } else {
+          // Jika meta_id tidak ditemukan, tampilkan pesan error atau log
+          echo "Meta ID $metaId tidak ditemukan di tabel 'metas'. Produk: {$product['title']}\n";
+        }
       }
     }
   }

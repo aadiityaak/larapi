@@ -17,7 +17,10 @@ class DatabaseSeeder extends Seeder
     {
         // Seed settings first
         $this->seedSettings();
-
+        $this->call([
+            UserSeeder::class,
+            ProductSeeder::class,
+        ]);
         // Seed customers and orders
         $customers = Customer::factory(28)->create();
 
