@@ -330,17 +330,25 @@ class ProductSeeder extends Seeder
 
     // Insert meta ke tabel 'products' dan 'meta_product'
     foreach ($products as $slug => $product) {
+      // Insert data ke tabel 'products'
       $productId = Product::factory()->create([
         'name' => $product['title'],
         'description' => '-',
         'category' => $product['category']
       ]);
 
+      // Insert data ke tabel 'meta_product'
       foreach ($product['meta'] as $metaId) {
-        MetaProduct::factory()->create([
-          'meta_id' => $metaId,
-          'product_id' => $productId
-        ]);
+        // Pastikan meta_id ada di tabel 'metas'
+        if (Meta::where('id', $metaId)->exists()) {
+          MetaProduct::factory()->create([
+            'meta_id' => $metaId,
+            'product_id' => $productId
+          ]);
+        } else {
+          // Jika meta_id tidak ditemukan, tampilkan pesan error atau log
+          echo "Meta ID $metaId tidak ditemukan di tabel 'metas'. Produk: {$product['title']}\n";
+        }
       }
     }
   }
