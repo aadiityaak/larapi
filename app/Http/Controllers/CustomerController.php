@@ -85,12 +85,14 @@ class CustomerController extends Controller
 
         $customer = Customer::create($validatedData);
         $response = [
-            'id' => $customer->id,
-            'name' => $customer->name,
-            'phone' => $customer->phone,
-            'address' => $customer->address,
-            'order_count' => $customer->orders->count(),
-            'orders' => $customer->orders
+            'data' => [
+                'id' => $customer->id,
+                'name' => $customer->name,
+                'phone' => $customer->phone,
+                'address' => $customer->address,
+                'order_count' => $customer->orders->count(),
+                'orders' => $customer->orders
+            ]
         ];
         return response()->json($response);
     }
@@ -121,12 +123,14 @@ class CustomerController extends Controller
         $customer->load('orders');
 
         $response = [
-            'id' => $customer->id,
-            'name' => $customer->name,
-            'phone' => $customer->phone,
-            'address' => $customer->address,
-            'order_count' => $customer->orders->count(),
-            'orders' => $customer->orders
+            'data' => [
+                'id' => $customer->id,
+                'name' => $customer->name,
+                'phone' => $customer->phone,
+                'address' => $customer->address,
+                'order_count' => $customer->orders->count(),
+                'orders' => $customer->orders
+            ]
         ];
         return response()->json($response);
     }
