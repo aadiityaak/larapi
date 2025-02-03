@@ -37,7 +37,7 @@ class ProductSeeder extends Seeder
       ],
       'jual_beli' => [
         'title' => 'Jual Beli',
-        'meta' => [2, 3, 31, 32, 33, 26, 34, 35, 36, 37, 38],
+        'meta' => [2, 3, 4, 31, 32, 33, 26, 34, 35, 36, 37, 38],
         'category' => 'perorangan',
       ],
       'hibah' => [
@@ -133,6 +133,10 @@ class ProductSeeder extends Seeder
       3 => [
         'title' => 'Tanggal Akta',
         'type' => 'date'
+      ],
+      4 => [
+        'title' => 'Harga Real',
+        'type' => 'currency'
       ],
       5 => [
         'title' => 'Jumlah Pinjaman',
