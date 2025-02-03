@@ -97,7 +97,6 @@ class OrderController extends Controller
                     'product' => [
                         'id' => $data->product->id,
                         'name' => $data->product->name,
-                        'price' => $user->position !== 'Staff' ? $data->product->price : 0,
                         'category' => $data->product->category,
                         'description' => $data->product->description,
                         'meta_products' => $data->product->metaProducts->pluck('meta'),
@@ -131,7 +130,6 @@ class OrderController extends Controller
                     'product' => [
                         'id' => $data->product->id,
                         'name' => $data->product->name,
-                        'price' => $user->position !== 'Staff' ? $data->product->price : 0,
                         'category' => $data->product->category,
                         'description' => $data->product->description,
                         'meta_products' => $data->product->metaProducts->pluck('meta'),
@@ -212,7 +210,6 @@ class OrderController extends Controller
             'product' => [
                 'id' => $order->product->id,
                 'name' => $order->product->name,
-                'price' => $user->position !== 'Staff' ? $order->product->price : 0,
                 'category' => $order->product->category,
                 'description' => $order->product->description,
                 'meta_products' => $order->product->metaProducts->pluck('meta'),
@@ -269,7 +266,6 @@ class OrderController extends Controller
             'product' => [
                 'id' => $order->product->id,
                 'name' => $order->product->name,
-                'price' => $user->position !== 'Staff' ? $order->product->price : 0,
                 'category' => $order->product->category,
                 'description' => $order->product->description,
                 'meta_products' => $order->product->metaProducts->pluck('meta'),
