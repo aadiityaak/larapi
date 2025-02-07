@@ -18,6 +18,7 @@ class KaryawanController extends Controller
     {
         $paginate = $request->query('paginate');
         $name = $request->query('name');
+        $position = $request->query('position');
 
         // Query dasar semua user dengan relasi jobdesk
         $query = User::with('jobdesk');
@@ -25,6 +26,11 @@ class KaryawanController extends Controller
         // Filter berdasarkan name jika ada
         if ($name && strlen($name) > 2) {
             $query->where('name', 'like', '%' . $name . '%');
+        }
+
+        // Filter berdasarkan position jika ada
+        if ($position) {
+            $query->where('position', $position);
         }
 
         // Sorting descending berdasarkan created_at
@@ -94,10 +100,8 @@ class KaryawanController extends Controller
             'avatar' => 'nullable',
         ]);
 
-        // Abaikan 'avatar' jika merupakan string, hanya lanjutkan jika file
-        if (is_string($request->avatar)) {
-            unset($validated['avatar']);
-        } elseif ($request->hasFile('avatar')) {
+        // Handle Avatar
+        if ($request->hasFile('avatar')) {
             $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
 
             // Hapus avatar lama jika ada
@@ -106,17 +110,17 @@ class KaryawanController extends Controller
             }
         } else {
             // Jika tidak ada file avatar, gunakan avatar yang ada
-            $validated['avatar'] = $user->avatar;
+            unset($validated['avatar']);
         }
 
-        // Hanya update password jika diisi
-        if (isset($validated['password']) && !empty($validated['password'])) {
-            $validated['password'] = bcrypt($validated['password']);
+        // Handle Password
+        if (!empty($validated['password'])) {
+            $validated['password'] = Hash::make($validated['password']);
         } else {
             unset($validated['password']);
         }
 
-        // Cek jika user bukan admin dan coba mengupdate position, maka abaikan perubahan position
+        // Cek jika user bukan admin dan coba mengupdate position
         if ($requested_user->is_admin !== 1 && isset($validated['position'])) {
             $validated['position'] = $user->position;
             $message = 'Data tersimpan, position tidak bisa diupdate';
@@ -125,7 +129,11 @@ class KaryawanController extends Controller
         }
 
         // Update user dengan data yang tervalidasi
-        $data = $user->update($validated);
+        $user->update($validated);
+
+        // Retrieve the updated user data
+        $data = User::find($id);
+
         $response = [
             'id' => $data->id,
             'name' => $data->name,
