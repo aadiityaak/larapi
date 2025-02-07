@@ -103,13 +103,10 @@ class KaryawanController extends Controller
         // Handle Avatar
         if ($request->hasFile('avatar')) {
             $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
-
-            // Hapus avatar lama jika ada
             if ($user->avatar) {
                 Storage::disk('public')->delete($user->avatar);
             }
         } else {
-            // Jika tidak ada file avatar, gunakan avatar yang ada
             unset($validated['avatar']);
         }
 
@@ -120,35 +117,22 @@ class KaryawanController extends Controller
             unset($validated['password']);
         }
 
-        // Cek jika user bukan admin dan coba mengupdate position
+        // Check for position update
         if ($requested_user->is_admin !== 1 && isset($validated['position'])) {
             $validated['position'] = $user->position;
-            $message = 'Data tersimpan, position tidak bisa diupdate';
-        } else {
-            $message = 'Data tersimpan';
         }
 
-        // Update user dengan data yang tervalidasi
-        $user->update($validated);
+        // Update user
+        $updated = $user->update($validated);
 
-        // Retrieve the updated user data
-        $data = User::find($id);
-
-        $response = [
-            'id' => $data->id,
-            'name' => $data->name,
-            'email' => $data->email,
-            'is_admin' => strval($data->is_admin),
-            'avatar' => $data->avatar,
-            'phone' => $data->phone,
-            'address' => $data->address,
-            'position' => $data->position,
-            'total_jobdesk' => $data->jobdesk->count(),
-            'jobdesk_on_progress' => $data->jobdesk->where('status', 'Progress')->count(),
-            'jobdesk_selesai' => $data->jobdesk->where('status', 'Selesai')->count(),
-        ];
-
-        return response()->json($response, 200);
+        // Check if the update was successful
+        if ($updated) {
+            // Retrieve the updated user data
+            $data = User::find($id);
+            return response()->json($data, 200);
+        } else {
+            return response()->json(['message' => 'Update failed'], 400);
+        }
     }
 
     public function store(Request $request)
