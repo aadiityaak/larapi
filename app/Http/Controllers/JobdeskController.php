@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Jobdesk;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class JobdeskController extends Controller
 {
@@ -62,12 +63,9 @@ class JobdeskController extends Controller
                 'status' => 'nullable|string',
             ]);
 
-            if (isset($validatedData['tanggal_pengerjaan'])) {
-                $validatedData['tanggal_pengerjaan'] = date('Y-m-d', strtotime($validatedData['tanggal_pengerjaan']));
-            }
-            if (isset($validatedData['tanggal_selesai'])) {
-                $validatedData['tanggal_selesai'] = date('Y-m-d', strtotime($validatedData['tanggal_selesai']));
-            }
+            $validatedData['tanggal_pengerjaan'] = $validatedData['tanggal_pengerjaan'] ? Carbon::parse($validatedData['tanggal_pengerjaan'])->setTimezone('Asia/Jakarta')->startOfDay() : null;
+            $validatedData['tanggal_selesai'] = $validatedData['tanggal_selesai'] ? Carbon::parse($validatedData['tanggal_selesai'])->setTimezone('Asia/Jakarta')->endOfDay() : null;
+
             $jobdesk = Jobdesk::create($validatedData);
             // relation
             $jobdesk->load('order', 'order.customer', 'user', 'order.product');
@@ -88,6 +86,10 @@ class JobdeskController extends Controller
                 'tanggal_selesai' => 'nullable|date',
                 'status' => 'nullable|string',
             ]);
+
+            $validatedData['tanggal_pengerjaan'] = $validatedData['tanggal_pengerjaan'] ? Carbon::parse($validatedData['tanggal_pengerjaan'])->setTimezone('Asia/Jakarta')->startOfDay() : null;
+            $validatedData['tanggal_selesai'] = $validatedData['tanggal_selesai'] ? Carbon::parse($validatedData['tanggal_selesai'])->setTimezone('Asia/Jakarta')->endOfDay() : null;
+
             $jobdesk->update($validatedData);
             $jobdesk->load('order', 'order.customer', 'user', 'order.product');
             return response()->json($jobdesk);

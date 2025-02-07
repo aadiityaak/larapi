@@ -25,7 +25,7 @@ class DashboardController extends Controller
         $totalPendapatan = intval(Order::sum('paid'));
         $pendapatanBulanIni = intval(Order::whereMonth('order_date', now()->month)->sum('paid'));
         $pendapatanBulanSebelumnya = intval(Order::whereMonth('order_date', now()->subMonth()->month)->sum('paid'));
-        $totalTagihan = intval(Order::sum('price'));
+        $totalTagihan = intval(Order::sum('price')) - $totalPendapatan;
         $totalTagihanBulanIni = intval(Order::whereMonth('order_date', now()->month)->sum('price'));
         $totalBelumbayar = $totalTagihan - $totalPendapatan;
 
