@@ -140,7 +140,20 @@ class CustomerController extends Controller
      */
     public function destroy(Customer $customer)
     {
+        // Retrieve all orders for the customer
+        $orders = $customer->orders;
+
+        // Loop through each order and delete related jobdesks
+        foreach ($orders as $order) {
+            $order->jobdesks()->delete(); // Ensure jobdesks relationship exists on Order
+        }
+
+        // Now delete the orders themselves
+        $customer->orders()->delete();
+
+        // Finally, delete the customer
         $customer->delete();
+
         return response()->json($customer);
     }
 }
