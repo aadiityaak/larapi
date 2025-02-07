@@ -13,7 +13,8 @@ class CustomerPolicy
      */
     public function viewAny(User $user): bool
     {
-        //
+        // Allow admin users to view any customer
+        return $user->is_admin === 1;
     }
 
     /**
@@ -21,7 +22,9 @@ class CustomerPolicy
      */
     public function view(User $user, Customer $customer): bool
     {
-        //
+        // Allow admin users to view any customer
+        // Allow regular users to view their own customers
+        return $user->is_admin === 1 || $user->id === $customer->user_id;
     }
 
     /**
@@ -29,7 +32,8 @@ class CustomerPolicy
      */
     public function create(User $user): bool
     {
-        //
+        // Allow admin users to create customers
+        return $user->is_admin === 1;
     }
 
     /**
@@ -37,7 +41,9 @@ class CustomerPolicy
      */
     public function update(User $user, Customer $customer): bool
     {
-        //
+        // Allow admin users to update any customer
+        // Allow regular users to update their own customers
+        return $user->is_admin === 1 || $user->id === $customer->user_id;
     }
 
     /**
@@ -45,7 +51,9 @@ class CustomerPolicy
      */
     public function delete(User $user, Customer $customer): bool
     {
-        //
+        // Allow admin users to delete any customer
+        // You may also want to allow the customer’s owner to delete their own record
+        return $user->is_admin === 1 || $user->id === $customer->user_id;
     }
 
     /**
@@ -53,7 +61,8 @@ class CustomerPolicy
      */
     public function restore(User $user, Customer $customer): bool
     {
-        //
+        // Typically allow only admins to restore customers
+        return $user->is_admin === 1;
     }
 
     /**
@@ -61,6 +70,7 @@ class CustomerPolicy
      */
     public function forceDelete(User $user, Customer $customer): bool
     {
-        //
+        // Typically allow only admins to permanently delete customers
+        return $user->is_admin === 1;
     }
 }

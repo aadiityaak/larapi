@@ -77,9 +77,9 @@ class OrderController extends Controller
                 return [
                     'id' => $data->id,
                     'no_order' => $data->no_order,
-                    'customer_id' => $data->customer->id,
+                    'customer_id' => $data->customer->id ?? null,
                     'order_date' => $data->order_date,
-                    'product_id' => $data->product->id,
+                    'product_id' => $data->product->id ?? null,
                     'price' => $user->position !== 'Staff' ? $data->price : 0,
                     'payment_method' => $data->payment_method,
                     'paid' => $user->position !== 'Staff' ? $data->paid : 0,
@@ -110,9 +110,9 @@ class OrderController extends Controller
                 return [
                     'id' => $data->id,
                     'no_order' => $data->no_order,
-                    'customer_id' => $data->customer->id,
+                    'customer_id' => $data->customer->id ?? null,
                     'order_date' => $data->order_date,
-                    'product_id' => $data->product->id,
+                    'product_id' => $data->product->id ?? null,
                     'price' => $user->position !== 'Staff' ? $data->price : 0,
                     'payment_method' => $data->payment_method,
                     'paid' => $user->position !== 'Staff' ? $data->paid : 0,
@@ -120,20 +120,20 @@ class OrderController extends Controller
                     'lampiran' => $data->lampiran,
                     'jobdesk_count' => $data->jobdesks()->count(),
                     'created_at' => $data->created_at,
-                    'customer' => [
+                    'customer' => $data->customer ? [
                         'id' => $data->customer->id,
                         'name' => $data->customer->name,
                         'phone' => $data->customer->phone,
                         'address' => $data->customer->address,
-                    ],
+                    ] : null,
                     'jobdesks' => $data->jobdesks,
-                    'product' => [
+                    'product' => $data->product ? [
                         'id' => $data->product->id,
                         'name' => $data->product->name,
                         'category' => $data->product->category,
                         'description' => $data->product->description,
                         'meta_products' => $data->product->metaProducts->pluck('meta'),
-                    ],
+                    ] : null,
                     'position' => $user->position,
                 ];
             });
@@ -276,6 +276,8 @@ class OrderController extends Controller
 
     public function destroy(Order $order)
     {
+        $order = Order::find($order->id);
+        $order->jobdesks()->delete();
         $order->delete();
         return response()->json($order);
     }
