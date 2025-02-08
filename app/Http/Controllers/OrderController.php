@@ -28,7 +28,7 @@ class OrderController extends Controller
         $customerId = $request->query('customer_id');
         $paginate = $request->query('paginate');
         $name = $request->query('name');
-        $product = $request->query('product');
+        $productQuery = $request->query('product');
         $status = $request->query('status');
         $status = isset($status) ? $status : null;
         $user = $request->user();
@@ -39,9 +39,12 @@ class OrderController extends Controller
             $query->where('customer_id', $customerId);
         }
 
-        if ($name && strlen($name) > 2 && !$customerId) {
+        if ($name || $productQuery) {
             $query->whereHas('customer', function ($query) use ($name) {
                 $query->where('name', 'like', '%' . $name . '%');
+            });
+            $query->whereHas('product', function ($query) use ($productQuery) {
+                $query->where('name', 'like', '%' . $productQuery . '%');
             });
         } else {
             if ($status) {
@@ -60,12 +63,6 @@ class OrderController extends Controller
                     $query->where('status', '!=', 'Selesai');
                 })->orWhereDoesntHave('jobdesks');
             }
-        }
-
-        if ($product && strlen($product) > 2) {
-            $query->whereHas('product', function ($query) use ($product) {
-                $query->where('name', 'like', '%' . $product . '%');
-            });
         }
 
         $query->orderBy('created_at', 'asc');
