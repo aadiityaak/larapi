@@ -147,18 +147,25 @@ class OrderController extends Controller
     public function update(Request $request, Order $order)
     {
         $user = $request->user();
-        // Validasi dokumen jika ada
-        if ($request->hasFile('lampiran')) {
-            // unset all validated data
-            $this->validate = [];
-            $this->validate = [
-                'lampiran' => 'required|mimes:pdf',
-            ];
-        }
 
-        // Validasi data yang diterima
-        $validatedData = $request->validate(
-            [
+        // Jika ada lampiran, hanya validasi lampiran
+        if ($request->hasFile('lampiran')) {
+            $request->validate([
+                'lampiran' => 'required|mimes:pdf',
+            ]);
+
+            $filePath = $request->file('lampiran')->store('lampiran', 'public');
+
+            // Hapus dokumen lama jika ada
+            if ($order->lampiran) {
+                Storage::disk('public')->delete($order->lampiran);
+            }
+
+            // Update order dengan lampiran baru
+            $order->update(['lampiran' => $filePath]);
+        } else {
+            // Validasi data lain jika lampiran tidak ada
+            $validatedData = $request->validate([
                 'order_date' => 'required',
                 'product_id' => 'required',
                 'price' => 'required',
@@ -166,23 +173,13 @@ class OrderController extends Controller
                 'payment_method' => 'required',
                 'meta' => 'nullable',
                 'customer' => 'required',
-            ]
-        );
+            ]);
 
-        // Validasi dokumen jika ada
-        if ($request->hasFile('lampiran')) {
-            $this->validate['lampiran'] = 'required|mimes:pdf';
-            $filePath = $request->file('lampiran')->store('lampiran', 'public');
-            $validatedData['lampiran'] = $filePath;
+            // Update order dengan data yang sudah divalidasi
+            $order->update($validatedData);
         }
 
-        // Cek dan hapus dokumen lama jika ada
-        if ($order->lampiran) {
-            Storage::disk('public')->delete($order->lampiran);
-        }
-
-        // Update order dengan data yang sudah divalidasi
-        $order->update($validatedData);
+        // Load relasi dan respon
         $order->load('customer', 'jobdesks', 'product', 'product.metaProducts.meta');
         $response = [
             'id' => $order->id,
@@ -212,6 +209,7 @@ class OrderController extends Controller
                 'meta_products' => $order->product->metaProducts->pluck('meta'),
             ]
         ];
+
         return response()->json($response);
     }
 
