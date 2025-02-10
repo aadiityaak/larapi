@@ -1,0 +1,13 @@
+{
+    "name": "larapi",
+    "version": "1.0.0",
+    "description": "Aplikasi Laravel untuk API",
+    "main": "index.js",
+    "scripts": {
+        "build": "node src/script.js"
+    },
+    "dependencies": {
+        "archiver": "^5.3.1",
+        "fs": "0.0.1-security"
+    }
+}
