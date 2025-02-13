@@ -51,7 +51,7 @@ class NewOrderNotification extends Notification
      */
     public function via($notifiable)
     {
-        return ['mail', 'database'];
+        return ['database']; //'mail', 'database'
     }
 
     /**
@@ -75,6 +75,7 @@ class NewOrderNotification extends Notification
         return [
             'message' => 'Pesanan baru telah diterima dari ' . $this->order->customer->name,
             'notifiable' => $notifiable,
+            'order' => $this->order
         ];
     }
 }

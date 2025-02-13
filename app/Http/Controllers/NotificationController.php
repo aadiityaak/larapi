@@ -43,10 +43,13 @@ class NotificationController extends Controller
     {
         $notifications = Auth::user()->unreadNotifications->map(function ($data) {
             return [
-
                 'id' => $data->id,
                 'message' => $data->data['message'],
-                'time' => $data->created_at
+                'time' => $data->created_at,
+                'url' => isset($data->data['order']['customer']['id'])
+                    ? '/order?konsumen_id=' . $data->data['order']['customer']['id']
+                    : null,
+                'order_id' => $data->data['order']['id'] ?? null
             ];
         });
 
