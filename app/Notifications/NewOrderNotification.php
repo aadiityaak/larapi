@@ -2,25 +2,18 @@
 
 namespace App\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Facades\View;
 use Illuminate\Notifications\Notification;
 use App\Models\Setting;
 
-use Illuminate\Support\Facades\Log;
-
-class NewOrderNotification extends Notification implements ShouldQueue
+class NewOrderNotification extends Notification
 {
-    use Queueable;
-
     protected $message;
     protected $order;
 
     /**
      * Buat instance notifikasi baru.
-     *
-     * Ambil pesan dari pengaturan.
      */
     public function __construct($order)
     {
@@ -55,36 +48,27 @@ class NewOrderNotification extends Notification implements ShouldQueue
 
     /**
      * Tentukan saluran mana yang akan digunakan untuk mengirim notifikasi.
-     *
-     * @param mixed $notifiable
-     * @return array
      */
     public function via($notifiable)
     {
-        return ['mail', 'database']; // Anda bisa menambahkan saluran lain seperti database, broadcast, dsb.
+        return ['mail', 'database'];
     }
 
     /**
      * Siapkan pesan email untuk notifikasi.
-     *
-     * @param mixed $notifiable
-     * @return MailMessage
      */
     public function toMail($notifiable)
     {
         return (new MailMessage)
             ->subject('Notifikasi Pesanan Baru')
-            ->line($this->message)
-            ->line('Tanggal Pesanan: ' . $this->order->order_date)
-            ->action('Lihat Pesanan', url('/orders'))
-            ->line('Terima kasih telah menggunakan aplikasi kami!');
+            ->view('emails.new_order', [
+                'messageContent' => $this->message, // Ubah key agar tidak bentrok
+                'order' => $this->order
+            ]);
     }
 
     /**
      * Siapkan pesan database untuk notifikasi.
-     *
-     * @param mixed $notifiable
-     * @return array
      */
     public function toDatabase($notifiable)
     {
