@@ -62,7 +62,7 @@ class NewOrderNotification extends Notification
         return (new MailMessage)
             ->subject('Notifikasi Pesanan Baru')
             ->view('emails.new_order', [
-                'messageContent' => $this->message, // Ubah key agar tidak bentrok
+                'messageContent' => $this->message,
                 'order' => $this->order
             ]);
     }

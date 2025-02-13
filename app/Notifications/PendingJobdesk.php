@@ -2,59 +2,72 @@
 
 namespace App\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use App\Models\Setting;
 
 class PendingJobdesk extends Notification
 {
-    use Queueable;
-
-    /**
-     * Create a new notification instance.
-     */
+    protected $message;
     protected $data;
 
+    /**
+     * Buat instance notifikasi baru.
+     */
     public function __construct($data)
     {
+        // Ambil pesan dari pengaturan, jika ada
+        $this->message = Setting::where('setting_key', 'pending_jobdesk')->value('setting_value') ?? 'Pesan default jika tidak ada setting';
+
+        // Simpan data jobdesk
         $this->data = $data;
+
+        $this->message = str_replace(
+            [
+                '[nama_klien]',
+                '[jobdesk_id]',
+                '[tim_manajemen]',
+            ],
+            [
+                $data['client_name'],
+                $data['jobdesk_id'],
+                'Tim Manajemen ' . Setting::where('setting_key', 'app_name')->value('setting_value'),
+            ],
+            $this->message
+        );
     }
 
     /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
+     * Tentukan saluran mana yang akan digunakan untuk mengirim notifikasi.
      */
-    public function via(object $notifiable): array
+    public function via($notifiable)
     {
-        return ['mail', 'database'];
+        return ['mail', 'database']; //'mail', 'database'
     }
 
     /**
-     * Get the mail representation of the notification.
+     * Siapkan pesan email untuk notifikasi.
      */
     public function toMail($notifiable)
     {
         return (new MailMessage)
             ->subject('Pemberitahuan: Jobdesk Belum Diambil')
-            ->greeting('Halo ' . $notifiable->name . '!')
-            ->line('Kami ingin mengingatkan Anda bahwa ada jobdesk yang belum Anda ambil:')
-            ->line('Jobdesk: ' . $this->data['jobdesk_id'])
-            ->action('Ambil Jobdesk', url('/jobdesk/' . $this->data['jobdesk_id']))
-            ->line('Terima kasih atas perhatian Anda!');
+            ->view('emails.pending_jobdesk', [
+                'messageContent' => $this->message,
+                'data' => $this->data,
+                'notifiable' => $notifiable,
+            ]);
     }
 
     /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
+     * Siapkan pesan database untuk notifikasi.
      */
-    public function toArray(object $notifiable): array
+    public function toDatabase($notifiable)
     {
         return [
-            'jobdesk' => $this->data['jobdesk_id'],
-            'message' => 'Pemberitahuan: Jobdesk #' . $this->data['jobdesk_id'] . ' Belum Diambil'
+            'message' => 'Jobdesk #' . $this->data['jobdesk_id'] . ' belum diambil oleh ' . $notifiable->name,
+            'notifiable' => $notifiable,
+            'jobdesk' => $this->data
         ];
     }
 }
