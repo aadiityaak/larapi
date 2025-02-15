@@ -35,7 +35,7 @@ class OrderController extends Controller
 
         $query = Order::with('customer', 'jobdesks', 'product', 'product.metaProducts.meta');
 
-        if ($customerId) {
+        if (isset($customerId) && $customerId !== 'undefined') {
             $query->where('customer_id', $customerId);
         }
 
