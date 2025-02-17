@@ -14,7 +14,7 @@ use App\Http\Controllers\MetaController;
 use App\Http\Controllers\SendNotificationController;
 use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\NotificationController;
-
+use App\Http\Controllers\PermissionController;
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('profile', function (Request $request) {
@@ -29,6 +29,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('notifications/read/{id}', [NotificationController::class, 'read']);
     Route::put('notifications/read-all', [NotificationController::class, 'readAll']);
     Route::get('notifications/unread', [NotificationController::class, 'unread']);
+    Route::get('/permissions', [PermissionController::class, 'index']);
+    Route::post('/user/{user}/permissions', [PermissionController::class, 'update']);
     Route::apiResources([
         'karyawans' => KaryawanController::class,
         'orders' => OrderController::class,
