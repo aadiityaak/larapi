@@ -19,4 +19,9 @@ class Customer extends Model
     {
         return $this->hasMany(Order::class);
     }
+
+    public function meta()
+    {
+        return $this->hasMany(CustomerMeta::class);
+    }
 }
