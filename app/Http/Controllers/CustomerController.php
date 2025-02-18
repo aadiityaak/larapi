@@ -24,6 +24,7 @@ class CustomerController extends Controller
         $validated = $request->validate([
             'name' => 'nullable|string|min:3',
             'phone' => 'nullable|string|min:4',
+            'bank' => 'nullable|string',
         ]);
 
         $query = Customer::with('orders', 'meta');
@@ -35,6 +36,25 @@ class CustomerController extends Controller
         if (!empty($validated['phone'])) {
             $query->where('phone', 'like', '%' . $validated['phone'] . '%');
         }
+
+        if (!empty($validated['bank'])) {
+            if ($validated['bank'] === 'Perorangan') {
+                $query->where(function ($q) {
+                    $q->whereHas('meta', function ($subQuery) {
+                        $subQuery->where('meta_key', 'bank')
+                            ->where('meta_value', 'Perorangan');
+                    })->orWhereDoesntHave('meta', function ($subQuery) {
+                        $subQuery->where('meta_key', 'bank');
+                    });
+                });
+            } else {
+                $query->whereHas('meta', function ($subQuery) use ($validated) {
+                    $subQuery->where('meta_key', 'bank')
+                        ->where('meta_value', 'like', '%' . $validated['bank'] . '%');
+                });
+            }
+        }
+
 
         $query->orderBy('created_at', 'desc');
 
