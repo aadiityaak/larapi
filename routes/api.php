@@ -15,6 +15,8 @@ use App\Http\Controllers\SendNotificationController;
 use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\BankSettingController;
+
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('profile', function (Request $request) {
@@ -31,6 +33,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('notifications/unread', [NotificationController::class, 'unread']);
     Route::get('/permissions', [PermissionController::class, 'index']);
     Route::post('/user/{user}/permissions', [PermissionController::class, 'update']);
+
+    Route::get('/settings/banks', [BankSettingController::class, 'index']);
+    Route::post('/settings/banks', [BankSettingController::class, 'store']);
+    Route::delete('/settings/banks', [BankSettingController::class, 'destroy']);
+
     Route::apiResources([
         'karyawans' => KaryawanController::class,
         'orders' => OrderController::class,
