@@ -26,17 +26,21 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('jobdesk-reminder', [SendNotificationController::class, 'sendJobdeskReminder']);
     Route::put('profile', [ProfileController::class, 'update']);
     Route::get('home', [DashboardController::class, 'index']);
+
     Route::get('notifications', [NotificationController::class, 'index']);
     Route::put('notifications/{id}', [NotificationController::class, 'update']);
     Route::put('notifications/read/{id}', [NotificationController::class, 'read']);
     Route::put('notifications/read-all', [NotificationController::class, 'readAll']);
     Route::get('notifications/unread', [NotificationController::class, 'unread']);
+
     Route::get('/permissions', [PermissionController::class, 'index']);
     Route::post('/user/{user}/permissions', [PermissionController::class, 'update']);
 
     Route::get('/settings/banks', [BankSettingController::class, 'index']);
     Route::post('/settings/banks', [BankSettingController::class, 'store']);
     Route::delete('/settings/banks', [BankSettingController::class, 'destroy']);
+
+    Route::post('customers/{customer}/meta', [CustomerController::class, 'storeMeta']);
 
     Route::apiResources([
         'karyawans' => KaryawanController::class,

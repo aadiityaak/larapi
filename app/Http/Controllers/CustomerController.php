@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\CustomerMeta;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
@@ -25,7 +26,7 @@ class CustomerController extends Controller
             'phone' => 'nullable|string|min:4',
         ]);
 
-        $query = Customer::with('orders');
+        $query = Customer::with('orders', 'meta');
 
         if (!empty($validated['name'])) {
             $query->where('name', 'like', '%' . $validated['name'] . '%');
@@ -45,7 +46,8 @@ class CustomerController extends Controller
                     'phone' => $data->phone,
                     'address' => $data->address,
                     'order_count' => $data->orders->count(),
-                    'orders' => $data->orders
+                    'orders' => $data->orders,
+                    'meta' => $data->meta
                 ];
             });
         } else {
@@ -57,7 +59,8 @@ class CustomerController extends Controller
                     'phone' => $data->phone,
                     'address' => $data->address,
                     'order_count' => $data->orders->count(),
-                    'orders' => $data->orders
+                    'orders' => $data->orders,
+                    'meta' => $data->meta
                 ];
             });
         }
@@ -74,16 +77,21 @@ class CustomerController extends Controller
                 'name' => 'required|string|max:255',
                 'phone' => 'required|string|max:20|unique:customers,phone',
                 'address' => 'required|string',
+                'meta' => 'nullable|array',
             ],
             [
                 'name.required' => 'Nama harus diisi.',
                 'phone.required' => 'Nomor telepon harus diisi.',
                 'phone.unique' => 'Nomor telepon sudah ada.',
                 'address.required' => 'Alamat harus diisi.',
+                'meta.array' => 'Meta harus berupa array.',
             ]
         );
 
         $customer = Customer::create($validatedData);
+        if (isset($validatedData['meta'])) {
+            $customer->meta()->createMany($validatedData['meta']);
+        }
         $response = [
             'data' => [
                 'id' => $customer->id,
@@ -91,7 +99,8 @@ class CustomerController extends Controller
                 'phone' => $customer->phone,
                 'address' => $customer->address,
                 'order_count' => $customer->orders->count(),
-                'orders' => $customer->orders
+                'orders' => $customer->orders,
+                'meta' => $customer->meta
             ]
         ];
         return response()->json($response);
@@ -117,10 +126,28 @@ class CustomerController extends Controller
                 'name' => 'required|string|max:255',
                 'phone' => 'required|string|max:20|unique:customers,phone,' . $customer->id,
                 'address' => 'required|string',
+                'meta' => 'nullable|array',
+            ],
+            [
+                'name.required' => 'Nama harus diisi.',
+                'phone.required' => 'Nomor telepon harus diisi.',
+                'phone.unique' => 'Nomor telepon sudah ada.',
+                'address.required' => 'Alamat harus diisi.',
+                'meta.array' => 'Meta harus berupa array.',
             ]
         );
         $customer->update($validatedData);
-        $customer->load('orders');
+        if (isset($validatedData['meta'])) {
+            // tanpa delete meta yang ada, update jika key sama 
+            foreach ($validatedData['meta'] as $metaData) {
+                $meta = CustomerMeta::updateOrCreate(
+                    ['customer_id' => $customer->id, 'meta_key' => $metaData['meta_key']]
+                );
+                $meta->meta_value = $metaData['meta_value'];
+                $meta->save();
+            }
+        }
+        $customer->load('orders', 'meta');
 
         $response = [
             'data' => [
@@ -129,7 +156,8 @@ class CustomerController extends Controller
                 'phone' => $customer->phone,
                 'address' => $customer->address,
                 'order_count' => $customer->orders->count(),
-                'orders' => $customer->orders
+                'orders' => $customer->orders,
+                'meta' => $customer->meta
             ]
         ];
         return response()->json($response);
@@ -155,5 +183,24 @@ class CustomerController extends Controller
         $customer->delete();
 
         return response()->json($customer);
+    }
+
+    public function storeMeta(Request $request, Customer $customer)
+    {
+        $validatedData = $request->validate([
+            'meta' => 'required|array',
+            'meta.*.meta_key' => 'required|string|max:100',
+            'meta.*.meta_value' => 'required|string',
+        ]);
+
+        foreach ($validatedData['meta'] as $metaData) {
+            $meta = new CustomerMeta();
+            $meta->customer_id = $customer->id;
+            $meta->meta_key = $metaData['meta_key'];
+            $meta->meta_value = $metaData['meta_value'];
+            $meta->save();
+        }
+
+        return response()->json(['message' => 'Data meta berhasil disimpan.']);
     }
 }
