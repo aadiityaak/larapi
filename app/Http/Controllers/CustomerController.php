@@ -55,7 +55,6 @@ class CustomerController extends Controller
             }
         }
 
-
         $query->orderBy('created_at', 'desc');
 
         if ($paginate === 'false') {

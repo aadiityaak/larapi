@@ -29,14 +29,33 @@ class OrderController extends Controller
         $paginate = $request->query('paginate');
         $name = $request->query('name');
         $productQuery = $request->query('product');
+        $bank = $request->query('bank');
         $status = $request->query('status');
         $status = isset($status) ? $status : null;
         $user = $request->user();
 
-        $query = Order::with('customer', 'jobdesks', 'product', 'product.metaProducts.meta');
+        $query = Order::with('customer', 'customer.meta', 'jobdesks', 'product', 'product.metaProducts.meta');
 
         if (isset($customerId) && $customerId !== 'undefined') {
             $query->where('customer_id', $customerId);
+        }
+
+        if (!empty($bank)) {
+            if ($bank === 'Perorangan') {
+                $query->where(function ($q) {
+                    $q->whereHas('customer.meta', function ($subQuery) {
+                        $subQuery->where('meta_key', 'bank')
+                            ->where('meta_value', 'Perorangan');
+                    })->orWhereDoesntHave('customer.meta', function ($subQuery) {
+                        $subQuery->where('meta_key', 'bank');
+                    });
+                });
+            } else {
+                $query->whereHas('customer.meta', function ($subQuery) use ($bank) {
+                    $subQuery->where('meta_key', 'bank')
+                        ->where('meta_value', 'like', '%' . $bank . '%');
+                });
+            }
         }
 
         if ($name || $productQuery) {
@@ -89,6 +108,7 @@ class OrderController extends Controller
                         'name' => $data->customer->name,
                         'phone' => $data->customer->phone,
                         'address' => $data->customer->address,
+                        'meta' => $data->customer->meta
                     ],
                     'jobdesks' => $data->jobdesks,
                     'product' => [
@@ -122,6 +142,7 @@ class OrderController extends Controller
                         'name' => $data->customer->name,
                         'phone' => $data->customer->phone,
                         'address' => $data->customer->address,
+                        'meta' => $data->customer->meta
                     ] : null,
                     'jobdesks' => $data->jobdesks,
                     'product' => $data->product ? [
