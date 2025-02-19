@@ -53,7 +53,7 @@ class OrderController extends Controller
             } else {
                 $query->whereHas('customer.meta', function ($subQuery) use ($bank) {
                     $subQuery->where('meta_key', 'bank')
-                        ->where('meta_value', 'like', '%' . $bank . '%');
+                        ->where('meta_value', '=', $bank);
                 });
             }
         }
