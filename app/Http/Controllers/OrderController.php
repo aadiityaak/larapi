@@ -40,31 +40,19 @@ class OrderController extends Controller
             $query->where('customer_id', $customerId);
         }
 
-        if (!empty($bank)) {
-            if ($bank === 'Perorangan') {
-                $query->where(function ($q) {
-                    $q->whereHas('customer.meta', function ($subQuery) {
-                        $subQuery->where('meta_key', 'bank')
-                            ->where('meta_value', 'Perorangan');
-                    })->orWhereDoesntHave('customer.meta', function ($subQuery) {
-                        $subQuery->where('meta_key', 'bank');
-                    });
-                });
-            } else {
-                $query->whereHas('customer.meta', function ($subQuery) use ($bank) {
-                    $subQuery->where('meta_key', 'bank')
-                        ->where('meta_value', '=', $bank);
-                });
-            }
-        }
-
-        if ($name || $productQuery) {
+        if ($name || $productQuery || $bank) {
             $query->whereHas('customer', function ($query) use ($name) {
                 $query->where('name', 'like', '%' . $name . '%');
             });
             $query->whereHas('product', function ($query) use ($productQuery) {
                 $query->where('name', 'like', '%' . $productQuery . '%');
             });
+            if ($bank) {
+                $query->whereHas('customer.meta', function ($subQuery) use ($bank) {
+                    $subQuery->where('meta_key', 'bank')
+                        ->where('meta_value', '=', $bank);
+                });
+            }
         } else {
             if ($status) {
                 $query->whereDoesntHave('jobdesks', function ($query) use ($status) {
@@ -77,6 +65,22 @@ class OrderController extends Controller
                     $query->whereNull('lampiran');
                 }
                 $query->whereHas('jobdesks');
+            } else if ($bank) {
+                if ($bank === 'Perorangan') {
+                    $query->where(function ($q) {
+                        $q->whereHas('customer.meta', function ($subQuery) {
+                            $subQuery->where('meta_key', 'bank')
+                                ->where('meta_value', 'Perorangan');
+                        })->orWhereDoesntHave('customer.meta', function ($subQuery) {
+                            $subQuery->where('meta_key', 'bank');
+                        });
+                    });
+                } else {
+                    $query->whereHas('customer.meta', function ($subQuery) use ($bank) {
+                        $subQuery->where('meta_key', 'bank')
+                            ->where('meta_value', '=', $bank);
+                    });
+                }
             } else if (!($customerId || $name)) {
                 $query->whereHas('jobdesks', function ($query) {
                     $query->where('status', '!=', 'Selesai');
