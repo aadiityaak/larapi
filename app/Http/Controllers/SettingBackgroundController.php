@@ -6,7 +6,7 @@ use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-class BackgroundSettingController extends Controller
+class SettingBackgroundController extends Controller
 {
   /**
    * Get the background settings.
@@ -39,7 +39,7 @@ class BackgroundSettingController extends Controller
     }
 
     //hapus gambar lama dari storage
-    if ($request->hasFile('image')) {
+    if ($request->hasFile('image') && $request->file('image')->isValid()) {
       $oldImage = Setting::where('setting_key', 'background')->first();
       if ($oldImage) {
         $oldImagePath = $oldImage->setting_value;
@@ -48,12 +48,15 @@ class BackgroundSettingController extends Controller
           Storage::disk('public')->delete($oldImage);
         }
       }
-    }
 
-    // Simpan gambar jika ada
-    if ($request->hasFile('image')) {
       $imagePath = $request->file('image')->store('backgrounds', 'public');
       $background['image'] = asset('storage/' . $imagePath);
+    }
+
+    // jika tidak ada gambar baru, gunakan gambar lama
+    if (!isset($background['image'])) {
+      $oldImage = Setting::where('setting_key', 'background')->first();
+      $background['image'] = $oldImage ? json_decode($oldImage->setting_value, true)['image'] : null;
     }
 
     // Simpan ke database

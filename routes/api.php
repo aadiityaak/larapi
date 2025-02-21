@@ -18,6 +18,8 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\SettingBankController;
 use App\Http\Controllers\SettingBackgroundController;
 
+Route::get('/settings/background', [SettingBackgroundController::class, 'index']);
+
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('profile', function (Request $request) {
         return $request->user();
@@ -36,9 +38,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/permissions', [PermissionController::class, 'index']);
     Route::post('/user/{user}/permissions', [PermissionController::class, 'update']);
 
-
     Route::prefix('settings')->group(function () {
-        Route::get('/background', [SettingBackgroundController::class, 'index']);
         Route::post('/background', [SettingBackgroundController::class, 'store']);
         Route::delete('/background', [SettingBackgroundController::class, 'destroy']);
 
