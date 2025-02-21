@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 
-class BankSettingController extends Controller
+class SettingBankController extends Controller
 {
     /**
      * Get the list of banks from settings.

@@ -15,8 +15,8 @@ use App\Http\Controllers\SendNotificationController;
 use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PermissionController;
-use App\Http\Controllers\BankSettingController;
-
+use App\Http\Controllers\SettingBankController;
+use App\Http\Controllers\SettingBackgroundController;
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('profile', function (Request $request) {
@@ -36,9 +36,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/permissions', [PermissionController::class, 'index']);
     Route::post('/user/{user}/permissions', [PermissionController::class, 'update']);
 
-    Route::get('/settings/banks', [BankSettingController::class, 'index']);
-    Route::post('/settings/banks', [BankSettingController::class, 'store']);
-    Route::delete('/settings/banks', [BankSettingController::class, 'destroy']);
+
+    Route::prefix('settings')->group(function () {
+        Route::get('/background', [SettingBackgroundController::class, 'index']);
+        Route::post('/background', [SettingBackgroundController::class, 'store']);
+        Route::delete('/background', [SettingBackgroundController::class, 'destroy']);
+
+        Route::get('/banks', [SettingBankController::class, 'index']);
+        Route::post('/banks', [SettingBankController::class, 'store']);
+        Route::delete('/banks', [SettingBankController::class, 'destroy']);
+    });
 
     Route::post('customers/{customer}/meta', [CustomerController::class, 'storeMeta']);
 
