@@ -17,8 +17,10 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\SettingBankController;
 use App\Http\Controllers\SettingBackgroundController;
+use App\Http\Controllers\SettingFaviconController;
 
 Route::get('/settings/background', [SettingBackgroundController::class, 'index']);
+Route::get('/settings/favicon', [SettingFaviconController::class, 'index']);
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('profile', function (Request $request) {
@@ -41,6 +43,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('settings')->group(function () {
         Route::post('/background', [SettingBackgroundController::class, 'store']);
         Route::delete('/background', [SettingBackgroundController::class, 'destroy']);
+
+        Route::post('/favicon', [SettingFaviconController::class, 'store']);
+        Route::delete('/favicon', [SettingFaviconController::class, 'destroy']);
 
         Route::get('/banks', [SettingBankController::class, 'index']);
         Route::post('/banks', [SettingBankController::class, 'store']);
