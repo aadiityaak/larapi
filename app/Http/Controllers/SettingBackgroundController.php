@@ -18,6 +18,7 @@ class SettingBackgroundController extends Controller
     return response()->json([
       'color' => $background['color'] ?? null,
       'image' => $background['image'] ?? null,
+      'style' => $background['style'] ?? null
     ]);
   }
 
@@ -29,6 +30,7 @@ class SettingBackgroundController extends Controller
     $validatedData = $request->validate([
       'color' => 'nullable|string|max:7', // Format hex warna (#FFFFFF)
       'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Maksimal 2MB
+      'style' => 'nullable|string',
     ]);
 
     $background = [];
@@ -36,6 +38,11 @@ class SettingBackgroundController extends Controller
     // Simpan warna jika ada
     if ($request->has('color')) {
       $background['color'] = $request->input('color');
+    }
+
+    // Simpan style jika ada
+    if ($request->has('style')) {
+      $background['style'] = $request->input('style');
     }
 
     //hapus gambar lama dari storage
@@ -62,7 +69,7 @@ class SettingBackgroundController extends Controller
     // Simpan ke database
     Setting::updateOrCreate(
       ['setting_key' => 'background'],
-      ['setting_value' => json_encode($background)]
+      ['setting_value' => json_encode($background)],
     );
 
     return response()->json(['message' => 'Pengaturan latar belakang berhasil disimpan.']);
