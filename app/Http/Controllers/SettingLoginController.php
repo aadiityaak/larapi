@@ -6,7 +6,7 @@ use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-class SettingBackgroundController extends Controller
+class SettingLoginController extends Controller
 {
   /**
    * Get the background settings.

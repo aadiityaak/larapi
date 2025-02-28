@@ -16,13 +16,13 @@ use App\Http\Controllers\{
     NotificationController,
     PermissionController,
     SettingBankController,
-    SettingBackgroundController,
+    SettingLoginController,
     SettingFaviconController,
     Auth\ProfileController
 };
 
 // Routes tanpa middleware
-Route::get('/settings/background', [SettingBackgroundController::class, 'index']);
+Route::get('/settings/background', [SettingLoginController::class, 'index']);
 Route::get('/settings/favicon', [SettingFaviconController::class, 'index']);
 
 // Routes dengan middleware 'auth:sanctum'
@@ -48,7 +48,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Settings
     Route::prefix('settings')->group(function () {
-        Route::controller(SettingBackgroundController::class)->group(function () {
+        Route::controller(SettingLoginController::class)->group(function () {
             Route::post('/background', 'store');
             Route::delete('/background', 'destroy');
         });
