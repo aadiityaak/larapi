@@ -18,6 +18,8 @@ use App\Http\Controllers\{
     SettingBankController,
     SettingLoginController,
     SettingFaviconController,
+    PostController,
+    CategoryController,
     Auth\ProfileController
 };
 
@@ -69,6 +71,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // API Resources
     Route::apiResources([
+        'posts' => PostController::class,
+        'categories' => CategoryController::class,
         'karyawans' => KaryawanController::class,
         'orders' => OrderController::class,
         'jobdesks' => JobdeskController::class,
