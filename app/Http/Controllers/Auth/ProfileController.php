@@ -28,12 +28,12 @@ class ProfileController extends Controller
 
         // Menangani avatar
         if ($request->hasFile('avatar')) {
-            $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
-
             // Hapus avatar lama jika ada
             if ($user->avatar) {
                 Storage::disk('public')->delete($user->avatar);
             }
+            $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
+            $validated['avatar'] = asset('storage/' . $validated['avatar']);
         } else {
             // Jika tidak ada file avatar, gunakan avatar yang ada
             $validated['avatar'] = $user->avatar;
