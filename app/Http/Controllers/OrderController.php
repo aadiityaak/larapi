@@ -176,7 +176,11 @@ class OrderController extends Controller
         // Jika ada lampiran, hanya validasi lampiran
         if ($request->hasFile('lampiran')) {
             $request->validate([
-                'lampiran' => 'required|mimes:pdf',
+                'lampiran' => 'required|mimes:pdf|max:15000',
+            ], [
+                'lampiran.required' => 'Lampiran harus diisi.',
+                'lampiran.mimes' => 'Lampiran harus berupa file PDF.',
+                'lampiran.max' => 'Lampiran tidak boleh lebih besar dari 15MB.',
             ]);
 
             $filePath = $request->file('lampiran')->store('lampiran', 'public');
