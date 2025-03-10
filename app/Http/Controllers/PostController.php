@@ -11,6 +11,7 @@ class PostController extends Controller
   public function index()
   {
     $posts = Post::latest()->paginate(10);
+    $posts->load('category');
     return response()->json($posts);
   }
 
