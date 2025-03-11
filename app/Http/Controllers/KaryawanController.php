@@ -81,7 +81,20 @@ class KaryawanController extends Controller
         $user = User::find($id);
         // load jobdesk
         $user->load('jobdesk');
-        return response()->json($user);
+        $response = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'is_admin' => strval($user->is_admin),
+            'avatar' => $user->avatar,
+            'phone' => $user->phone,
+            'address' => $user->address,
+            'position' => $user->position,
+            'total_jobdesk' => $user->jobdesk->count(),
+            'jobdesk_on_progress' => $user->jobdesk->where('status', 'Progress')->count(),
+            'jobdesk_selesai' => $user->jobdesk->where('status', 'Selesai')->count(),
+        ];
+        return response()->json($response);
     }
 
     public function update(Request $request, $id)
