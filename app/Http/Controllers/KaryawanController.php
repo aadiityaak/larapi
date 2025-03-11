@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 use App\Models\Jobdesk;
-use App\Notifications\PendingJobdesk;
 
 
 class KaryawanController extends Controller
@@ -80,6 +79,8 @@ class KaryawanController extends Controller
     public function show($id)
     {
         $user = User::find($id);
+        // load jobdesk
+        $user->load('jobdesk');
         return response()->json($user);
     }
 
