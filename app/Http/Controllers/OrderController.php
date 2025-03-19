@@ -173,7 +173,7 @@ class OrderController extends Controller
     {
         $user = $request->user();
 
-        // Jika ada lampiran, hanya validasi lampiran
+        // Jika ada lampiran, validasi hanya file lampiran
         if ($request->hasFile('lampiran')) {
             $request->validate([
                 'lampiran' => 'required|mimes:pdf|max:15000',
@@ -183,7 +183,10 @@ class OrderController extends Controller
                 'lampiran.max' => 'Lampiran tidak boleh lebih besar dari 15MB.',
             ]);
 
+            // Simpan file lampiran baru
             $filePath = $request->file('lampiran')->store('lampiran', 'public');
+            // simpan lengkap dengan asset
+            $filePath = asset('storage/' . $filePath);
 
             // Hapus dokumen lama jika ada
             if ($order->lampiran) {
@@ -193,7 +196,7 @@ class OrderController extends Controller
             // Update order dengan lampiran baru
             $order->update(['lampiran' => $filePath]);
         } else {
-            // Validasi data lain jika lampiran tidak ada
+            // Jika tidak ada lampiran, validasi field lain
             $validatedData = $request->validate([
                 'order_date' => 'required',
                 'product_id' => 'required',
@@ -202,13 +205,19 @@ class OrderController extends Controller
                 'payment_method' => 'required',
                 'meta' => 'nullable',
                 'customer' => 'required',
+            ], [
+                'order_date.required' => 'Tanggal pesanan harus diisi.',
+                'product_id.required' => 'Produk harus dipilih.',
+                'price.required' => 'Harga harus diisi.',
+                'payment_method.required' => 'Metode pembayaran harus dipilih.',
+                'customer.required' => 'Pelanggan harus diisi.',
             ]);
 
             // Update order dengan data yang sudah divalidasi
             $order->update($validatedData);
         }
 
-        // Load relasi dan respon
+        // Load relasi dan siapkan respons
         $order->load('customer', 'jobdesks', 'product', 'product.metaProducts.meta');
         $response = [
             'id' => $order->id,
