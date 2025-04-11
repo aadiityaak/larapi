@@ -27,7 +27,7 @@ class SettingFaviconController extends Controller
   public function store(Request $request)
   {
     $validatedData = $request->validate([
-      'favicon' => 'nullable|image|mimes:png,ico|max:1024', // Maksimal 1MB, hanya PNG atau ICO
+      'favicon' => 'nullable|image|mimes:png,ico,jpg|max:1024', // Maksimal 1MB, hanya PNG atau ICO
     ]);
 
     $favicon = [];
