@@ -94,7 +94,7 @@ class OrderController extends Controller
         if ($paginate === 'false') {
             // Get all records without pagination            
             $orders = $query->get()->map(function ($data) use ($user) {
-                $data['lampiran'] = asset('storage/' . $data->lampiran);
+                $data['lampiran'] = $data->lampiran;
                 return [
                     'id' => $data->id,
                     'no_order' => $data->no_order,
@@ -129,7 +129,7 @@ class OrderController extends Controller
             // Paginate results
             $orders = $query->paginate(25);
             $orders->getCollection()->transform(function ($data) use ($user) {
-                $data['lampiran'] = asset('storage/' . $data->lampiran);
+                $data['lampiran'] = $data->lampiran;
                 return [
                     'id' => $data->id,
                     'no_order' => $data->no_order,
