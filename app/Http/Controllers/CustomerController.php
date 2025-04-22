@@ -66,7 +66,8 @@ class CustomerController extends Controller
                     'address' => $data->address,
                     'order_count' => $data->orders->count(),
                     'orders' => $data->orders,
-                    'meta' => $data->meta
+                    'meta' => $data->meta,
+                    'created_at' => $data->created_at
                 ];
             });
         } else {
@@ -79,7 +80,8 @@ class CustomerController extends Controller
                     'address' => $data->address,
                     'order_count' => $data->orders->count(),
                     'orders' => $data->orders,
-                    'meta' => $data->meta
+                    'meta' => $data->meta,
+                    'created_at' => $data->created_at
                 ];
             });
         }
@@ -119,7 +121,8 @@ class CustomerController extends Controller
                 'address' => $customer->address,
                 'order_count' => $customer->orders->count(),
                 'orders' => $customer->orders,
-                'meta' => $customer->meta
+                'meta' => $customer->meta,
+                'created_at' => $customer->created_at
             ]
         ];
         return response()->json($response);
@@ -176,7 +179,8 @@ class CustomerController extends Controller
                 'address' => $customer->address,
                 'order_count' => $customer->orders->count(),
                 'orders' => $customer->orders,
-                'meta' => $customer->meta
+                'meta' => $customer->meta,
+                'created_at' => $customer->created_at
             ]
         ];
         return response()->json($response);
