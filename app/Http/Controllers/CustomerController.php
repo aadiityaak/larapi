@@ -21,11 +21,21 @@ class CustomerController extends Controller
     public function index(Request $request)
     {
         $paginate = $request->query('paginate');
-        $validated = $request->validate([
-            'name' => 'nullable|string|min:3',
-            'phone' => 'nullable|string|min:4',
-            'bank' => 'nullable|string',
-        ]);
+        $validated = $request->validate(
+            [
+                'name' => 'nullable|string|min:3',
+                'phone' => 'nullable|string|min:4',
+                'bank' => 'nullable|string',
+                'dari' => 'nullable|date',
+                'sampai' => 'nullable|date',
+            ],
+            [
+                'name.min' => 'Minimal 3 karakter',
+                'phone.min' => 'Minimal 4 karakter',
+                'dari.date' => 'Format tanggal salah',
+                'sampai.date' => 'Format tanggal salah',
+            ]
+        );
 
         $query = Customer::with('orders', 'meta');
 
@@ -53,6 +63,10 @@ class CustomerController extends Controller
                         ->where('meta_value', 'like', '%' . $validated['bank'] . '%');
                 });
             }
+        }
+
+        if (!empty($validated['dari']) && !empty($validated['sampai'])) {
+            $query->whereBetween('created_at', [$validated['dari'], $validated['sampai']]);
         }
 
         $query->orderBy('created_at', 'desc');
