@@ -66,7 +66,15 @@ class CustomerController extends Controller
         }
 
         if (!empty($validated['dari']) && !empty($validated['sampai'])) {
-            $query->whereBetween('created_at', [$validated['dari'], $validated['sampai']]);
+            $query->whereBetween('order_date', [$validated['dari'], $validated['sampai']]);
+        }
+
+        if (!empty($validated['dari']) && empty($validated['sampai'])) {
+            $query->where('order_date', '>=', $validated['dari']);
+        }
+
+        if (empty($validated['dari']) && !empty($validated['sampai'])) {
+            $query->where('order_date', '<=', $validated['sampai']);
         }
 
         $query->orderBy('created_at', 'desc');

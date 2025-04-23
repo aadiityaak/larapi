@@ -30,6 +30,8 @@ class OrderController extends Controller
         $name = $request->query('name');
         $productQuery = $request->query('product');
         $bank = $request->query('bank');
+        $dari = $request->query('dari');
+        $sampai = $request->query('sampai');
         $status = $request->query('status');
         $status = isset($status) ? $status : null;
         $user = $request->user();
@@ -40,7 +42,7 @@ class OrderController extends Controller
             $query->where('customer_id', $customerId);
         }
 
-        if ($name || $productQuery || $bank) {
+        if ($name || $productQuery || $bank || $dari || $sampai) {
             $query->whereHas('customer', function ($query) use ($name) {
                 $query->where('name', 'like', '%' . $name . '%');
             });
@@ -52,6 +54,15 @@ class OrderController extends Controller
                     $subQuery->where('meta_key', 'bank')
                         ->where('meta_value', '=', $bank);
                 });
+            }
+            if ($dari && $sampai) {
+                $query->whereBetween('order_date', [$dari, $sampai]);
+            }
+            if ($dari && !$sampai) {
+                $query->where('order_date', '>=', $dari);
+            }
+            if (!$dari && $sampai) {
+                $query->where('order_date', '<=', $sampai);
             }
         } else {
             if ($status) {
