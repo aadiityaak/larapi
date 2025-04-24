@@ -16,8 +16,8 @@ class SettingLoginController extends Controller
     $setting = Setting::where('setting_key', 'background')->first();
     $background = $setting ? json_decode($setting->setting_value, true) : [];
     return response()->json([
-      'color' => $background['color'] ?? null,
-      'image' => $background['image'] ?? null,
+      'color' => $background['color'] ?? 'rgba(0, 0, 0, 0.1)',
+      'image' => $background['image'] ?? asset('assets/bg.jpeg'),
       'style' => $background['style'] ?? null
     ]);
   }
