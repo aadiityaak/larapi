@@ -17,7 +17,7 @@ class UserSeeder extends Seeder
       'avatar' => null,
       'phone' => '08123456789',
       'address' => 'Jl. Kebon Jeruk No. 1',
-      'position' => 'Manager',
+      'position' => 'Owner',
       'password' => Hash::make('password'),
     ]);
     User::factory()->create([

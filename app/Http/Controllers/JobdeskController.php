@@ -15,6 +15,8 @@ class JobdeskController extends Controller
         $status = $request->query('status');
         $name = $request->query('name');
         $userId = $request->query('user_id');
+        $dari = $request->query('dari');
+        $sampai = $request->query('sampai');
         $user = $request->user();
 
         // Initialize the query
@@ -43,6 +45,18 @@ class JobdeskController extends Controller
             $query->whereHas('order.customer', function ($query) use ($name) {
                 $query->where('name', 'like', '%' . $name . '%');
             });
+        }
+
+        if ($dari && $sampai) {
+            $query->whereBetween('order.order_date', [$dari, $sampai]);
+        }
+
+        if ($dari && !$sampai) {
+            $query->where('order.order_date', '>=', $dari);
+        }
+
+        if (!$dari && $sampai) {
+            $query->where('order.order_date', '<=', $sampai);
         }
 
         // Paginate the results
