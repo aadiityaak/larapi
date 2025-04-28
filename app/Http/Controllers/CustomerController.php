@@ -15,6 +15,9 @@ class CustomerController extends Controller
     public $validate = [
         'name' => 'required|string|max:255',
         'phone' => 'required|string|max:20',
+        'bank' => 'string',
+        'dari' => 'date',
+        'sampai' => 'date',
         'address' => 'required|string',
     ];
 
@@ -65,19 +68,20 @@ class CustomerController extends Controller
             }
         }
 
-        if (!empty($validated['dari']) && !empty($validated['sampai'])) {
-            $query->whereBetween('order_date', [$validated['dari'], $validated['sampai']]);
-        }
-
-        if (!empty($validated['dari']) && empty($validated['sampai'])) {
-            $query->where('order_date', '>=', $validated['dari']);
-        }
-
-        if (empty($validated['dari']) && !empty($validated['sampai'])) {
-            $query->where('order_date', '<=', $validated['sampai']);
+        if (!empty($validated['dari']) || !empty($validated['sampai'])) {
+            $query->when(!empty($validated['dari']) && !empty($validated['sampai']), function ($q) use ($validated) {
+                $q->whereBetween('created_at', [$validated['dari'], $validated['sampai']]);
+            })
+                ->when(!empty($validated['dari']) && empty($validated['sampai']), function ($q) use ($validated) {
+                    $q->where('created_at', '>=', $validated['dari']);
+                })
+                ->when(empty($validated['dari']) && !empty($validated['sampai']), function ($q) use ($validated) {
+                    $q->where('created_at', '<=', $validated['sampai']);
+                });
         }
 
         $query->orderBy('created_at', 'desc');
+
 
         if ($paginate === 'false') {
             $customers = $query->get()->map(function ($data) {

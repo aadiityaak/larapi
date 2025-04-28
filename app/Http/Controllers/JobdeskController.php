@@ -48,15 +48,21 @@ class JobdeskController extends Controller
         }
 
         if ($dari && $sampai) {
-            $query->whereBetween('order.order_date', [$dari, $sampai]);
+            $query->whereHas('order', function ($q) use ($dari, $sampai) {
+                $q->whereBetween('order_date', [$dari, $sampai]);
+            });
         }
 
         if ($dari && !$sampai) {
-            $query->where('order.order_date', '>=', $dari);
+            $query->whereHas('order', function ($q) use ($dari) {
+                $q->where('order_date', '>=', $dari);
+            });
         }
 
         if (!$dari && $sampai) {
-            $query->where('order.order_date', '<=', $sampai);
+            $query->whereHas('order', function ($q) use ($sampai) {
+                $q->where('order_date', '<=', $sampai);
+            });
         }
 
         // Paginate the results
