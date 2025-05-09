@@ -12,7 +12,7 @@ class UserSeeder extends Seeder
   {
     User::factory()->create([
       'name' => 'Test Admin',
-      'email' => 'user1@asistennotaris.com',
+      'email' => 'user1@example.com',
       'is_admin' => true,
       'avatar' => null,
       'phone' => '08123456789',
@@ -22,7 +22,7 @@ class UserSeeder extends Seeder
     ]);
     User::factory()->create([
       'name' => 'Test Manager',
-      'email' => 'user2@asistennotaris.com',
+      'email' => 'user2@example.com',
       'is_admin' => false,
       'avatar' => null,
       'phone' => '08123456789',
@@ -32,7 +32,7 @@ class UserSeeder extends Seeder
     ]);
     User::factory()->create([
       'name' => 'Test Keuangan',
-      'email' => 'user3@asistennotaris.com',
+      'email' => 'user3@example.com',
       'is_admin' => false,
       'avatar' => null,
       'phone' => '08123456789',
@@ -42,7 +42,7 @@ class UserSeeder extends Seeder
     ]);
     User::factory()->create([
       'name' => 'Test Staff',
-      'email' => 'user4@asistennotaris.com',
+      'email' => 'user4@example.com',
       'is_admin' => false,
       'avatar' => null,
       'phone' => '08123456789',
@@ -53,7 +53,7 @@ class UserSeeder extends Seeder
 
     User::factory()->create([
       'name' => 'Test Staff 2',
-      'email' => 'user5@asistennotaris.com',
+      'email' => 'user5@example.com',
       'is_admin' => false,
       'avatar' => null,
       'phone' => '08123456789',
