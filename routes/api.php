@@ -20,6 +20,7 @@ use App\Http\Controllers\{
     SettingFaviconController,
     PostController,
     CategoryController,
+    RoleController,
     Auth\ProfileController
 };
 
@@ -79,6 +80,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         'customers' => CustomerController::class,
         'settings' => SettingController::class,
         'products' => ProductController::class,
-        'metas' => MetaController::class
+        'metas' => MetaController::class,
+        'roles' => RoleController::class
     ]);
 });
