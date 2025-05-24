@@ -23,6 +23,7 @@ use App\Http\Controllers\{
     RoleController,
     Auth\ProfileController
 };
+use Spatie\Permission\Models\Permission;
 
 // Routes tanpa middleware
 Route::get('/settings/background', [SettingLoginController::class, 'index']);
@@ -48,6 +49,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Permissions
     Route::get('/permissions', [PermissionController::class, 'index']);
     Route::post('/user/{user}/permissions', [PermissionController::class, 'update']);
+
+    Route::get('/capabilities', function () {
+        return Permission::select('id', 'name')->get();
+    });
 
     // Settings
     Route::prefix('settings')->group(function () {

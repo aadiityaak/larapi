@@ -1,12 +1,26 @@
 <?php
+
+use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 
-public function run(): void
+class RoleSeeder extends Seeder
 {
-  Role::create(['name' => 'admin']);
-  Role::create(['name' => 'user']);
-  Role::create(['name' => 'owner']);
-  Role::create(['name' => 'manager']);
-  Role::create(['name' => 'keuangan']);
-  Role::create(['name' => 'staff']);
+  public function run(): void
+  {
+    $roles = [
+      'admin',
+      'user',
+      'owner',
+      'manager',
+      'keuangan',
+      'staff',
+    ];
+
+    foreach ($roles as $role) {
+      Role::firstOrCreate([
+        'name' => $role,
+        'guard_name' => 'web', // default guard
+      ]);
+    }
+  }
 }
