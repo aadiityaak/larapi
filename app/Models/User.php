@@ -26,7 +26,7 @@ class User extends Authenticatable
         'avatar',
         'phone',
         'address',
-        'position',
+        'role',
         'is_admin',
     ];
 

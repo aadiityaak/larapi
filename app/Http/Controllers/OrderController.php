@@ -112,9 +112,9 @@ class OrderController extends Controller
                     'customer_id' => $data->customer->id ?? null,
                     'order_date' => $data->order_date,
                     'product_id' => $data->product->id ?? null,
-                    'price' => $user->position !== 'Staff' ? $data->price : 0,
+                    'price' => $user->role !== 'staff' ? $data->price : 0,
                     'payment_method' => $data->payment_method,
-                    'paid' => $user->position !== 'Staff' ? $data->paid : 0,
+                    'paid' => $user->role !== 'staff' ? $data->paid : 0,
                     'meta' => $data->meta,
                     'lampiran' => $data->lampiran,
                     'jobdesk_count' => $data->jobdesks()->count(),
@@ -147,9 +147,9 @@ class OrderController extends Controller
                     'customer_id' => $data->customer->id ?? null,
                     'order_date' => $data->order_date,
                     'product_id' => $data->product->id ?? null,
-                    'price' => $user->position !== 'Staff' ? $data->price : 0,
+                    'price' => $user->role !== 'staff' ? $data->price : 0,
                     'payment_method' => $data->payment_method,
-                    'paid' => $user->position !== 'Staff' ? $data->paid : 0,
+                    'paid' => $user->role !== 'staff' ? $data->paid : 0,
                     'meta' => $data->meta,
                     'lampiran' => $data->lampiran,
                     'jobdesk_count' => $data->jobdesks()->count(),
@@ -169,7 +169,7 @@ class OrderController extends Controller
                         'description' => $data->product->description,
                         'meta_products' => $data->product->metaProducts->pluck('meta'),
                     ] : null,
-                    'position' => $user->position,
+                    'role' => $user->role,
                 ];
             });
         }
@@ -238,9 +238,9 @@ class OrderController extends Controller
             'customer_id' => $order->customer->id,
             'order_date' => $order->order_date,
             'product_id' => $order->product->id,
-            'price' => $user->position !== 'Staff' ? $order->price : 0,
+            'price' => $user->role !== 'staff' ? $order->price : 0,
             'payment_method' => $order->payment_method,
-            'paid' => $user->position !== 'Staff' ? $order->paid : 0,
+            'paid' => $user->role !== 'staff' ? $order->paid : 0,
             'meta' => $order->meta,
             'lampiran' => $order->lampiran,
             'jobdesk_count' => $order->jobdesks()->count(),
@@ -287,7 +287,7 @@ class OrderController extends Controller
         $order = Order::create($validator->validated());
         $order->load('customer', 'jobdesks', 'product', 'product.metaProducts.meta');
 
-        $users = User::where('is_admin', 1)->orWhere('position', 'owner')->get();
+        $users = User::where('is_admin', 1)->orWhere('role', 'owner')->get();
         Notification::send($users, new NewOrderNotification($order));
         $response = [
             'id' => $order->id,
@@ -295,9 +295,9 @@ class OrderController extends Controller
             'customer_id' => $order->customer->id,
             'order_date' => $order->order_date,
             'product_id' => $order->product->id,
-            'price' => $user->position !== 'Staff' ? $order->price : 0,
+            'price' => $user->role !== 'staff' ? $order->price : 0,
             'payment_method' => $order->payment_method,
-            'paid' => $user->position !== 'Staff' ? $order->paid : 0,
+            'paid' => $user->role !== 'staff' ? $order->paid : 0,
             'meta' => $order->meta,
             'lampiran' => $order->lampiran,
             'jobdesk_count' => $order->jobdesks()->count(),

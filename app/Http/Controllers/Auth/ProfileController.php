@@ -47,9 +47,9 @@ class ProfileController extends Controller
             unset($validated['password']);
         }
 
-        //abaikan position jika diisi selain oleh is_admin
-        if (isset($validated['position']) && $user->is_admin !== 1) {
-            unset($validated['position']);
+        //abaikan role jika diisi selain oleh is_admin
+        if (isset($validated['role']) && $user->is_admin !== 1) {
+            unset($validated['role']);
         }
 
         // Update profil pengguna

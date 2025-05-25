@@ -27,7 +27,7 @@ class JobdeskController extends Controller
             $query->where('order_id', $orderId);
         }
 
-        if (in_array($user->position, ['Staff'])) {
+        if (in_array($user->role, ['staff'])) {
             $query->where('user_id', $user->id);
         }
 

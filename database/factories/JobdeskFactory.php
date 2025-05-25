@@ -19,7 +19,7 @@ class JobdeskFactory extends Factory
   public function definition(): array
   {
     $status = random_int(1, 100) <= 80 ? 'Selesai' : fake()->randomElement(['Masuk', 'Progress']);
-    $staffs = User::where('position', 'Staff')->get();
+    $staffs = User::where('role', 'staff')->get();
     return [
       'order_id' => fake()->numberBetween(1, 10),
       'description' => fake()->sentence(),

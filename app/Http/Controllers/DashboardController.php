@@ -38,12 +38,12 @@ class DashboardController extends Controller
         $data = [
             'total_customers' => $totalCustomers,
             'order_bulan_ini' => $orderBulanIni,
-            'total_orders' => $user->position !== 'Staff' ? $totalOrders : 0,
-            'total_pendapatan' => $user->position !== 'Staff' ? $totalPendapatan : 0,
-            'pendapatan_bulan_ini' => $user->position !== 'Staff' ? $pendapatanBulanIni : 0,
-            'pendapatan_bulan_sebelumnya' => $user->position !== 'Staff' ? $pendapatanBulanSebelumnya : 0,
-            'total_tagihan' => $user->position !== 'Staff' ? $totalTagihan : 0,
-            'total_tagihan_bulan_ini' => $user->position !== 'Staff' ? $totalTagihanBulanIni : 0,
+            'total_orders' => $user->role !== 'staff' ? $totalOrders : 0,
+            'total_pendapatan' => $user->role !== 'staff' ? $totalPendapatan : 0,
+            'pendapatan_bulan_ini' => $user->role !== 'staff' ? $pendapatanBulanIni : 0,
+            'pendapatan_bulan_sebelumnya' => $user->role !== 'staff' ? $pendapatanBulanSebelumnya : 0,
+            'total_tagihan' => $user->role !== 'staff' ? $totalTagihan : 0,
+            'total_tagihan_bulan_ini' => $user->role !== 'staff' ? $totalTagihanBulanIni : 0,
             'total_karyawan' => $totalKaryawan,
             'total_jobdesks' => [
                 'Masuk' => (int) $totalJobdesk->get('Masuk', 0),

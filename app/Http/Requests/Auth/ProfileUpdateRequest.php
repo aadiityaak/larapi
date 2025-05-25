@@ -33,7 +33,7 @@ class ProfileUpdateRequest extends FormRequest
             ],
             'phone' => ['required', 'string'],
             'address' => ['required', 'string'],
-            'position' => ['nullable', 'string'],
+            'role' => ['nullable', 'string'],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
             'avatar' => ['nullable'],
         ];
