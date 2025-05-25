@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\Order;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Jobdesk>
@@ -19,7 +19,7 @@ class JobdeskFactory extends Factory
   public function definition(): array
   {
     $status = random_int(1, 100) <= 80 ? 'Selesai' : fake()->randomElement(['Masuk', 'Progress']);
-    $staffs = User::where('role', 'staff')->get();
+    $staffs = User::role('staff')->get();
     return [
       'order_id' => fake()->numberBetween(1, 10),
       'description' => fake()->sentence(),

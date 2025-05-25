@@ -7,6 +7,7 @@ use App\Models\Jobdesk;
 use App\Models\Order;
 use App\Models\Setting;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Contracts\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,6 +19,8 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             SettingSeeder::class,
+            RoleSeeder::class,
+            PermissionSeeder::class,
             UserSeeder::class,
             ProductSeeder::class,
         ]);

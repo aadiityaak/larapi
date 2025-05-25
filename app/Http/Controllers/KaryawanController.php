@@ -130,6 +130,9 @@ class KaryawanController extends Controller
         $updated = $user->update($validated);
 
         if ($updated) {
+            if ($requested_user->is_admin === 1 && isset($validated['role'])) {
+                $user->syncRoles([$validated['role']]);
+            }
             $data = User::find($id);
             return response()->json($data, 200);
         } else {
@@ -158,6 +161,10 @@ class KaryawanController extends Controller
 
         $validated['password'] = bcrypt($validated['password']);
         $data = User::create($validated);
+
+        if (!empty($validated['role'])) {
+            $data->assignRole($validated['role']);
+        }
 
         $response = [
             'id' => $data->id,

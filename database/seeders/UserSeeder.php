@@ -6,17 +6,12 @@ use Illuminate\Database\Seeder;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class UserSeeder extends Seeder
 {
   public function run()
   {
-    // Pastikan roles sudah tersedia
-    $roles = ['Owner', 'Manager', 'Keuangan', 'Staff'];
-    foreach ($roles as $role) {
-      Role::firstOrCreate(['name' => $role]);
-    }
-
     $admin = User::factory()->create([
       'name' => 'Test Admin',
       'email' => 'user1@example.com',
@@ -71,5 +66,11 @@ class UserSeeder extends Seeder
       'password' => Hash::make('password'),
     ]);
     $staff2->assignRole('staff');
+
+    $roleOwner = Role::firstOrCreate(['name' => 'owner']);
+    $roleOwner->givePermissionTo(Permission::all());
+
+    $admin->assignRole($roleOwner); // cukup assign role, tidak perlu assign permission ke user langsung
+
   }
 }

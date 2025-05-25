@@ -48,8 +48,8 @@ class RoleController extends Controller
     // Validasi nama role
     $validated = $request->validate([
       'name' => 'required|string|unique:roles,name,' . $role->id,
-      'capabilities' => 'nullable|array', // tambahkan validasi capabilities
-      'capabilities.*' => 'string|exists:permissions,name', // pastikan permission ada
+      'capabilities' => 'nullable|array',
+      'capabilities.*' => 'string|exists:permissions,name',
     ]);
 
     // Update nama role
@@ -63,8 +63,7 @@ class RoleController extends Controller
       $permissions = Permission::whereIn('name', $validated['capabilities'])->get();
       $role->syncPermissions($permissions);
     }
-    // Sinkronkan capabilities (permissions) jika tersedia
-    $role->syncPermissions($permissions);
+
     return $role;
   }
 
