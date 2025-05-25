@@ -21,7 +21,6 @@ class UserSeeder extends Seeder
       'address' => 'Jl. Kebon Jeruk No. 1',
       'password' => Hash::make('password'),
     ]);
-    $admin->assignRole('owner');
 
     $manager = User::factory()->create([
       'name' => 'Test Manager',
@@ -32,7 +31,6 @@ class UserSeeder extends Seeder
       'address' => 'Jl. Kebon Jeruk No. 1',
       'password' => Hash::make('password'),
     ]);
-    $manager->assignRole('manager');
 
     $finance = User::factory()->create([
       'name' => 'Test Keuangan',
@@ -43,7 +41,6 @@ class UserSeeder extends Seeder
       'address' => 'Jl. Kebon Jeruk No. 1',
       'password' => Hash::make('password'),
     ]);
-    $finance->assignRole('keuangan');
 
     $staff1 = User::factory()->create([
       'name' => 'Test Staff',
@@ -54,7 +51,6 @@ class UserSeeder extends Seeder
       'address' => 'Jl. Kebon Jeruk No. 1',
       'password' => Hash::make('password'),
     ]);
-    $staff1->assignRole('staff');
 
     $staff2 = User::factory()->create([
       'name' => 'Test Staff 2',
@@ -65,12 +61,11 @@ class UserSeeder extends Seeder
       'address' => 'Jl. Kebon Jeruk No. 1',
       'password' => Hash::make('password'),
     ]);
+
+    $admin->assignRole('admin');
+    $manager->assignRole('manager');
+    $finance->assignRole('keuangan');
+    $staff1->assignRole('staff');
     $staff2->assignRole('staff');
-
-    $roleOwner = Role::firstOrCreate(['name' => 'owner']);
-    $roleOwner->givePermissionTo(Permission::all());
-
-    $admin->assignRole($roleOwner); // cukup assign role, tidak perlu assign permission ke user langsung
-
   }
 }

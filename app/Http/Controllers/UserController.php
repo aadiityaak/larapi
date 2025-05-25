@@ -20,7 +20,7 @@ class UserController extends Controller
             'avatar' => $user->avatar,
             'phone' => $user->phone,
             'address' => $user->address,
-            'role' => $user->role,
+            'role' => $user->roles->pluck('name'),
             'capabilities' => $user->getAllPermissions()->pluck('name'),
             'created_at' => $user->created_at,
             'updated_at' => $user->updated_at

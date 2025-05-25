@@ -14,6 +14,7 @@ class PermissionSeeder extends Seeder
             'menu:dashboard',
             'menu:customers',
             'menu:orders',
+            'menu:jobdesks',
             'menu:products',
             'menu:users',
             'menu:roles',
