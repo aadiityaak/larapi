@@ -287,7 +287,9 @@ class OrderController extends Controller
         $order = Order::create($validator->validated());
         $order->load('customer', 'jobdesks', 'product', 'product.metaProducts.meta');
 
-        $users = User::where('is_admin', 1)->orWhere('role', 'owner')->get();
+        $users = User::whereHas('permissions', function ($query) {
+            $query->where('name', 'menu:settings');
+        })->get();
         Notification::send($users, new NewOrderNotification($order));
         $response = [
             'id' => $order->id,
