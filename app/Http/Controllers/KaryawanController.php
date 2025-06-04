@@ -6,6 +6,8 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 use App\Models\User;
 use App\Models\Jobdesk;
 
@@ -15,58 +17,47 @@ class KaryawanController extends Controller
 
     public function index(Request $request)
     {
-        $paginate = $request->query('paginate');
+        $paginate = $request->boolean('paginate', true);
         $name = $request->query('name');
-        $role = $request->query('role');
 
-        $query = User::with('jobdesk');
+        $query = User::with(['roles', 'jobdesk']);
 
+        // Filter nama jika lebih dari 2 karakter
         if ($name && strlen($name) > 2) {
             $query->where('name', 'like', '%' . $name . '%');
         }
 
-        if ($role) {
-            $query->where('role', $role);
+        $query->orderByDesc('created_at');
+
+        $transformUser = function ($user) {
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'is_admin' => strval($user->is_admin),
+                'avatar' => $user->avatar,
+                'phone' => $user->phone,
+                'address' => $user->address,
+                'role' => $user->roles->pluck('name'),
+                'total_jobdesk' => $user->jobdesk->count(),
+                'jobdesk_on_progress' => $user->jobdesk->where('status', 'Progress')->count(),
+                'jobdesk_selesai' => $user->jobdesk->where('status', 'Selesai')->count(),
+            ];
+        };
+
+        if (!$paginate) {
+            $users = $query->get()->map($transformUser);
+            return response()->json([
+                'data' => $users,
+                'total' => $users->count(),
+            ]);
         }
 
-        $query->orderBy('created_at', 'desc');
+        // Paginate with transform
+        $paginated = $query->paginate(25);
+        $paginated->getCollection()->transform($transformUser);
 
-        if ($paginate === 'false') {
-            $users = $query->get()->map(function ($data) {
-                return [
-                    'id' => $data->id,
-                    'name' => $data->name,
-                    'email' => $data->email,
-                    'is_admin' => strval($data->is_admin),
-                    'avatar' => $data->avatar,
-                    'phone' => $data->phone,
-                    'address' => $data->address,
-                    'role' => $data->roles->pluck('name'),
-                    'total_jobdesk' => $data->jobdesk->count(),
-                    'jobdesk_on_progress' => $data->jobdesk->where('status', 'Progress')->count(),
-                    'jobdesk_selesai' => $data->jobdesk->where('status', 'Selesai')->count(),
-                ];
-            });
-        } else {
-            $users = $query->paginate(25);
-            $users->getCollection()->transform(function ($data) {
-                return [
-                    'id' => $data->id,
-                    'name' => $data->name,
-                    'email' => $data->email,
-                    'is_admin' => strval($data->is_admin),
-                    'avatar' => $data->avatar,
-                    'phone' => $data->phone,
-                    'address' => $data->address,
-                    'role' => $data->roles->pluck('name'),
-                    'total_jobdesk' => $data->jobdesk->count(),
-                    'jobdesk_on_progress' => $data->jobdesk->where('status', 'Progress')->count(),
-                    'jobdesk_selesai' => $data->jobdesk->where('status', 'Selesai')->count(),
-                ];
-            });
-        }
-
-        return response()->json($users);
+        return response()->json($paginated);
     }
 
     public function show($id)
@@ -107,6 +98,7 @@ class KaryawanController extends Controller
             'avatar' => 'nullable',
         ]);
 
+        // Handle avatar upload
         if ($request->hasFile('avatar')) {
             if ($user->avatar) {
                 Storage::disk('public')->delete($user->avatar);
@@ -117,28 +109,48 @@ class KaryawanController extends Controller
             unset($validated['avatar']);
         }
 
+        // Handle password hashing
         if (!empty($validated['password'])) {
             $validated['password'] = Hash::make($validated['password']);
         } else {
             unset($validated['password']);
         }
 
-        if ($requested_user->is_admin !== 1 && isset($validated['role'])) {
-            $validated['role'] = $user->role;
-        }
+        // Handle role separately, cek dulu
+        $roleName = $validated['role'] ?? null;
+        unset($validated['role']); // jangan ikut update di table users
 
+        // Update user data
         $updated = $user->update($validated);
 
-        if ($updated) {
-            if ($requested_user->is_admin === 1 && isset($validated['role'])) {
-                $user->syncRoles([$validated['role']]);
+        if ($updated && $requested_user->is_admin == 1 && $roleName) {
+            $role = Role::where('name', $roleName)->first();
+            if (!$role) {
+                return response()->json(['message' => 'Role not found'], 404);
             }
-            $data = User::find($id);
-            return response()->json($data, 200);
-        } else {
-            return response()->json(['message' => 'Update failed'], 400);
+            $user->syncRoles([$role->name]);
         }
+
+        if ($updated) {
+            $response = [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'is_admin' => strval($user->is_admin),
+                'avatar' => $user->avatar,
+                'phone' => $user->phone,
+                'address' => $user->address,
+                'role' => $user->roles->pluck('name'),
+                'total_jobdesk' => $user->jobdesk->count(),
+                'jobdesk_on_progress' => $user->jobdesk->where('status', 'Progress')->count(),
+                'jobdesk_selesai' => $user->jobdesk->where('status', 'Selesai')->count(),
+            ];
+            return response()->json($response, 200);
+        }
+
+        return response()->json(['message' => 'Update failed'], 400);
     }
+
 
     public function store(Request $request)
     {
@@ -149,38 +161,52 @@ class KaryawanController extends Controller
             'address' => 'required|string',
             'role' => 'nullable|string',
             'password' => 'required|string|min:8|confirmed',
-            'avatar' => 'nullable',
+            'avatar' => 'nullable|image|max:2048', // disarankan validasi image
         ]);
 
-        if (is_string($request->avatar)) {
+        // Handle avatar upload
+        if ($request->hasFile('avatar')) {
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $validated['avatar'] = asset('storage/' . $path);
+        } else {
             unset($validated['avatar']);
-        } elseif ($request->hasFile('avatar')) {
-            $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
-            $validated['avatar'] = asset('storage/' . $validated['avatar']);
         }
 
-        $validated['password'] = bcrypt($validated['password']);
-        $data = User::create($validated);
+        // Hash password
+        $validated['password'] = Hash::make($validated['password']);
 
-        if (!empty($validated['role'])) {
-            $data->assignRole($validated['role']);
+        // Tangani role secara terpisah
+        $roleName = $validated['role'] ?? null;
+        unset($validated['role']); // jangan masuk ke User::create
+
+        // Create user
+        $user = User::create($validated);
+
+        // Assign role jika tersedia
+        if ($roleName) {
+            $role = Role::where('name', $roleName)->first();
+            if (!$role) {
+                return response()->json(['message' => 'Role not found'], 404);
+            }
+            $user->assignRole($role->name);
         }
 
+        // Buat response
         $response = [
-            'id' => $data->id,
-            'name' => $data->name,
-            'email' => $data->email,
-            'is_admin' => strval($data->is_admin),
-            'avatar' => $data->avatar,
-            'phone' => $data->phone,
-            'address' => $data->address,
-            'role' => $data->roles->pluck('name'),
-            'total_jobdesk' => $data->jobdesk->count(),
-            'jobdesk_on_progress' => $data->jobdesk->where('status', 'Progress')->count(),
-            'jobdesk_selesai' => $data->jobdesk->where('status', 'Selesai')->count(),
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'is_admin' => strval($user->is_admin),
+            'avatar' => $user->avatar,
+            'phone' => $user->phone,
+            'address' => $user->address,
+            'role' => $user->roles->pluck('name'),
+            'total_jobdesk' => $user->jobdesk->count(),
+            'jobdesk_on_progress' => $user->jobdesk->where('status', 'Progress')->count(),
+            'jobdesk_selesai' => $user->jobdesk->where('status', 'Selesai')->count(),
         ];
 
-        return response()->json($response, 200);
+        return response()->json($response, 201);
     }
 
     public function destroy($id)
