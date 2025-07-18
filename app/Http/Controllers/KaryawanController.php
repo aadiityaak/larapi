@@ -125,7 +125,7 @@ class KaryawanController extends Controller
         // Update user data
         $updated = $user->update($validated);
 
-        if ($updated && $requested_user->is_admin == 1 && $roleName) {
+        if ($updated && $roleName) {
             $role = Role::where('name', $roleName)->first();
             if (!$role) {
                 return response()->json(['message' => 'Role not found'], 404);
