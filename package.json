@@ -1,7 +1,7 @@
 {
     "name": "larapi",
-    "version": "1.0.0",
-    "description": "Aplikasi Laravel untuk API",
+    "version": "1.0.1",
+    "description": "Backend Aplikasi Notaris",
     "main": "index.js",
     "scripts": {
         "build": "node src/script.js"

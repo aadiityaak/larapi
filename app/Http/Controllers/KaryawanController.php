@@ -17,6 +17,7 @@ class KaryawanController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorize('viewAny', User::class);
         $paginate = $request->boolean('paginate', true);
         $name = $request->query('name');
 
@@ -62,6 +63,7 @@ class KaryawanController extends Controller
 
     public function show($id)
     {
+        $this->authorize('view', User::find($id));
         $user = User::find($id);
         $user->load('jobdesk');
 
@@ -154,6 +156,7 @@ class KaryawanController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create', User::class);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email',
