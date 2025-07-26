@@ -26,154 +26,231 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $customerId = $request->query('customer_id');
-        $paginate = $request->query('paginate');
+        $paginate = $request->query('paginate', true);
         $name = $request->query('name');
         $productQuery = $request->query('product');
         $bank = $request->query('bank');
         $dari = $request->query('dari');
         $sampai = $request->query('sampai');
         $status = $request->query('status');
-        $status = isset($status) ? $status : null;
         $user = $request->user();
 
-        $query = Order::with('customer', 'customer.meta', 'jobdesks', 'product', 'product.metaProducts.meta');
+        // Optimized eager loading based on frontend needs
+        $query = Order::with([
+            'customer:id,name,phone,address',
+            'customer.meta:id,customer_id,meta_key,meta_value',
+            'jobdesks:id,order_id,status,description',
+            'product:id,name,category,description',
+            'product.metaProducts:id,product_id,meta_id',
+            'product.metaProducts.meta:id,name'
+        ])
+            ->select([
+                'id',
+                'no_order',
+                'customer_id',
+                'product_id',
+                'order_date',
+                'price',
+                'payment_method',
+                'paid',
+                'meta',
+                'lampiran',
+                'created_at'
+            ]);
 
+        // Apply customer filter
         if (isset($customerId) && $customerId !== 'undefined') {
             $query->where('customer_id', $customerId);
         }
 
-        if ($name || $productQuery || $bank || $dari || $sampai) {
-            $query->whereHas('customer', function ($query) use ($name) {
-                $query->where('name', 'like', '%' . $name . '%');
+        // Apply search and date filters
+        $this->applyFilters($query, $name, $productQuery, $bank, $dari, $sampai);
+
+        // Apply status filter - optimized for frontend tabs
+        $this->applyStatusFilter($query, $status);
+
+        $query->orderBy('created_at', 'desc'); // Changed to desc for latest first
+
+        // Get results with or without pagination
+        return $this->getOrderResults($query, $paginate, $user);
+    }
+
+    private function applyFilters($query, $name, $productQuery, $bank, $dari, $sampai)
+    {
+        // Search by customer name (minimum 3 characters as per frontend)
+        if ($name && strlen($name) >= 3) {
+            $query->whereHas('customer', function ($q) use ($name) {
+                $q->where('name', 'like', '%' . $name . '%');
             });
-            $query->whereHas('product', function ($query) use ($productQuery) {
-                $query->where('name', 'like', '%' . $productQuery . '%');
+        }
+
+        // Search by product name (minimum 3 characters as per frontend)
+        if ($productQuery && strlen($productQuery) >= 3) {
+            $query->whereHas('product', function ($q) use ($productQuery) {
+                $q->where('name', 'like', '%' . $productQuery . '%');
             });
-            if ($bank) {
+        }
+
+        // Bank/category filter optimized for frontend dropdown
+        if ($bank) {
+            if ($bank === 'Perorangan') {
+                $query->where(function ($q) {
+                    $q->whereHas('customer.meta', function ($subQuery) {
+                        $subQuery->where('meta_key', 'bank')
+                            ->where('meta_value', 'Perorangan');
+                    })->orWhereDoesntHave('customer.meta', function ($subQuery) {
+                        $subQuery->where('meta_key', 'bank');
+                    });
+                });
+            } else {
                 $query->whereHas('customer.meta', function ($subQuery) use ($bank) {
                     $subQuery->where('meta_key', 'bank')
-                        ->where('meta_value', '=', $bank);
+                        ->where('meta_value', $bank);
                 });
-            }
-            if ($dari && $sampai) {
-                $query->whereBetween('order_date', [$dari, $sampai]);
-            }
-            if ($dari && !$sampai) {
-                $query->where('order_date', '>=', $dari);
-            }
-            if (!$dari && $sampai) {
-                $query->where('order_date', '<=', $sampai);
-            }
-        } else {
-            if ($status) {
-                $query->whereDoesntHave('jobdesks', function ($query) use ($status) {
-                    $query->where('status', '!=', 'Selesai');
-                });
-                if ($status === 'Selesai') {
-                    $query->whereNotNull('lampiran');
-                }
-                if ($status === 'Arsip') {
-                    $query->whereNull('lampiran');
-                }
-                $query->whereHas('jobdesks');
-            } else if ($bank) {
-                if ($bank === 'Perorangan') {
-                    $query->where(function ($q) {
-                        $q->whereHas('customer.meta', function ($subQuery) {
-                            $subQuery->where('meta_key', 'bank')
-                                ->where('meta_value', 'Perorangan');
-                        })->orWhereDoesntHave('customer.meta', function ($subQuery) {
-                            $subQuery->where('meta_key', 'bank');
-                        });
-                    });
-                } else {
-                    $query->whereHas('customer.meta', function ($subQuery) use ($bank) {
-                        $subQuery->where('meta_key', 'bank')
-                            ->where('meta_value', '=', $bank);
-                    });
-                }
-            } else if (!($customerId || $name)) {
-                $query->whereHas('jobdesks', function ($query) {
-                    $query->where('status', '!=', 'Selesai');
-                })->orWhereDoesntHave('jobdesks');
             }
         }
 
-        $query->orderBy('created_at', 'asc');
-
-        // Check if pagination should be disabled
-        if ($paginate === 'false') {
-            // Get all records without pagination            
-            $orders = $query->get()->map(function ($data) use ($user) {
-                $data['lampiran'] = $data->lampiran;
-                return [
-                    'id' => $data->id,
-                    'no_order' => $data->no_order,
-                    'customer_id' => $data->customer->id ?? null,
-                    'order_date' => $data->order_date,
-                    'product_id' => $data->product->id ?? null,
-                    'price' => $user->role !== 'staff' ? $data->price : 0,
-                    'payment_method' => $data->payment_method,
-                    'paid' => $user->role !== 'staff' ? $data->paid : 0,
-                    'meta' => $data->meta,
-                    'lampiran' => $data->lampiran,
-                    'jobdesk_count' => $data->jobdesks()->count(),
-                    'created_at' => $data->created_at,
-                    'customer' => [
-                        'id' => $data->customer->id,
-                        'name' => $data->customer->name,
-                        'phone' => $data->customer->phone,
-                        'address' => $data->customer->address,
-                        'meta' => $data->customer->meta
-                    ],
-                    'jobdesks' => $data->jobdesks,
-                    'product' => [
-                        'id' => $data->product->id,
-                        'name' => $data->product->name,
-                        'category' => $data->product->category,
-                        'description' => $data->product->description,
-                        'meta_products' => $data->product->metaProducts->pluck('meta'),
-                    ]
-                ];
-            });
-        } else {
-            // Paginate results
-            $orders = $query->paginate(25);
-            $orders->getCollection()->transform(function ($data) use ($user) {
-                $data['lampiran'] = $data->lampiran;
-                return [
-                    'id' => $data->id,
-                    'no_order' => $data->no_order,
-                    'customer_id' => $data->customer->id ?? null,
-                    'order_date' => $data->order_date,
-                    'product_id' => $data->product->id ?? null,
-                    'price' => $user->role !== 'staff' ? $data->price : 0,
-                    'payment_method' => $data->payment_method,
-                    'paid' => $user->role !== 'staff' ? $data->paid : 0,
-                    'meta' => $data->meta,
-                    'lampiran' => $data->lampiran,
-                    'jobdesk_count' => $data->jobdesks()->count(),
-                    'created_at' => $data->created_at,
-                    'customer' => $data->customer ? [
-                        'id' => $data->customer->id,
-                        'name' => $data->customer->name,
-                        'phone' => $data->customer->phone,
-                        'address' => $data->customer->address,
-                        'meta' => $data->customer->meta
-                    ] : null,
-                    'jobdesks' => $data->jobdesks,
-                    'product' => $data->product ? [
-                        'id' => $data->product->id,
-                        'name' => $data->product->name,
-                        'category' => $data->product->category,
-                        'description' => $data->product->description,
-                        'meta_products' => $data->product->metaProducts->pluck('meta'),
-                    ] : null,
-                    'role' => $user->role,
-                ];
-            });
+        // Date range filter optimized for frontend date picker
+        if ($dari && $sampai) {
+            $query->whereBetween('order_date', [
+                date('Y-m-d', strtotime($dari)),
+                date('Y-m-d', strtotime($sampai))
+            ]);
+        } elseif ($dari) {
+            $query->where('order_date', '>=', date('Y-m-d', strtotime($dari)));
+        } elseif ($sampai) {
+            $query->where('order_date', '<=', date('Y-m-d', strtotime($sampai)));
         }
+    }
+
+    private function applyStatusFilter($query, $status)
+    {
+        if (!$status) {
+            return; // Show all orders by default
+        }
+
+        switch ($status) {
+            case 'Masuk':
+                $query->where(function ($q) {
+                    $q->whereHas('jobdesks', function ($query) {
+                        $query->where('status', '!=', 'Selesai');
+                    })->orWhereDoesntHave('jobdesks');
+                });
+                break;
+
+            case 'Selesai':
+                $query->whereDoesntHave('jobdesks', function ($query) {
+                    $query->where('status', '!=', 'Selesai');
+                })->whereNotNull('lampiran')->whereHas('jobdesks');
+                break;
+
+            case 'Arsip':
+                $query->whereDoesntHave('jobdesks', function ($query) {
+                    $query->where('status', '!=', 'Selesai');
+                })->whereNull('lampiran')->whereHas('jobdesks');
+                break;
+        }
+    }
+
+    private function getOrderResults($query, $paginate, $user)
+    {
+        if ($paginate === 'false' || $paginate === false) {
+            $orders = $query->get();
+            return response()->json($orders->map(function ($order) use ($user) {
+                return $this->formatOrderResponse($order, $user);
+            }));
+        }
+
+        $orders = $query->paginate(25);
+        $orders->through(function ($order) use ($user) {
+            return $this->formatOrderResponse($order, $user);
+        });
+
         return response()->json($orders);
+    }
+
+    private function formatOrderResponse($order, $user)
+    {
+        // Calculate jobdesk count from loaded relation instead of separate query
+        $jobdeskCount = $order->jobdesks ? $order->jobdesks->count() : 0;
+        $completedJobdesks = $order->jobdesks ? $order->jobdesks->where('status', 'Selesai')->count() : 0;
+
+        return [
+            'id' => $order->id,
+            'no_order' => $order->no_order,
+            'customer_id' => $order->customer?->id,
+            'order_date' => $order->order_date,
+            'product_id' => $order->product?->id,
+            'price' => $user->role !== 'staff' ? $order->price : 0,
+            'payment_method' => $order->payment_method,
+            'paid' => $user->role !== 'staff' ? $order->paid : 0,
+            'meta' => $order->meta,
+            'lampiran' => $order->lampiran,
+            'jobdesk_count' => $jobdeskCount,
+            'completed_jobdesks' => $completedJobdesks, // Added for frontend progress calculation
+            'progress_percentage' => $jobdeskCount > 0 ? round(($completedJobdesks / $jobdeskCount) * 100) : 0,
+            'created_at' => $order->created_at,
+            'customer' => $order->customer ? [
+                'id' => $order->customer->id,
+                'name' => $order->customer->name,
+                'phone' => $order->customer->phone,
+                'address' => $order->customer->address,
+                'meta' => $order->customer->meta ? $order->customer->meta->map(function ($meta) {
+                    return [
+                        'id' => $meta->id,
+                        'meta_key' => $meta->meta_key,
+                        'meta_value' => $meta->meta_value
+                    ];
+                }) : []
+            ] : null,
+            'jobdesks' => $order->jobdesks ? $order->jobdesks->map(function ($jobdesk) {
+                return [
+                    'id' => $jobdesk->id,
+                    'status' => $jobdesk->status,
+                    'description' => $jobdesk->description ?? '-'
+                ];
+            }) : [],
+            'product' => $order->product ? [
+                'id' => $order->product->id,
+                'name' => $order->product->name,
+                'category' => $order->product->category,
+                'description' => $order->product->description,
+                'meta_products' => $order->product->metaProducts ? $order->product->metaProducts->map(function ($metaProduct) {
+                    return $metaProduct->meta ? [
+                        'id' => $metaProduct->meta->id,
+                        'name' => $metaProduct->meta->name
+                    ] : null;
+                })->filter() : [],
+            ] : null,
+            'role' => $user->role,
+            // Added fields for frontend convenience
+            'is_completed' => $jobdeskCount > 0 && $completedJobdesks === $jobdeskCount,
+            'has_lampiran' => !empty($order->lampiran),
+            'last_jobdesk_status' => $order->jobdesks && $order->jobdesks->isNotEmpty()
+                ? $this->getLastJobdeskStatus($order->jobdesks)
+                : null,
+        ];
+    }
+
+    private function getLastJobdeskStatus($jobdesks)
+    {
+        // Priority order as per frontend logic
+        $priority = ['Progress', 'Masuk', 'Selesai'];
+
+        foreach ($priority as $status) {
+            $lastJobdesk = $jobdesks->where('status', $status)->last();
+            if ($lastJobdesk) {
+                return [
+                    'status' => $status,
+                    'description' => $lastJobdesk->description ?? '-'
+                ];
+            }
+        }
+
+        return [
+            'status' => null,
+            'description' => '-'
+        ];
     }
 
     public function show(Order $order)
@@ -328,5 +405,44 @@ class OrderController extends Controller
         $order->jobdesks()->delete();
         $order->delete();
         return response()->json($order);
+    }
+
+    /**
+     * Get order statistics for dashboard
+     */
+    public function stats(Request $request)
+    {
+        $customerId = $request->query('customer_id');
+
+        $query = Order::query();
+
+        if (isset($customerId) && $customerId !== 'undefined') {
+            $query->where('customer_id', $customerId);
+        }
+
+        $totalOrders = $query->count();
+
+        // Count orders by status based on jobdesk completion
+        $masukCount = (clone $query)->where(function ($q) {
+            $q->whereHas('jobdesks', function ($query) {
+                $query->where('status', '!=', 'Selesai');
+            })->orWhereDoesntHave('jobdesks');
+        })->count();
+
+        $selesaiCount = (clone $query)->whereDoesntHave('jobdesks', function ($query) {
+            $query->where('status', '!=', 'Selesai');
+        })->whereNotNull('lampiran')->whereHas('jobdesks')->count();
+
+        $arsipCount = (clone $query)->whereDoesntHave('jobdesks', function ($query) {
+            $query->where('status', '!=', 'Selesai');
+        })->whereNull('lampiran')->whereHas('jobdesks')->count();
+
+        return response()->json([
+            'total_orders' => $totalOrders,
+            'masuk' => $masukCount,
+            'selesai' => $selesaiCount,
+            'arsip' => $arsipCount,
+            'completion_rate' => $totalOrders > 0 ? round((($selesaiCount + $arsipCount) / $totalOrders) * 100, 2) : 0
+        ]);
     }
 }

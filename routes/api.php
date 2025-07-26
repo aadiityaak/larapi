@@ -75,6 +75,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::post('customers/{customer}/meta', [CustomerController::class, 'storeMeta']);
 
+    // Order stats endpoint
+    Route::get('orders/stats', [OrderController::class, 'stats']);
+
+    // Jobdesk stats endpoint
+    Route::get('jobdesks/stats', [JobdeskController::class, 'stats']);
+
     // API Resources
     Route::apiResources([
         'posts' => PostController::class,
