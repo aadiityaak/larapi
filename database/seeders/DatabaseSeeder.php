@@ -23,6 +23,8 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             UserSeeder::class,
             ProductSeeder::class,
+            CategorySeeder::class,
+            PostSeeder::class,
         ]);
 
         // Seed customers and orders
