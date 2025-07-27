@@ -41,5 +41,10 @@ class DatabaseSeeder extends Seeder
                 ]);
             }
         }
+
+        // Seed notifications (after users, customers, and orders are created)
+        $this->call([
+            NotificationSeeder::class,
+        ]);
     }
 }
