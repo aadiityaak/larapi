@@ -95,6 +95,67 @@ class SettingController extends Controller
     }
 
     /**
+     * Get background settings specifically
+     */
+    public function getBackground()
+    {
+        $backgroundSettings = Setting::whereIn('setting_key', ['background_color', 'background_image', 'login_style'])
+            ->pluck('setting_value', 'setting_key')
+            ->toArray();
+
+        return response()->json([
+            'color' => $backgroundSettings['background_color'] ?? '',
+            'image' => $backgroundSettings['background_image'] ? asset('storage/' . $backgroundSettings['background_image']) : null,
+            'style' => $backgroundSettings['login_style'] ?? 'center'
+        ]);
+    }
+
+    /**
+     * Store background settings specifically
+     */
+    public function storeBackground(Request $request)
+    {
+        $validatedData = $request->validate([
+            'color' => 'nullable|string|max:50',
+            'style' => 'nullable|string|in:center,side',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:1024', // 1MB max
+        ]);
+
+        $settings = [];
+
+        // Handle color
+        if (isset($validatedData['color'])) {
+            $settings['background_color'] = $validatedData['color'];
+        }
+
+        // Handle style
+        if (isset($validatedData['style'])) {
+            $settings['login_style'] = $validatedData['style'];
+        }
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            $oldImageSetting = Setting::where('setting_key', 'background_image')->first();
+            if ($oldImageSetting && $oldImageSetting->setting_value) {
+                Storage::disk('public')->delete($oldImageSetting->setting_value);
+            }
+
+            $imagePath = $request->file('image')->store('backgrounds', 'public');
+            $settings['background_image'] = $imagePath;
+        }
+
+        // Save settings
+        $this->saveSettings($settings);
+
+        return $this->responseSuccess('Background settings saved successfully.', [
+            'color' => $settings['background_color'] ?? '',
+            'image' => isset($settings['background_image']) ? asset('storage/' . $settings['background_image']) : null,
+            'style' => $settings['login_style'] ?? 'center'
+        ]);
+    }
+
+    /**
      * Validation rules for storing/updating settings.
      */
     protected function validationRules()
@@ -111,6 +172,11 @@ class SettingController extends Controller
             'new_order' => 'nullable|string',
             'project_assignment' => 'nullable|string',
             'followup_project' => 'nullable|string',
+
+            // Background/Login settings
+            'color' => 'nullable|string|max:50',
+            'style' => 'nullable|string|max:50',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:1024', // 1MB max
         ];
     }
 
