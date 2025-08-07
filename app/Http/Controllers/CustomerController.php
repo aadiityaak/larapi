@@ -159,8 +159,22 @@ class CustomerController extends Controller
      */
     public function show(Customer $customer)
     {
-        $customer = Customer::find($customer->id);
-        return response()->json($customer);
+        $customer = Customer::with('orders.jobdesks', 'meta')->find($customer->id);
+        
+        $response = [
+            'id' => $customer->id,
+            'name' => $customer->name,
+            'phone' => $customer->phone,
+            'email' => $customer->email,
+            'address' => $customer->address,
+            'order_count' => $customer->orders->count(),
+            'orders' => $customer->orders,
+            'meta' => $customer->meta,
+            'created_at' => $customer->created_at,
+            'updated_at' => $customer->updated_at
+        ];
+        
+        return response()->json($response);
     }
 
     /**
