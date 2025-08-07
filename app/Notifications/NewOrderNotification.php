@@ -51,7 +51,14 @@ class NewOrderNotification extends Notification
      */
     public function via($notifiable)
     {
-        return ['database']; //'mail', 'database'
+        $channels = ['database'];
+        
+        // Hanya kirim email jika user mengaktifkan notifikasi email
+        if ($notifiable->email_notifications ?? true) {
+            $channels[] = 'mail';
+        }
+        
+        return $channels;
     }
 
     /**

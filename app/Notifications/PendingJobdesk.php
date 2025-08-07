@@ -42,7 +42,14 @@ class PendingJobdesk extends Notification
      */
     public function via($notifiable)
     {
-        return ['mail', 'database']; //'mail', 'database'
+        $channels = ['database'];
+        
+        // Hanya kirim email jika user mengaktifkan notifikasi email
+        if ($notifiable->email_notifications ?? true) {
+            $channels[] = 'mail';
+        }
+        
+        return $channels;
     }
 
     /**

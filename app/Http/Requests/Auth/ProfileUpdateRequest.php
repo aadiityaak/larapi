@@ -36,6 +36,7 @@ class ProfileUpdateRequest extends FormRequest
             'role' => ['nullable', 'string'],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
             'avatar' => ['nullable'],
+            'email_notifications' => ['boolean'],
         ];
 
         if (is_string($this->avatar)) {
@@ -45,5 +46,17 @@ class ProfileUpdateRequest extends FormRequest
         }
 
         return $rules;
+    }
+
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation()
+    {
+        if ($this->has('email_notifications')) {
+            $this->merge([
+                'email_notifications' => filter_var($this->email_notifications, FILTER_VALIDATE_BOOLEAN),
+            ]);
+        }
     }
 }
