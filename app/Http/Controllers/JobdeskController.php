@@ -124,19 +124,9 @@ class JobdeskController extends Controller
                 }
             });
 
-            // Add meta information for frontend
-            $response = $jobdesks->toArray();
-            $response['status_counts'] = $totalCounts;
-            $response['current_filter'] = [
-                'status' => $status,
-                'order_id' => $orderId,
-                'user_id' => $userId,
-                'name' => $name,
-                'dari' => $dari,
-                'sampai' => $sampai
-            ];
-
-            return response()->json($response);
+            // Just return the paginated jobdesks like OrderController
+            // We'll add the extra data in the frontend from status_counts endpoint
+            return response()->json($jobdesks);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Server Error',
