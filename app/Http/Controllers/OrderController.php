@@ -69,7 +69,31 @@ class OrderController extends Controller
         // Apply status filter - optimized for frontend tabs
         $this->applyStatusFilter($query, $status);
 
-        $query->orderBy('created_at', 'desc'); // Changed to desc for latest first
+        // Default behavior: show oldest unfinished orders first, then newest finished orders
+        if (!$status) {
+            // When no status filter is applied, prioritize unfinished orders (oldest first)
+            $query->orderBy(
+                \DB::raw("CASE 
+                    WHEN (
+                        SELECT COUNT(*) 
+                        FROM jobdesks 
+                        WHERE jobdesks.order_id = orders.id 
+                        AND jobdesks.status != 'Selesai'
+                    ) > 0 
+                    OR (
+                        SELECT COUNT(*) 
+                        FROM jobdesks 
+                        WHERE jobdesks.order_id = orders.id
+                    ) = 0 
+                    THEN 0 
+                    ELSE 1 
+                END")
+            )
+            ->orderBy('created_at', 'asc'); // Oldest unfinished first
+        } else {
+            // When status filter is applied, use latest first
+            $query->orderBy('created_at', 'desc');
+        }
 
         // Get results with or without pagination
         return $this->getOrderResults($query, $paginate, $user);
