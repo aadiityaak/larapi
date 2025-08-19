@@ -216,9 +216,15 @@ class JobdeskController extends Controller
 
     public function destroy(Jobdesk $jobdesk)
     {
-        $jobdesk = Jobdesk::find($jobdesk->id);
-        $jobdesk->delete();
-        return response()->json(['message' => 'Jobdesk deleted successfully']);
+        try {
+            $jobdesk->delete();
+            return response()->json(['message' => 'Jobdesk deleted successfully']);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error deleting jobdesk',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
