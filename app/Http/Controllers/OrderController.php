@@ -42,7 +42,7 @@ class OrderController extends Controller
             'jobdesks:id,order_id,status,description',
             'product:id,name,category,description',
             'product.metaProducts:id,product_id,meta_id',
-            'product.metaProducts.meta:id,name'
+            'product.metaProducts.meta:id,name,type'
         ])
             ->select([
                 'id',
@@ -242,7 +242,8 @@ class OrderController extends Controller
                 'meta_products' => $order->product->metaProducts ? $order->product->metaProducts->map(function ($metaProduct) {
                     return $metaProduct->meta ? [
                         'id' => $metaProduct->meta->id,
-                        'name' => $metaProduct->meta->name
+                        'name' => $metaProduct->meta->name,
+                        'type' => $metaProduct->meta->type
                     ] : null;
                 })->filter() : [],
             ] : null,
