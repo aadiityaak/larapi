@@ -17,20 +17,43 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
+
+        // Get date filters from request
+        $dateFrom = $request->get('date_from');
+        $dateTo = $request->get('date_to');
+
+        // If no dates provided, use current month as default
+        if (!$dateFrom || !$dateTo) {
+            $dateFrom = now()->startOfMonth()->format('Y-m-d');
+            $dateTo = now()->format('Y-m-d');
+        }
+
+        // Base queries with date filters
+        $orderQuery = Order::whereBetween('order_date', [$dateFrom, $dateTo]);
+        $jobdeskQuery = Jobdesk::whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59']);
+
+        // Total counts (not filtered by date for context)
         $totalCustomers = Customer::count();
         $totalOrders = Order::count();
-        $orderBulanIni = Order::whereMonth('order_date', now()->month)->count();
         $totalKaryawan = User::count();
 
-        $totalPendapatan = intval(Order::sum('paid'));
-        $pendapatanBulanIni = intval(Order::whereMonth('order_date', now()->month)->sum('paid'));
-        $pendapatanBulanSebelumnya = intval(Order::whereMonth('order_date', now()->subMonth()->month)->sum('paid'));
-        $totalTagihan = intval(Order::sum('price')) - $totalPendapatan;
-        $totalTagihanBulanIni = intval(Order::whereMonth('order_date', now()->month)->sum('price'));
-        $totalBelumbayar = $totalTagihan - $totalPendapatan;
+        // Filtered data based on date range
+        $orderBulanIni = $orderQuery->count();
+        $totalPendapatan = intval($orderQuery->sum('paid'));
+        $pendapatanBulanIni = intval($orderQuery->sum('paid'));
 
-        // Menghitung jobdesk berdasarkan status
-        $totalJobdesk = Jobdesk::select('status', DB::raw('count(*) as count'))
+        // Previous period comparison (same date range but previous period)
+        $dateDiff = \Carbon\Carbon::parse($dateFrom)->diffInDays(\Carbon\Carbon::parse($dateTo));
+        $previousDateFrom = \Carbon\Carbon::parse($dateFrom)->subDays($dateDiff + 1)->format('Y-m-d');
+        $previousDateTo = \Carbon\Carbon::parse($dateFrom)->subDay()->format('Y-m-d');
+        $pendapatanBulanSebelumnya = intval(Order::whereBetween('order_date', [$previousDateFrom, $previousDateTo])->sum('paid'));
+
+        $totalTagihanPeriode = intval($orderQuery->sum('price'));
+        $totalTagihanBulanIni = $totalTagihanPeriode;
+        $totalTagihan = intval(Order::sum('price')) - intval(Order::sum('paid'));
+
+        // Menghitung jobdesk berdasarkan status dengan filter tanggal
+        $totalJobdesk = $jobdeskQuery->select('status', DB::raw('count(*) as count'))
             ->groupBy('status')
             ->pluck('count', 'status');
 
