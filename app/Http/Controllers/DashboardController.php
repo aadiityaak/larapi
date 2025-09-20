@@ -57,6 +57,53 @@ class DashboardController extends Controller
             ->groupBy('status')
             ->pluck('count', 'status');
 
+        // Data tren jobdesk 30 hari terakhir
+        $thirtyDaysAgo = now()->subDays(30)->format('Y-m-d');
+        $today = now()->format('Y-m-d');
+
+        $jobdeskTrend = [];
+        for ($i = 29; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $dateStart = $date . ' 00:00:00';
+            $dateEnd = $date . ' 23:59:59';
+
+            $dailyJobdesk = Jobdesk::whereBetween('created_at', [$dateStart, $dateEnd])
+                ->select('status', DB::raw('count(*) as count'))
+                ->groupBy('status')
+                ->pluck('count', 'status');
+
+            $jobdeskTrend[] = [
+                'date' => $date,
+                'masuk' => (int) $dailyJobdesk->get('Masuk', 0),
+                'progress' => (int) $dailyJobdesk->get('Progress', 0),
+                'selesai' => (int) $dailyJobdesk->get('Selesai', 0),
+            ];
+        }
+
+        // Data tren pendapatan dan tagihan 12 bulan terakhir
+        $monthlyTrend = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $monthStart = now()->subMonths($i)->startOfMonth();
+            $monthEnd = now()->subMonths($i)->endOfMonth();
+
+            $monthlyRevenue = Order::whereBetween('order_date', [
+                $monthStart->format('Y-m-d'),
+                $monthEnd->format('Y-m-d')
+            ])->sum('paid');
+
+            $monthlyBilling = Order::whereBetween('order_date', [
+                $monthStart->format('Y-m-d'),
+                $monthEnd->format('Y-m-d')
+            ])->sum('price');
+
+            $monthlyTrend[] = [
+                'month' => $monthStart->format('Y-m'),
+                'month_name' => $monthStart->translatedFormat('M'),
+                'revenue' => (int) $monthlyRevenue,
+                'billing' => (int) $monthlyBilling,
+            ];
+        }
+
         // Menyiapkan data untuk response
         $data = [
             'total_customers' => $totalCustomers,
@@ -73,6 +120,8 @@ class DashboardController extends Controller
                 'Progress' => (int) $totalJobdesk->get('Progress', 0),
                 'Selesai' => (int) $totalJobdesk->get('Selesai', 0),
             ],
+            'jobdesk_trend' => $jobdeskTrend,
+            'monthly_trend' => $monthlyTrend,
         ];
 
         return response()->json($data);
