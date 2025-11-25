@@ -137,7 +137,7 @@ class OrderSeeder extends Seeder
             ]
         ];
 
-        // Insert perorangan orders with customer and meta data
+        // Insert 5 perorangan orders (individual customers)
         foreach ($peroranganOrders as $orderData) {
             $customerData = $orderData['customer'];
             $orderMeta = $orderData['meta'] ?? [];
@@ -172,29 +172,88 @@ class OrderSeeder extends Seeder
             $order = $customer->orders()->create($orderInfo);
 
             // Create order meta data
-            foreach ($orderMeta as $key => $value) {
-                $order->meta()->create([
-                    'meta_key' => $key,
-                    'meta_value' => $value
-                ]);
-            }
+            $order->meta = $orderMeta;
+            $order->save();
 
-            // Add bank meta to customer (random banks with full names)
-            $banks = [
-                'BPR NUSAMBA PUSAT',
-                'BPR BBA',
-                'BPR PALA WNO',
-                'BPR ARUM MANDIRI',
-                'BPR NUSAMBA BANTUL',
-                'BPR DANAMAS PRIMA',
-                'KOPERASI ARTHA KENCANA',
-                'BPR NUSAMBA KK PIYUNGAN',
-                'BPR NUSAMBA KK KADIPIRO'
-            ];
-
+            // Add Perorangan meta for these individual customers
             $customer->meta()->create([
                 'meta_key' => 'bank',
-                'meta_value' => $banks[array_rand($banks)]
+                'meta_value' => 'Perorangan'
+            ]);
+        }
+
+        // Insert bank orders (15 orders with bank customers)
+        $bankOrders = [
+            // BPR NUSAMBA PUSAT orders
+            ['no_order' => 'BP001', 'product_id' => 2, 'bank' => 'BPR NUSAMBA PUSAT', 'customer_name' => 'PT. MITRA SEJAHTERA', 'customer_phone' => '02745551234', 'customer_address' => 'Jl. Sudirman No. 123, Yogyakarta'],
+            ['no_order' => 'BP002', 'product_id' => 1, 'bank' => 'BPR NUSAMBA PUSAT', 'customer_name' => 'CV. JAYA ABADI', 'customer_phone' => '02745551123', 'customer_address' => 'Jl. Malioboro No. 56, Yogyakarta'],
+            ['no_order' => 'BP003', 'product_id' => 3, 'bank' => 'BPR NUSAMBA PUSAT', 'customer_name' => 'PT. BERKAH MULYA', 'customer_phone' => '02745551345', 'customer_address' => 'Jl. Solo Km 12, Yogyakarta'],
+
+            // BPR BBA orders
+            ['no_order' => 'BB001', 'product_id' => 2, 'bank' => 'BPR BBA', 'customer_name' => 'PT. MAJU JAYA', 'customer_phone' => '027433344567', 'customer_address' => 'Jl. Kaliurang Km 5, Sleman'],
+            ['no_order' => 'BB002', 'product_id' => 1, 'bank' => 'BPR BBA', 'customer_name' => 'CV. KARYA MANDIRI', 'customer_phone' => '027433344578', 'customer_address' => 'Jl. Gejayan No. 88, Yogyakarta'],
+
+            // BPR PALA WNO orders
+            ['no_order' => 'PW001', 'product_id' => 3, 'bank' => 'BPR PALA WNO', 'customer_name' => 'PT. INDO TEKNIK', 'customer_phone' => '027422233890', 'customer_address' => 'Jl. Ring Road Utara, Sleman'],
+            ['no_order' => 'PW002', 'product_id' => 4, 'bank' => 'BPR PALA WNO', 'customer_name' => 'CV. SENTOSA ABADI', 'customer_phone' => '027422233901', 'customer_address' => 'Jl. Magelang Km 10, Yogyakarta'],
+
+            // BPR ARUM MANDIRI orders
+            ['no_order' => 'AM001', 'product_id' => 2, 'bank' => 'BPR ARUM MANDIRI', 'customer_name' => 'PT. MAHKOTA INDAH', 'customer_phone' => '027411122345', 'customer_address' => 'Jl. Wates Km 8, Bantul'],
+            ['no_order' => 'AM002', 'product_id' => 1, 'bank' => 'BPR ARUM MANDIRI', 'customer_name' => 'CV. CAHAYA MULIA', 'customer_phone' => '027411122456', 'customer_address' => 'Jl. Parangtritis Km 5, Bantul'],
+
+            // BPR NUSAMBA BANTUL orders
+            ['no_order' => 'NB001', 'product_id' => 4, 'bank' => 'BPR NUSAMBA BANTUL', 'customer_name' => 'PT. BANTUL SEJAHTERA', 'customer_phone' => '027500998765', 'customer_address' => 'Jl. Bantul Km 3, Bantul'],
+            ['no_order' => 'NB002', 'product_id' => 3, 'bank' => 'BPR NUSAMBA BANTUL', 'customer_name' => 'CV. NUSANTARA JAYA', 'customer_phone' => '027500998876', 'customer_address' => 'Jl. Imogiri Timur Km 10, Bantul'],
+
+            // BPR DANAMAS PRIMA orders
+            ['no_order' => 'DP001', 'product_id' => 2, 'bank' => 'BPR DANAMAS PRIMA', 'customer_name' => 'PT. DANAMAS INVESTAMA', 'customer_phone' => '027466677890', 'customer_address' => 'Jl. Godean Km 9, Sleman'],
+            ['no_order' => 'DP002', 'product_id' => 1, 'bank' => 'BPR DANAMAS PRIMA', 'customer_name' => 'CV. PRIMA KARYA', 'customer_phone' => '027466677901', 'customer_address' => 'Jl. Palagan Km 7, Yogyakarta'],
+
+            // KOPERASI ARTHA KENCANA orders
+            ['no_order' => 'AK001', 'product_id' => 3, 'bank' => 'KOPERASI ARTHA KENCANA', 'customer_name' => 'KOPERASI KARYA TANI', 'customer_phone' => '027477788012', 'customer_address' => 'Jl. Kaliurang Km 15, Sleman'],
+            ['no_order' => 'AK002', 'product_id' => 4, 'bank' => 'KOPERASI ARTHA KENCANA', 'customer_name' => 'KOPKAR BERSATU', 'customer_phone' => '027477788123', 'customer_address' => 'Jl. Seturan Raya, Sleman'],
+        ];
+
+        // Insert bank orders with bank customers
+        foreach ($bankOrders as $orderData) {
+            // Extract order data
+            $orderInfo = [
+                'no_order' => $orderData['no_order'],
+                'order_date' => '2025-11-25',
+                'product_id' => $orderData['product_id'],
+                'price' => rand(50000000, 500000000),
+                'payment_method' => 'Transfer',
+                'paid' => 0,
+                'created_at' => '2025-11-25T11:00:00.000000Z',
+                'updated_at' => '2025-11-25T11:00:00.000000Z'
+            ];
+
+            // Create or find bank customer
+            $customer = Customer::firstOrCreate(
+                ['phone' => $orderData['customer_phone']],
+                [
+                    'name' => $orderData['customer_name'],
+                    'address' => $orderData['customer_address'],
+                    'created_at' => '2025-11-25T10:30:00.000000Z',
+                    'updated_at' => '2025-11-25T10:30:00.000000Z'
+                ]
+            );
+
+            // Create order
+            $order = $customer->orders()->create($orderInfo);
+
+            // Create basic order meta data for bank orders
+            $order->meta = [
+                '2' => rand(100, 999) . '/2025',
+                '3' => '2025-11-24T17:00:00.000Z',
+                '5' => rand(100000000, 400000000)
+            ];
+            $order->save();
+
+            // Add bank meta to customer
+            $customer->meta()->create([
+                'meta_key' => 'bank',
+                'meta_value' => $orderData['bank']
             ]);
         }
     }

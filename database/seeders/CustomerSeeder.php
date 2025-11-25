@@ -1004,11 +1004,9 @@ class CustomerSeeder extends Seeder
                 $order = $customer->orders()->create($orderData);
 
                 // Insert meta data for the order
-                foreach ($orderMeta as $key => $value) {
-                    $order->meta()->create([
-                        'meta_key' => $key,
-                        'meta_value' => $value
-                    ]);
+                if (!empty($orderMeta)) {
+                    $order->meta = $orderMeta;
+                    $order->save();
                 }
             }
         }
