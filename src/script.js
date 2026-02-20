@@ -17,10 +17,10 @@ const archive = archiver("zip", {
 // Event listener untuk ketika file ZIP selesai dibuat
 output.on("close", function () {
     console.log(
-        "File ZIP berhasil dibuat: " + archive.pointer() + " total bytes"
+        "File ZIP berhasil dibuat: " + archive.pointer() + " total bytes",
     );
     console.log(
-        `File ZIP disimpan di: ${path.join(distDir, "laravel-app.zip")}`
+        `File ZIP disimpan di: ${path.join(distDir, "laravel-app.zip")}`,
     );
 });
 
@@ -37,19 +37,19 @@ const laravelDir = path.join(__dirname, ".."); // Sesuaikan dengan struktur dire
 
 // Daftar file dan folder yang akan diabaikan
 const ignoreList = [
-    ".vscode",
-    ".git",
     ".env",
-    "package.json",
-    "package-lock.json",
+    ".git",
     "node_modules",
-    "storage",
-    "vendor",
-    "dist",
-    "laravel-app.zip",
+    ".vscode",
     ".github",
     "composer.lock",
     "composer.json",
+    "package-lock.json",
+    "package.json",
+    "bun.lock",
+    "public",
+    "dist",
+    "laravel-app.zip",
 ];
 
 // Fungsi untuk menambahkan file dan folder ke ZIP

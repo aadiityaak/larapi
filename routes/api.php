@@ -28,6 +28,7 @@ use Spatie\Permission\Models\Permission;
 // Routes tanpa middleware
 Route::get('/settings/background', [SettingLoginController::class, 'index']);
 Route::get('/settings/favicon', [SettingFaviconController::class, 'index']);
+Route::get('/settings', [SettingController::class, 'index']);
 
 // Routes dengan middleware 'auth:sanctum'
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -89,9 +90,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         'orders' => OrderController::class,
         'jobdesks' => JobdeskController::class,
         'customers' => CustomerController::class,
-        'settings' => SettingController::class,
         'products' => ProductController::class,
         'metas' => MetaController::class,
         'roles' => RoleController::class
     ]);
+
+    // Settings resource routes (protected) except index which is public
+    Route::apiResource('settings', SettingController::class)->except(['index']);
 });
