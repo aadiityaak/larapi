@@ -43,6 +43,7 @@ class Order extends Model
         'no_order',
         'customer_id',
         'pemberi_order',
+        'pemberi_phone',
         'order_date',
         'product_id',
         'price',

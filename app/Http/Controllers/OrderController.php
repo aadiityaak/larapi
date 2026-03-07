@@ -50,6 +50,7 @@ class OrderController extends Controller
                 'no_order',
                 'customer_id',
                 'pemberi_order',
+                'pemberi_phone',
                 'product_id',
                 'order_date',
                 'price',
@@ -206,6 +207,7 @@ class OrderController extends Controller
             'no_order' => $order->no_order,
             'customer_id' => $order->customer?->id,
             'pemberi_order' => $order->pemberi_order,
+            'pemberi_phone' => $order->pemberi_phone,
             'order_date' => $order->order_date,
             'product_id' => $order->product?->id,
             'price' => $user->role !== 'staff' ? $order->price : 0,
@@ -324,6 +326,7 @@ class OrderController extends Controller
                 'meta' => 'nullable',
                 'customer' => 'required',
                 'pemberi_order' => 'nullable|string|max:255',
+                'pemberi_phone' => 'nullable|string|max:50',
             ], [
                 'order_date.required' => 'Tanggal pesanan harus diisi.',
                 'product_id.required' => 'Produk harus dipilih.',
@@ -382,6 +385,7 @@ class OrderController extends Controller
             'meta' => 'nullable',
             'customer_id' => 'required|exists:customers,id',
             'pemberi_order' => 'nullable|string|max:255',
+            'pemberi_phone' => 'nullable|string|max:50',
         ]);
 
         if ($validator->fails()) {
@@ -403,6 +407,7 @@ class OrderController extends Controller
             'no_order' => $order->no_order,
             'customer_id' => $order->customer->id,
             'pemberi_order' => $order->pemberi_order,
+            'pemberi_phone' => $order->pemberi_phone,
             'order_date' => $order->order_date,
             'product_id' => $order->product->id,
             'price' => $user->role !== 'staff' ? $order->price : 0,

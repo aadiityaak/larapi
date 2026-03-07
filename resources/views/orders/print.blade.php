@@ -19,8 +19,8 @@
     .value { font-size: 12pt; font-weight: 700; }
     .noorder { background: #3b82f6; color: #fff; text-align: center; font-size: 26pt; font-weight: 800; letter-spacing: 1px; }
     .section-title { font-size: 9pt; color: #111; margin-bottom: 1mm; }
-    .box { border: 1px solid #000; padding: 3mm;}
-    .box-lg { border: 1px solid #000; padding: 3mm; min-height: 35mm; }
+    .box { padding: 3mm;}
+    .box-lg { padding: 3mm; }
     .footer-cells td { font-size: 18pt; font-weight: 800; text-align: center; padding: 6mm; }
     .muted { font-size: 9pt; }
 
@@ -62,6 +62,8 @@
         <td>
           <div class="label">Pemberi Order</div>
           <div class="value">{{ $order->pemberi_order ?? ($order->customer->name ?? '') }}</div>
+          <div class="label" style="margin-top: 2mm;">Contact Person</div>
+          <div class="value">{{ $order->pemberi_phone ?? ($order->customer->phone ?? '') }}</div>
         </td>
       </tr>
       <tr>
