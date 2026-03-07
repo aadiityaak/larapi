@@ -6,8 +6,8 @@
   <style>
     @page { size: A4; margin: 18mm; }
     * { box-sizing: border-box; }
-    body { font-family: DejaVu Sans, Arial, Helvetica, sans-serif; color: #000; }
-    .sheet { width: 100%; max-width: 100%; border: 1.5px solid #000; padding: 6mm; margin: 0 auto; }
+    body { font-family: DejaVu Sans, Arial, Helvetica, sans-serif; color: #000; margin: 0; }
+    .sheet { width: calc(100% - 2mm); max-width: calc(100% - 18mm); border: 1.5px solid #000; padding: 6mm; margin: 0 auto; }
     .header { text-align: center; margin-bottom: 4mm; }
     .title { font-size: 16pt; font-weight: 700; }
     .subtitle { font-size: 9pt; margin-top: 2mm; }
@@ -31,7 +31,7 @@
       <div class="title">{{ $app_name }}</div>
       <div class="subtitle">{{ $app_description }}</div>
       <div class="contact">{{ $address }}</div>
-      <div class="contact">{{ $phone }}</div>
+      <div class="contact">Telp: {{ $phone }} | Email: {{ $email }}</div>
     </div>
 
     <table class="outer">

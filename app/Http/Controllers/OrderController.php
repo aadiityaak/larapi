@@ -490,6 +490,7 @@ class OrderController extends Controller
             'app_description' => $settings['app_description'] ?? '',
             'address' => $settings['address'] ?? '',
             'phone' => $settings['phone'] ?? '',
+            'email' => $settings['email'] ?? '',
             'order' => $order
         ];
 

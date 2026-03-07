@@ -165,6 +165,7 @@ class SettingController extends Controller
             'app_code' => 'nullable|string|max:255',
             'app_description' => 'nullable|string|max:500',
             'address' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:50',
             'banks' => 'nullable|string|max:2000',
             'pekerjaan' => 'nullable|string|max:10000',
             'pdf_sample' => 'nullable',
