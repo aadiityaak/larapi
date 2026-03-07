@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Notifications\NewOrderNotification;
@@ -469,5 +470,32 @@ class OrderController extends Controller
             'arsip' => $arsipCount,
             'completion_rate' => $totalOrders > 0 ? round((($selesaiCount + $arsipCount) / $totalOrders) * 100, 2) : 0
         ]);
+    }
+
+    /**
+     * Generate printable PDF for an order
+     */
+    public function print(Order $order)
+    {
+        $order = Order::with([
+            'customer:id,name,phone,address',
+            'jobdesks:id,order_id,status,description',
+            'product:id,name,category,description'
+        ])->findOrFail($order->id);
+
+        $settings = \App\Models\Setting::all()->pluck('setting_value', 'setting_key')->toArray();
+
+        $data = [
+            'app_name' => $settings['app_name'] ?? 'KANTOR NOTARIS',
+            'app_description' => $settings['app_description'] ?? '',
+            'address' => $settings['address'] ?? '',
+            'phone' => $settings['phone'] ?? '',
+            'order' => $order
+        ];
+
+        $pdf = Pdf::loadView('orders.print', $data)->setPaper('a4', 'portrait');
+
+        $filename = 'Order-' . ($order->no_order ?? $order->id) . '.pdf';
+        return $pdf->download($filename);
     }
 }

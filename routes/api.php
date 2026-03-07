@@ -79,6 +79,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Order stats endpoint
     Route::get('orders/stats', [OrderController::class, 'stats']);
 
+    // Order print (PDF)
+    Route::get('orders/{order}/print', [OrderController::class, 'print'])->name('orders.print');
+
     // Jobdesk stats endpoint
     Route::get('jobdesks/stats', [JobdeskController::class, 'stats']);
 
