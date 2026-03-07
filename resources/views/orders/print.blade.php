@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <title>Cetak Order {{ $order->no_order ?? $order->id }}</title>
   <style>
-    @page { size: A4; margin: 18mm; }
+    @page { size: A4; margin: 5mm; }
     * { box-sizing: border-box; }
     body { font-family: DejaVu Sans, Arial, Helvetica, sans-serif; color: #000; margin: 0; }
     .sheet { width: calc(100% - 2mm); max-width: calc(100% - 18mm); border: 1.5px solid #000; padding: 6mm; margin: 0 auto; }
@@ -19,10 +19,24 @@
     .value { font-size: 12pt; font-weight: 700; }
     .noorder { background: #3b82f6; color: #fff; text-align: center; font-size: 26pt; font-weight: 800; letter-spacing: 1px; }
     .section-title { font-size: 9pt; color: #111; margin-bottom: 1mm; }
-    .box { border: 1px solid #000; padding: 3mm; min-height: 22mm; }
+    .box { border: 1px solid #000; padding: 3mm;}
     .box-lg { border: 1px solid #000; padding: 3mm; min-height: 35mm; }
     .footer-cells td { font-size: 18pt; font-weight: 800; text-align: center; padding: 6mm; }
     .muted { font-size: 9pt; }
+
+    .font-sans { font-family: DejaVu Sans, Arial, Helvetica, sans-serif; }
+    .font-serif { font-family: DejaVu Serif, Times New Roman, Times, serif; }
+    .font-mono { font-family: DejaVu Sans Mono, Courier New, Courier, monospace; }
+    .text-xs { font-size: 8pt; }
+    .text-sm { font-size: 9pt; }
+    .text-base { font-size: 11pt; }
+    .text-lg { font-size: 12pt; }
+    .text-xl { font-size: 14pt; }
+    .fw-400 { font-weight: 400; }
+    .fw-600 { font-weight: 600; }
+    .fw-700 { font-weight: 700; }
+    .fw-800 { font-weight: 800; }
+    .outer td.va-top { vertical-align: top; }
   </style>
 </head>
 <body>
@@ -47,33 +61,36 @@
       <tr>
         <td>
           <div class="label">Pemberi Order</div>
-          <div class="value">{{ $order->customer->name ?? '' }}</div>
+          <div class="value">{{ $order->pemberi_order ?? ($order->customer->name ?? '') }}</div>
         </td>
       </tr>
       <tr>
-        <td>
-          <div class="label">Contact Person</div>
-          <div class="value">{{ $order->customer->phone ?? '' }}</div>
-        </td>
-        <td>
-          <div class="label">Jenis Order</div>
-          <div class="value">{{ $order->product->name ?? '' }}</div>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="2">
+        <td class="va-top">
           <div class="section-title">Klien</div>
-          <div class="box"></div>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="2">
-          <div class="section-title">Jaminan / Agunan / Objek</div>
           <div class="box">
-            {{ data_get($order->meta, '8') ?? data_get($order->meta, '17') ?? '' }}
+            <div class="value">{{ $order->customer->name ?? '-' }}</div>
+            <div>{{ $order->customer->address ?? '-' }}</div>
+            <div>{{ $order->customer->phone ?? '-' }}</div>
+          </div>
+        </td>
+        <td class="va-top">
+          <div class="section-title">Jenis Order</div>
+          <div class="box">
+            <div class="value">{{ $order->product->name ?? '-' }}</div>
           </div>
         </td>
       </tr>
+      @php($objek = data_get($order->meta, '8') ?: data_get($order->meta, '17'))
+      @if(!blank($objek))
+        <tr>
+          <td colspan="2">
+            <div class="section-title">Jaminan / Agunan / Objek</div>
+            <div class="box">
+              {{ $objek }}
+            </div>
+          </td>
+        </tr>
+      @endif
       <tr>
         <td colspan="2">
           <div class="section-title">Catatan & Keterangan</div>

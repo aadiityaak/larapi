@@ -42,6 +42,7 @@ class Order extends Model
     protected $fillable = [
         'no_order',
         'customer_id',
+        'pemberi_order',
         'order_date',
         'product_id',
         'price',

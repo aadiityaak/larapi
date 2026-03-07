@@ -49,6 +49,7 @@ class OrderController extends Controller
                 'id',
                 'no_order',
                 'customer_id',
+                'pemberi_order',
                 'product_id',
                 'order_date',
                 'price',
@@ -90,7 +91,7 @@ class OrderController extends Controller
                     ELSE 1 
                 END")
             )
-            ->orderBy('created_at', 'asc'); // Oldest unfinished first
+                ->orderBy('created_at', 'asc'); // Oldest unfinished first
         } else {
             // When status filter is applied, use latest first
             $query->orderBy('created_at', 'desc');
@@ -204,6 +205,7 @@ class OrderController extends Controller
             'id' => $order->id,
             'no_order' => $order->no_order,
             'customer_id' => $order->customer?->id,
+            'pemberi_order' => $order->pemberi_order,
             'order_date' => $order->order_date,
             'product_id' => $order->product?->id,
             'price' => $user->role !== 'staff' ? $order->price : 0,
@@ -321,6 +323,7 @@ class OrderController extends Controller
                 'payment_method' => 'required',
                 'meta' => 'nullable',
                 'customer' => 'required',
+                'pemberi_order' => 'nullable|string|max:255',
             ], [
                 'order_date.required' => 'Tanggal pesanan harus diisi.',
                 'product_id.required' => 'Produk harus dipilih.',
@@ -378,6 +381,7 @@ class OrderController extends Controller
             'payment_method' => 'required',
             'meta' => 'nullable',
             'customer_id' => 'required|exists:customers,id',
+            'pemberi_order' => 'nullable|string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -398,6 +402,7 @@ class OrderController extends Controller
             'id' => $order->id,
             'no_order' => $order->no_order,
             'customer_id' => $order->customer->id,
+            'pemberi_order' => $order->pemberi_order,
             'order_date' => $order->order_date,
             'product_id' => $order->product->id,
             'price' => $user->role !== 'staff' ? $order->price : 0,
