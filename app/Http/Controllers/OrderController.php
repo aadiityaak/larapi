@@ -518,7 +518,7 @@ class OrderController extends Controller
             'pic' => $order->jobdesks->pluck('user.name')->filter()->unique()->implode(', '),
         ];
 
-        $pdf = Pdf::loadView('orders.print', $data)->setPaper('a4', 'portrait');
+        $pdf = Pdf::loadView('orders.print', $data)->setPaper([0, 0, 595.28, 935.43], 'portrait');
 
         $filename = 'Order-' . ($order->no_order ?? $order->id) . '.pdf';
         return $pdf->download($filename);
