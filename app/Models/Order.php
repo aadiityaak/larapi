@@ -42,6 +42,7 @@ class Order extends Model
     protected $fillable = [
         'no_order',
         'customer_id',
+        'created_by',
         'pemberi_order',
         'pemberi_phone',
         'order_date',
@@ -49,6 +50,7 @@ class Order extends Model
         'price',
         'payment_method',
         'paid',
+        'billing_notes',
         'meta',
         'lampiran',
     ];
@@ -70,5 +72,10 @@ class Order extends Model
     public function jobdesks()
     {
         return $this->hasMany(Jobdesk::class);
+    }
+
+    public function maker()
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

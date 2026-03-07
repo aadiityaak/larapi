@@ -49,6 +49,7 @@ class OrderController extends Controller
                 'id',
                 'no_order',
                 'customer_id',
+                'created_by',
                 'pemberi_order',
                 'pemberi_phone',
                 'product_id',
@@ -56,6 +57,7 @@ class OrderController extends Controller
                 'price',
                 'payment_method',
                 'paid',
+                'billing_notes',
                 'meta',
                 'lampiran',
                 'created_at'
@@ -213,6 +215,7 @@ class OrderController extends Controller
             'price' => $user->role !== 'staff' ? $order->price : 0,
             'payment_method' => $order->payment_method,
             'paid' => $user->role !== 'staff' ? $order->paid : 0,
+            'billing_notes' => $order->billing_notes,
             'meta' => $order->meta,
             'lampiran' => $order->lampiran,
             'jobdesk_count' => $jobdeskCount,
@@ -327,6 +330,7 @@ class OrderController extends Controller
                 'customer' => 'required',
                 'pemberi_order' => 'nullable|string|max:255',
                 'pemberi_phone' => 'nullable|string|max:50',
+                'billing_notes' => 'nullable|string|max:10000',
             ], [
                 'order_date.required' => 'Tanggal pesanan harus diisi.',
                 'product_id.required' => 'Produk harus dipilih.',
@@ -386,6 +390,7 @@ class OrderController extends Controller
             'customer_id' => 'required|exists:customers,id',
             'pemberi_order' => 'nullable|string|max:255',
             'pemberi_phone' => 'nullable|string|max:50',
+            'billing_notes' => 'nullable|string|max:10000',
         ]);
 
         if ($validator->fails()) {
@@ -396,6 +401,11 @@ class OrderController extends Controller
         }
 
         $order = Order::create($validator->validated());
+        // set maker (created_by) on create
+        if (!$order->created_by && $user) {
+            $order->created_by = $user->id;
+            $order->save();
+        }
         $order->load('customer', 'jobdesks', 'product', 'product.metaProducts.meta');
 
         $users = User::whereHas('permissions', function ($query) {
@@ -413,6 +423,7 @@ class OrderController extends Controller
             'price' => $user->role !== 'staff' ? $order->price : 0,
             'payment_method' => $order->payment_method,
             'paid' => $user->role !== 'staff' ? $order->paid : 0,
+            'billing_notes' => $order->billing_notes,
             'meta' => $order->meta,
             'lampiran' => $order->lampiran,
             'jobdesk_count' => $order->jobdesks()->count(),
@@ -489,7 +500,8 @@ class OrderController extends Controller
     {
         $order = Order::with([
             'customer:id,name,phone,address',
-            'jobdesks:id,order_id,status,description',
+            'jobdesks:id,order_id,user_id,status,description',
+            'jobdesks.user:id,name',
             'product:id,name,category,description'
         ])->findOrFail($order->id);
 
@@ -501,7 +513,9 @@ class OrderController extends Controller
             'address' => $settings['address'] ?? '',
             'phone' => $settings['phone'] ?? '',
             'email' => $settings['email'] ?? '',
-            'order' => $order
+            'order' => $order,
+            'maker' => optional($order->maker)->name ?? '',
+            'pic' => $order->jobdesks->pluck('user.name')->filter()->unique()->implode(', '),
         ];
 
         $pdf = Pdf::loadView('orders.print', $data)->setPaper('a4', 'portrait');
