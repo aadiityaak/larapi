@@ -41,16 +41,6 @@ class ProductController extends Controller
       });
     } else {
       $products = $query->paginate(25);
-      $products->getCollection()->transform(function ($data) {
-        return [
-          'id' => $data->id,
-          'name' => $data->name,
-          'description' => $data->description,
-          'category' => $data->category,
-          'meta_products' => $data->metaProducts->pluck('meta')->pluck('id'),
-          'order_count' => $data->orders->count(),
-        ];
-      });
     }
 
     return response()->json($products, 200);

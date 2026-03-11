@@ -93,7 +93,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         'orders' => OrderController::class,
         'jobdesks' => JobdeskController::class,
         'customers' => CustomerController::class,
-        'products' => ProductController::class,
+        'produk' => ProductController::class,
         'metas' => MetaController::class,
         'roles' => RoleController::class
     ]);
