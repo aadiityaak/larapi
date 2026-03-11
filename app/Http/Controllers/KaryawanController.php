@@ -20,8 +20,15 @@ class KaryawanController extends Controller
         $this->authorize('viewAny', User::class);
         $paginate = $request->boolean('paginate', true);
         $name = $request->query('name');
+        $role = $request->query('role');
 
         $query = User::with(['roles', 'jobdesk']);
+
+        if ($role) {
+            $query->whereHas('roles', function ($q) use ($role) {
+                $q->where('name', $role);
+            });
+        }
 
         // Filter nama jika lebih dari 2 karakter
         if ($name && strlen($name) > 2) {
