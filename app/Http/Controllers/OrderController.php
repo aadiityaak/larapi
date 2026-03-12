@@ -423,7 +423,22 @@ class OrderController extends Controller
         $users = User::whereHas('permissions', function ($query) {
             $query->where('name', 'menu:settings');
         })->get();
-        Notification::send($users, new NewOrderNotification($order));
+
+        // Tambahkan maker dan PIC sebagai penerima, tanpa duplikasi
+        $extraRecipients = collect();
+        if ($order->maker_id) {
+            $maker = User::find($order->maker_id);
+            if ($maker) $extraRecipients->push($maker);
+        }
+        if ($order->pic_id) {
+            $pic = User::find($order->pic_id);
+            if ($pic) $extraRecipients->push($pic);
+        }
+        $recipients = $users->concat($extraRecipients)->unique('id')->values();
+        if ($recipients->isNotEmpty()) {
+            Notification::send($recipients, new NewOrderNotification($order));
+        }
+
         $response = [
             'id' => $order->id,
             'no_order' => $order->no_order,

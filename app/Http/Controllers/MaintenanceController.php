@@ -64,13 +64,20 @@ class MaintenanceController extends Controller
                 if (
                     ($user->hasRole('Admin') ?? false) ||
                     ($user->hasRole('Super Admin') ?? false) ||
-                    ($user->hasPermissionTo('system:maintain') ?? false)
+                    ($user->hasRole('admin') ?? false) ||
+                    ($user->hasPermissionTo('system:maintain') ?? false) ||
+                    ($user->hasPermissionTo('setting:update') ?? false)
                 ) {
                     return;
                 }
             }
         } catch (\Throwable $e) {
             // Fallback below
+        }
+
+        // On local environment, allow any authenticated user to run maintenance
+        if (app()->environment('local')) {
+            return;
         }
 
         // Fallback: allow only users with 'admin' position field if exists
@@ -81,4 +88,3 @@ class MaintenanceController extends Controller
         abort(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki akses maintenance.');
     }
 }
-
