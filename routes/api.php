@@ -21,7 +21,8 @@ use App\Http\Controllers\{
     PostController,
     CategoryController,
     RoleController,
-    Auth\ProfileController
+    Auth\ProfileController,
+    MaintenanceController
 };
 use Spatie\Permission\Models\Permission;
 
@@ -100,4 +101,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Settings resource routes (protected) except index which is public
     Route::apiResource('settings', SettingController::class)->except(['index']);
+
+    // Maintenance (admin only)
+    Route::prefix('maintenance')->group(function () {
+        Route::post('{action}', [MaintenanceController::class, 'run'])
+            ->where('action', 'migrate|migrate-fresh|cache-clear|config-clear|route-clear|view-clear|optimize-clear|queue-restart|storage-link');
+    });
 });
