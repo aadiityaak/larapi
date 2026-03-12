@@ -43,6 +43,8 @@ class Order extends Model
         'no_order',
         'customer_id',
         'created_by',
+        'maker_id',
+        'pic_id',
         'pemberi_order',
         'pemberi_phone',
         'order_date',
@@ -76,6 +78,11 @@ class Order extends Model
 
     public function maker()
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(User::class, 'maker_id');
+    }
+
+    public function pic()
+    {
+        return $this->belongsTo(User::class, 'pic_id');
     }
 }

@@ -43,13 +43,17 @@ class OrderController extends Controller
             'jobdesks:id,order_id,status,description',
             'product:id,name,category,description',
             'product.metaProducts:id,product_id,meta_id',
-            'product.metaProducts.meta:id,name,type'
+            'product.metaProducts.meta:id,name,type',
+            'maker:id,name',
+            'pic:id,name'
         ])
             ->select([
                 'id',
                 'no_order',
                 'customer_id',
                 'created_by',
+                'maker_id',
+                'pic_id',
                 'pemberi_order',
                 'pemberi_phone',
                 'product_id',
@@ -210,6 +214,10 @@ class OrderController extends Controller
             'customer_id' => $order->customer?->id,
             'pemberi_order' => $order->pemberi_order,
             'pemberi_phone' => $order->pemberi_phone,
+            'maker_id' => $order->maker_id,
+            'pic_id' => $order->pic_id,
+            'maker_name' => $order->maker?->name,
+            'pic_name' => $order->pic?->name,
             'order_date' => $order->order_date,
             'product_id' => $order->product?->id,
             'price' => $user->role !== 'staff' ? $order->price : 0,
@@ -331,6 +339,8 @@ class OrderController extends Controller
                 'pemberi_order' => 'nullable|string|max:255',
                 'pemberi_phone' => 'nullable|string|max:50',
                 'billing_notes' => 'nullable|string|max:10000',
+                'maker_id' => 'nullable|exists:users,id',
+                'pic_id' => 'nullable|exists:users,id',
             ], [
                 'order_date.required' => 'Tanggal pesanan harus diisi.',
                 'product_id.required' => 'Produk harus dipilih.',
@@ -391,6 +401,8 @@ class OrderController extends Controller
             'pemberi_order' => 'nullable|string|max:255',
             'pemberi_phone' => 'nullable|string|max:50',
             'billing_notes' => 'nullable|string|max:10000',
+            'maker_id' => 'nullable|exists:users,id',
+            'pic_id' => 'nullable|exists:users,id',
         ]);
 
         if ($validator->fails()) {
@@ -502,7 +514,9 @@ class OrderController extends Controller
             'customer:id,name,phone,address',
             'jobdesks:id,order_id,user_id,status,description',
             'jobdesks.user:id,name',
-            'product:id,name,category,description'
+            'product:id,name,category,description',
+            'maker:id,name',
+            'pic:id,name'
         ])->findOrFail($order->id);
 
         $settings = \App\Models\Setting::all()->pluck('setting_value', 'setting_key')->toArray();
@@ -514,8 +528,8 @@ class OrderController extends Controller
             'phone' => $settings['phone'] ?? '',
             'email' => $settings['email'] ?? '',
             'order' => $order,
-            'maker' => optional($order->maker)->name ?? '',
-            'pic' => $order->jobdesks->pluck('user.name')->filter()->unique()->implode(', '),
+            'maker' => $order->maker?->name ?: $order->jobdesks->pluck('user.name')->filter()->unique()->implode(', '),
+            'pic' => $order->pic?->name ?: '',
         ];
 
         $pdf = Pdf::loadView('orders.print', $data)->setPaper([0, 0, 595.28, 935.43], 'portrait');
