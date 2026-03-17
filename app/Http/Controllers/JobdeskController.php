@@ -341,6 +341,14 @@ class JobdeskController extends Controller
                     'id' => $jobdesk->order->id ?? null,
                     'no_order' => $jobdesk->order->no_order ?? '',
                     'order_date' => $jobdesk->order->order_date ?? null,
+                    'maker' => $jobdesk->order->maker ? [
+                        'id' => $jobdesk->order->maker->id ?? null,
+                        'name' => $jobdesk->order->maker->name ?? '',
+                    ] : null,
+                    'pic' => $jobdesk->order->pic ? [
+                        'id' => $jobdesk->order->pic->id ?? null,
+                        'name' => $jobdesk->order->pic->name ?? '',
+                    ] : null,
                     'customer' => $jobdesk->order->customer ? [
                         'id' => $jobdesk->order->customer->id ?? null,
                         'name' => $jobdesk->order->customer->name ?? '',
@@ -368,6 +376,8 @@ class JobdeskController extends Controller
                 'customer_phone' => $jobdesk->order?->customer?->phone ?? '-',
                 'product_name' => $jobdesk->order?->product?->name ?? '-',
                 'assigned_to' => $jobdesk->user?->name ?? 'Belum ditugaskan',
+                'maker_name' => $jobdesk->order?->maker?->name ?? null,
+                'pic_name' => $jobdesk->order?->pic?->name ?? null,
                 'status_text' => $this->getStatusText($jobdesk->status ?? ''),
                 'status_class' => $this->getStatusClass($jobdesk->status ?? ''),
                 'is_overdue' => $this->isOverdue($jobdesk),
