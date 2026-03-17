@@ -10,7 +10,8 @@
     @page { size: 210mm 330mm; margin: 5mm; }
     * { box-sizing: border-box; }
     body { font-family: DejaVu Sans, Arial, Helvetica, sans-serif; color: #000; margin: 0; }
-    .sheet { width: calc(100% - 2mm); max-width: calc(100% - 18mm); border: 1.5px solid #999; padding: 6mm; margin: 0 auto; }
+    .sheet { width: calc(100% - 2mm); max-width: calc(100% - 18mm); border: none; padding: 6mm; margin: 0 auto; }
+    .letterhead-space { height: 35mm; }
     .header { text-align: center; margin-bottom: 4mm; }
     .title { font-size: 14pt; font-weight: 700; font-family: 'Playfair Display', DejaVu Serif, 'Times New Roman', Times, serif; }
     .subtitle { font-size: 8pt; margin-top: 2mm; }
@@ -37,18 +38,12 @@
     .fw-700 { font-weight: 700; }
     .fw-800 { font-weight: 800; }
     .outer td.va-top { vertical-align: top; }
+    .min-h-30 { min-height: 30mm; }
   </style>
 </head>
 <body>
   <div class="sheet">
-    <div class="header">
-      <div class="title">{{ $app_name }}</div>
-      <div class="subtitle">{{ $app_description }}</div>
-      <div class="contact">{{ $address }}</div>
-      <div class="contact">Telp: {{ $phone }} | Email: {{ $email }}</div>
-    </div>
-    <hr style="margin: 5mm 0 0; border: 0.5px solid #999;">
-    <hr style="margin: 1mm 0 5mm 0; border: 1px solid #999;">
+    <div class="letterhead-space"></div>
     <table class="outer">
       <tr>
         <td class="noorder" rowspan="2" style="width:55%; height:36mm;">
@@ -57,7 +52,7 @@
         </td>
         <td style="width:45%;">
           <div class="label">Tanggal Order</div>
-          <div class="value">
+          <div class="min-h-30">
             {{ \Carbon\Carbon::parse($order->order_date ?? $order->created_at)->locale('id')->translatedFormat('j F Y') }}
           </div>
         </td>
@@ -65,15 +60,17 @@
       <tr>
         <td>
           <div class="label">Pemberi Order</div>
-          <div class="value">{{ $order->pemberi_order ?? ($order->customer->name ?? '') }}</div>
-          <div class="label" style="margin-top: 2mm;">Contact Person</div>
-          <div class="value">{{ $order->pemberi_phone ?? ($order->customer->phone ?? '') }}</div>
+          <div class="min-h-30">
+            <div class="value">{{ $order->pemberi_order ?? ($order->customer->name ?? '') }}</div>
+            <div class="label" style="margin-top: 2mm;">Contact Person</div>
+            <div class="value">{{ $order->pemberi_phone ?? ($order->customer->phone ?? '') }}</div>
+          </div>
         </td>
       </tr>
       <tr>
         <td class="va-top">
           <div class="label">Klien</div>
-          <div>
+          <div class="min-h-30">
             <div class="value">{{ $order->customer->name ?? '-' }}</div>
             <div>{{ $order->customer->address ?? '-' }}</div>
             <div>{{ $order->customer->phone ?? '-' }}</div>
@@ -82,14 +79,14 @@
         <td class="va-top">
           <div class="label">Jenis Order</div>
           <div>
-            <div class="value">{{ $order->product->name ?? '-' }}</div>
+            <div class="min-h-30">{{ $order->product->name ?? '-' }}</div>
           </div>
         </td>
       </tr>
         <tr>
           <td colspan="2">
             <div class="label">Jaminan / Agunan / Objek</div>
-            <div>
+            <div class="min-h-30">
               {{ data_get($order->meta, '8') ?: (data_get($order->meta, '17') ?: '-') }}
             </div>
           </td>
@@ -97,7 +94,7 @@
       <tr>
         <td colspan="2">
           <div class="label">Catatan & Keterangan</div>
-          <div>
+          <div class="min-h-30">
             {{ data_get($order->meta, '1') ?? '' }}
           </div>
         </td>
@@ -105,7 +102,7 @@
       <tr>
         <td colspan="2">
           <div class="label">Catatan & Keterangan Tagihan <span class="muted">(diisi Div. Keuangan)</span></div>
-          <div>{{ $order->billing_notes ?? '' }}</div>
+          <div class="min-h-30">{{ $order->billing_notes ?? '' }}</div>
         </td>
       </tr>
       <tr class="footer-cells">
