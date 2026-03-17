@@ -68,6 +68,42 @@ class KaryawanController extends Controller
         return response()->json($paginated);
     }
 
+    /**
+     * Minimal list for selection (id, name) with relaxed authorization for order workflows.
+     */
+    public function min(Request $request)
+    {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+        // Allow users who can read/create orders or access menu:orders
+        if (
+            !$user->can('order:read') &&
+            !$user->can('order:create') &&
+            !$user->can('menu:orders')
+        ) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $role = $request->query('role');
+        $name = $request->query('name');
+
+        $query = User::query();
+        if ($role) {
+            $query->whereHas('roles', function ($q) use ($role) {
+                $q->where('name', $role);
+            });
+        }
+        if ($name && strlen($name) > 2) {
+            $query->where('name', 'like', '%' . $name . '%');
+        }
+        $query->orderByDesc('created_at');
+
+        $users = $query->get(['id', 'name']);
+        return response()->json($users);
+    }
+
     public function show($id)
     {
         $this->authorize('view', User::find($id));

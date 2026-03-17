@@ -16,16 +16,20 @@ class JobdeskController extends Controller
             $status = $request->query('status');
             $name = $request->query('name');
             $userId = $request->query('user_id');
+            $makerId = $request->query('maker_id');
+            $picId = $request->query('pic_id');
             $dari = $request->query('dari');
             $sampai = $request->query('sampai');
             $user = $request->user();
 
             // Optimized eager loading with selective fields
             $query = Jobdesk::with([
-                'order:id,no_order,customer_id,product_id,order_date',
+                'order:id,no_order,customer_id,product_id,order_date,maker_id,pic_id',
                 'order.customer:id,name,phone,address',
                 'order.product:id,name,category,description',
-                'user:id,name,email' // Removed 'role' column
+                'order.maker:id,name',
+                'order.pic:id,name',
+                'user:id,name,email'
             ])
                 ->select([
                     'id',
@@ -57,6 +61,20 @@ class JobdeskController extends Controller
             // Filter by user_id if provided
             if ($userId && $userId !== '') {
                 $query->where('user_id', $userId);
+            }
+
+            // Filter by order maker_id if provided
+            if ($makerId && $makerId !== '') {
+                $query->whereHas('order', function ($q) use ($makerId) {
+                    $q->where('maker_id', $makerId);
+                });
+            }
+
+            // Filter by order pic_id if provided
+            if ($picId && $picId !== '') {
+                $query->whereHas('order', function ($q) use ($picId) {
+                    $q->where('pic_id', $picId);
+                });
             }
 
             // Search by customer name (minimum 3 characters)
@@ -107,7 +125,7 @@ class JobdeskController extends Controller
                     return $this->formatJobdeskResponse($jobdesk, $user);
                 } catch (\Exception $e) {
                     // Fallback to basic response if formatting fails
-                    return [
+                    $basic = [
                         'id' => $jobdesk->id,
                         'order_id' => $jobdesk->order_id,
                         'user_id' => $jobdesk->user_id,
@@ -119,8 +137,15 @@ class JobdeskController extends Controller
                         'updated_at' => $jobdesk->updated_at,
                         'order' => $jobdesk->order,
                         'user' => $jobdesk->user,
+                        'customer_name' => $jobdesk->order?->customer?->name ?? 'Tidak diketahui',
+                        'customer_phone' => $jobdesk->order?->customer?->phone ?? '-',
+                        'product_name' => $jobdesk->order?->product?->name ?? '-',
+                        'assigned_to' => $jobdesk->user?->name ?? 'Belum ditugaskan',
+                        'maker_name' => $jobdesk->order?->maker?->name ?? null,
+                        'pic_name' => $jobdesk->order?->pic?->name ?? null,
                         'error' => 'Formatting error: ' . $e->getMessage()
                     ];
+                    return $basic;
                 }
             });
 
