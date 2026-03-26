@@ -11,7 +11,7 @@
     * { box-sizing: border-box; }
     body { font-family: DejaVu Sans, Arial, Helvetica, sans-serif; color: #000; margin: 0; }
     .sheet { width: calc(100% - 2mm); max-width: calc(100% - 18mm); border: none; padding: 6mm; margin: 0 auto; }
-    .letterhead-space { height: 55mm; }
+    .letterhead-space { height: 85mm; }
     .header { text-align: center; margin-bottom: 4mm; }
     .title { font-size: 14pt; font-weight: 700; font-family: 'Playfair Display', DejaVu Serif, 'Times New Roman', Times, serif; }
     .subtitle { font-size: 8pt; margin-top: 2mm; }
@@ -38,7 +38,7 @@
     .fw-700 { font-weight: 700; }
     .fw-800 { font-weight: 800; }
     .outer td.va-top { vertical-align: top; }
-    .min-h-30 { min-height: 30mm; }
+    .min-h-30 { min-height: 20mm; }
   </style>
 </head>
 <body>
