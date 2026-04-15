@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Spatie\Permission\Models\Role;
+use App\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Http\Request;
 
@@ -19,6 +19,7 @@ class RoleController extends Controller
     $validated = $request->validate([
       'name' => 'required|string|unique:roles,name',
       'guard_name' => 'nullable|string',
+      'show_in_jobdesk' => 'nullable|boolean',
       'capabilities' => 'nullable|array', // tambahkan validasi capabilities
       'capabilities.*' => 'string|exists:permissions,name', // pastikan permission ada
     ]);
@@ -26,6 +27,7 @@ class RoleController extends Controller
     $role = Role::create([
       'name' => $validated['name'],
       'guard_name' => $validated['guard_name'] ?? 'web',
+      'show_in_jobdesk' => $validated['show_in_jobdesk'] ?? false,
     ]);
 
     // Sinkronkan capabilities (permissions) jika tersedia
@@ -48,6 +50,7 @@ class RoleController extends Controller
     // Validasi nama role
     $validated = $request->validate([
       'name' => 'required|string|unique:roles,name,' . $role->id,
+      'show_in_jobdesk' => 'nullable|boolean',
       'capabilities' => 'nullable|array',
       'capabilities.*' => 'string|exists:permissions,name',
     ]);
@@ -56,6 +59,7 @@ class RoleController extends Controller
     $role->update([
       'name' => $validated['name'],
       'guard_name' => $validated['guard_name'] ?? 'web',
+      'show_in_jobdesk' => $validated['show_in_jobdesk'] ?? false,
     ]);
 
     // Sinkronkan capabilities (permissions) jika tersedia

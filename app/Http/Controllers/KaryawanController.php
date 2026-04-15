@@ -6,7 +6,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
-use Spatie\Permission\Models\Role;
+use App\Models\Role;
 use Spatie\Permission\Models\Permission;
 use App\Models\User;
 use App\Models\Jobdesk;
@@ -21,12 +21,17 @@ class KaryawanController extends Controller
         $paginate = $request->boolean('paginate', true);
         $name = $request->query('name');
         $role = $request->query('role');
+        $jobdeskRoles = $request->boolean('jobdesk_roles', false);
 
         $query = User::with(['roles', 'jobdesk']);
 
         if ($role) {
             $query->whereHas('roles', function ($q) use ($role) {
                 $q->where('name', $role);
+            });
+        } elseif ($jobdeskRoles) {
+            $query->whereHas('roles', function ($q) {
+                $q->where('show_in_jobdesk', true);
             });
         }
 
@@ -88,11 +93,16 @@ class KaryawanController extends Controller
 
         $role = $request->query('role');
         $name = $request->query('name');
+        $jobdeskRoles = $request->boolean('jobdesk_roles', false);
 
         $query = User::query();
         if ($role) {
             $query->whereHas('roles', function ($q) use ($role) {
                 $q->where('name', $role);
+            });
+        } elseif ($jobdeskRoles) {
+            $query->whereHas('roles', function ($q) {
+                $q->where('show_in_jobdesk', true);
             });
         }
         if ($name && strlen($name) > 2) {
