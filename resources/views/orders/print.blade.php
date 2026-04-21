@@ -11,7 +11,7 @@
     * { box-sizing: border-box; }
     body { font-family: DejaVu Sans, Arial, Helvetica, sans-serif; color: #000; margin: 0; }
     .sheet { width: calc(100% - 2mm); max-width: calc(100% - 18mm); border: none; padding: 6mm; margin: 0 auto; }
-    .letterhead-space { height: 85mm; }
+    .letterhead-space { height: 65mm; }
     .header { text-align: center; margin-bottom: 4mm; }
     .title { font-size: 14pt; font-weight: 700; font-family: 'Playfair Display', DejaVu Serif, 'Times New Roman', Times, serif; }
     .subtitle { font-size: 8pt; margin-top: 2mm; }
