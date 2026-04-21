@@ -96,100 +96,89 @@
         </td>
       </tr>
       <tr>
-        <td class="va-top">
-          <div class="label">Klien</div>
-          <div class="min-h-30">
-            <div class="value">{{ $order->customer->name ?? '-' }}</div>
-            <div>{{ $order->customer->address ?? '-' }}</div>
+        <?php
+        // Kumpulkan kedua klien
+        $klienUtama = $order->customer;
+        $klienRelasi = null;
+        $tipeRelasi = null;
+        $tipeRelasiKedua = null;
+        
+        if ($order->relatedOrder && $order->relatedOrder->customer) {
+            $klienRelasi = $order->relatedOrder->customer;
+            $tipeRelasi = $order->relation_type;
+            // Tentukan tipe untuk klien kedua (kebalikan)
+            if ($tipeRelasi === 'penjual') {
+                $tipeRelasiKedua = 'pembeli';
+            } elseif ($tipeRelasi === 'pembeli') {
+                $tipeRelasiKedua = 'penjual';
+            } else {
+                $tipeRelasiKedua = 'lainnya';
+            }
+        } elseif ($order->relatedOrders->count() > 0) {
+            $relatedOrder = $order->relatedOrders->first();
+            if ($relatedOrder && $relatedOrder->customer) {
+                $klienRelasi = $relatedOrder->customer;
+                $tipeRelasiKedua = $relatedOrder->relation_type;
+                // Tentukan tipe untuk klien utama (kebalikan)
+                if ($tipeRelasiKedua === 'penjual') {
+                    $tipeRelasi = 'pembeli';
+                } elseif ($tipeRelasiKedua === 'pembeli') {
+                    $tipeRelasi = 'penjual';
+                } else {
+                    $tipeRelasi = 'lainnya';
+                }
+            }
+        }
+        
+        // Fungsi untuk menampilkan data klien
+        function renderKlienSimple($customer, $label) {
+            if (!$customer) return;
             
-            <?php
-            // Tampilkan semua nomor telepon
+            echo '<div style="margin-bottom: 8px;">';
+            echo '<div style="font-weight: bold; color: #4f46e5; margin-bottom: 2px; font-size: 9pt;">' . htmlspecialchars(ucfirst($label)) . ':</div>';
+            echo '<div style="font-weight: bold; font-size: 11pt;">' . htmlspecialchars($customer->name ?? '-') . '</div>';
+            echo '<div style="font-size: 9pt;">' . htmlspecialchars($customer->address ?? '-') . '</div>';
+            
+            // Tampilkan telepon
             $phones = [];
-            if ($order->customer->phone) {
-                $phones[] = $order->customer->phone;
+            if ($customer->phone) {
+                $phones[] = $customer->phone;
             }
             
-            // Tambahkan nomor telepon dari customer_meta (phone_*)
-            if ($order->customer->meta) {
-                foreach ($order->customer->meta as $meta) {
+            if (property_exists($customer, 'meta') && $customer->meta) {
+                foreach ($customer->meta as $meta) {
                     if (str_starts_with($meta->meta_key, 'phone_') && !empty($meta->meta_value)) {
                         $phones[] = $meta->meta_value;
                     }
                 }
             }
-            ?>
             
-            @if(!empty($phones))
-                @foreach($phones as $phone)
-                    <div>{{ $phone }}</div>
-                @endforeach
-            @else
-                <div>-</div>
-            @endif
-          </div>
-        </td>
-        <td class="va-top">
-          <div class="label">Klien Relasi</div>
-          <div class="min-h-30">
-            <?php
-            // Cek apakah ada related order
-            $relatedCustomer = null;
-            $relationType = null;
-            
-            if ($order->relatedOrder && $order->relatedOrder->customer) {
-                $relatedCustomer = $order->relatedOrder->customer;
-                $relationType = $order->relation_type;
-            } elseif ($order->relatedOrders->count() > 0) {
-                $relatedOrder = $order->relatedOrders->first();
-                if ($relatedOrder && $relatedOrder->customer) {
-                    $relatedCustomer = $relatedOrder->customer;
-                    $relationType = $relatedOrder->relation_type;
+            if (!empty($phones)) {
+                foreach ($phones as $phone) {
+                    echo '<div style="font-size: 9pt;">' . htmlspecialchars($phone) . '</div>';
                 }
+            } else {
+                echo '<div style="font-size: 9pt;">-</div>';
             }
-            ?>
-            
-            @if($relatedCustomer)
-                <div class="value">{{ $relatedCustomer->name ?? '-' }}</div>
-                <div>{{ $relatedCustomer->address ?? '-' }}</div>
-                
-                <?php
-                // Tampilkan nomor telepon related customer
-                $relatedPhones = [];
-                if ($relatedCustomer->phone) {
-                    $relatedPhones[] = $relatedCustomer->phone;
-                }
-                
-                if (property_exists($relatedCustomer, 'meta') && $relatedCustomer->meta) {
-                    foreach ($relatedCustomer->meta as $meta) {
-                        if (str_starts_with($meta->meta_key, 'phone_') && !empty($meta->meta_value)) {
-                            $relatedPhones[] = $meta->meta_value;
-                        }
-                    }
-                }
-                ?>
-                
-                @if(!empty($relatedPhones))
-                    @foreach($relatedPhones as $phone)
-                        <div>{{ $phone }}</div>
-                    @endforeach
-                @else
-                    <div>-</div>
-                @endif
-                
-                @if($relationType)
-                    <div style="margin-top: 2mm; padding: 1mm 3mm; background: #e5e7eb; color: #111827; font-size: 8pt; border-radius: 2mm; display: inline-block;">
-                        {{ ucfirst($relationType) }}
-                    </div>
-                @endif
+            echo '</div>';
+        }
+        ?>
+        
+        <td class="va-top" style="width: 55%;">
+          <div class="label">Klien</div>
+          <div class="min-h-30">
+            @if($klienRelasi)
+                <?php renderKlienSimple($klienUtama, $tipeRelasi); ?>
+                <?php renderKlienSimple($klienRelasi, $tipeRelasiKedua); ?>
             @else
-                <div>-</div>
+                <?php renderKlienSimple($klienUtama, 'Klien'); ?>
             @endif
           </div>
         </td>
-        <td class="va-top">
+        <td class="va-top" style="width: 45%;">
           <div class="label">Jenis Order</div>
-          <div>
-            <div class="min-h-30">{{ $order->product->name ?? '-' }}</div>
+          <div class="min-h-30">
+            <div>{{ $order->product->name ?? '-' }}</div>
           </div>
         </td>
       </tr>
