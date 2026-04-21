@@ -114,11 +114,12 @@
         }
         
         // Fungsi untuk menampilkan data klien
-        function renderKlienSimple($customer, $label) {
+        function renderKlienSimple($customer, $label, $klienNumber) {
             if (!$customer) return;
             
-            echo '<div style="margin-bottom: 8px;">';
-            echo '<div style="font-weight: bold; color: #4f46e5; margin-bottom: 2px; font-size: 9pt;">' . htmlspecialchars($label ?: 'Klien') . ':</div>';
+            $displayLabel = $label ? $klienNumber . ' (' . $label . ')' : $klienNumber;
+            echo '<div style="margin-bottom: 10px;">';
+            echo '<div style="font-weight: bold; color: #4f46e5; margin-bottom: 3px; font-size: 10pt;">' . htmlspecialchars($displayLabel) . '</div>';
             echo '<div style="font-weight: bold; font-size: 11pt;">' . htmlspecialchars($customer->name ?? '-') . '</div>';
             echo '<div style="font-size: 9pt;">' . htmlspecialchars($customer->address ?? '-') . '</div>';
             
@@ -151,10 +152,10 @@
           <div class="label">Klien</div>
           <div class="min-h-30">
             @if($klienRelasi)
-                <?php renderKlienSimple($klienUtama, $tipeRelasi); ?>
-                <?php renderKlienSimple($klienRelasi, null); ?>
+                <?php renderKlienSimple($klienUtama, $tipeRelasi, 'Klien 1'); ?>
+                <?php renderKlienSimple($klienRelasi, null, 'Klien 2'); ?>
             @else
-                <?php renderKlienSimple($klienUtama, 'Klien'); ?>
+                <?php renderKlienSimple($klienUtama, null, 'Klien'); ?>
             @endif
           </div>
         </td>
