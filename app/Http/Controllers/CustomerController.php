@@ -89,6 +89,7 @@ class CustomerController extends Controller
                     'id' => $data->id,
                     'name' => $data->name,
                     'phone' => $data->phone,
+                    'phones' => $data->phones,
                     'address' => $data->address,
                     'order_count' => $data->orders->count(),
                     'orders' => $data->orders,
@@ -103,6 +104,7 @@ class CustomerController extends Controller
                     'id' => $data->id,
                     'name' => $data->name,
                     'phone' => $data->phone,
+                    'phones' => $data->phones,
                     'address' => $data->address,
                     'order_count' => $data->orders->count(),
                     'orders' => $data->orders,
@@ -125,6 +127,7 @@ class CustomerController extends Controller
                 'phone' => 'required|string|max:20|unique:customers,phone',
                 'address' => 'required|string',
                 'meta' => 'nullable|array',
+                'phones' => 'nullable|array',
             ],
             [
                 'name.required' => 'Nama harus diisi.',
@@ -132,6 +135,7 @@ class CustomerController extends Controller
                 'phone.unique' => 'Nomor telepon sudah ada.',
                 'address.required' => 'Alamat harus diisi.',
                 'meta.array' => 'Meta harus berupa array.',
+                'phones.array' => 'Phones harus berupa array.',
             ]
         );
 
@@ -139,11 +143,16 @@ class CustomerController extends Controller
         if (isset($validatedData['meta'])) {
             $customer->meta()->createMany($validatedData['meta']);
         }
+        // Simpan nomor telepon tambahan
+        if (isset($validatedData['phones'])) {
+            $customer->saveAdditionalPhones($validatedData['phones']);
+        }
         $response = [
             'data' => [
                 'id' => $customer->id,
                 'name' => $customer->name,
                 'phone' => $customer->phone,
+                'phones' => $customer->phones,
                 'address' => $customer->address,
                 'order_count' => $customer->orders->count(),
                 'orders' => $customer->orders,
@@ -189,6 +198,7 @@ class CustomerController extends Controller
                 'phone' => 'required|string|max:20|unique:customers,phone,' . $customer->id,
                 'address' => 'required|string',
                 'meta' => 'nullable|array',
+                'phones' => 'nullable|array',
             ],
             [
                 'name.required' => 'Nama harus diisi.',
@@ -196,6 +206,7 @@ class CustomerController extends Controller
                 'phone.unique' => 'Nomor telepon sudah ada.',
                 'address.required' => 'Alamat harus diisi.',
                 'meta.array' => 'Meta harus berupa array.',
+                'phones.array' => 'Phones harus berupa array.',
             ]
         );
         $customer->update($validatedData);
@@ -209,6 +220,10 @@ class CustomerController extends Controller
                 $meta->save();
             }
         }
+        // Simpan nomor telepon tambahan
+        if (isset($validatedData['phones'])) {
+            $customer->saveAdditionalPhones($validatedData['phones']);
+        }
         $customer->load('orders', 'meta');
 
         $response = [
@@ -216,6 +231,7 @@ class CustomerController extends Controller
                 'id' => $customer->id,
                 'name' => $customer->name,
                 'phone' => $customer->phone,
+                'phones' => $customer->phones,
                 'address' => $customer->address,
                 'order_count' => $customer->orders->count(),
                 'orders' => $customer->orders,

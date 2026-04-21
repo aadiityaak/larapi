@@ -38,8 +38,8 @@ class OrderController extends Controller
 
         // Optimized eager loading based on frontend needs
         $query = Order::with([
-            'customer:id,name,phone,address',
-            'customer.meta:id,customer_id,meta_key,meta_value',
+            'customer',
+            'customer.meta',
             'jobdesks:id,order_id,status,description',
             'product:id,name,category,description',
             'product.metaProducts:id,product_id,meta_id',
@@ -234,6 +234,7 @@ class OrderController extends Controller
                 'id' => $order->customer->id,
                 'name' => $order->customer->name,
                 'phone' => $order->customer->phone,
+                'phones' => $order->customer->phones,
                 'address' => $order->customer->address,
                 'meta' => $order->customer->meta ? $order->customer->meta->map(function ($meta) {
                     return [
@@ -526,7 +527,8 @@ class OrderController extends Controller
     public function print(Order $order)
     {
         $order = Order::with([
-            'customer:id,name,phone,address',
+            'customer',
+            'customer.meta',
             'jobdesks:id,order_id,user_id,status,description',
             'jobdesks.user:id,name',
             'product:id,name,category,description',
