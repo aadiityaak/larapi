@@ -101,32 +101,15 @@
         $klienUtama = $order->customer;
         $klienRelasi = null;
         $tipeRelasi = null;
-        $tipeRelasiKedua = null;
         
         if ($order->relatedOrder && $order->relatedOrder->customer) {
             $klienRelasi = $order->relatedOrder->customer;
             $tipeRelasi = $order->relation_type;
-            // Tentukan tipe untuk klien kedua (kebalikan)
-            if ($tipeRelasi === 'penjual') {
-                $tipeRelasiKedua = 'pembeli';
-            } elseif ($tipeRelasi === 'pembeli') {
-                $tipeRelasiKedua = 'penjual';
-            } else {
-                $tipeRelasiKedua = 'lainnya';
-            }
         } elseif ($order->relatedOrders->count() > 0) {
             $relatedOrder = $order->relatedOrders->first();
             if ($relatedOrder && $relatedOrder->customer) {
                 $klienRelasi = $relatedOrder->customer;
-                $tipeRelasiKedua = $relatedOrder->relation_type;
-                // Tentukan tipe untuk klien utama (kebalikan)
-                if ($tipeRelasiKedua === 'penjual') {
-                    $tipeRelasi = 'pembeli';
-                } elseif ($tipeRelasiKedua === 'pembeli') {
-                    $tipeRelasi = 'penjual';
-                } else {
-                    $tipeRelasi = 'lainnya';
-                }
+                $tipeRelasi = $relatedOrder->relation_type;
             }
         }
         
@@ -135,7 +118,7 @@
             if (!$customer) return;
             
             echo '<div style="margin-bottom: 8px;">';
-            echo '<div style="font-weight: bold; color: #4f46e5; margin-bottom: 2px; font-size: 9pt;">' . htmlspecialchars(ucfirst($label)) . ':</div>';
+            echo '<div style="font-weight: bold; color: #4f46e5; margin-bottom: 2px; font-size: 9pt;">' . htmlspecialchars($label ?: 'Klien') . ':</div>';
             echo '<div style="font-weight: bold; font-size: 11pt;">' . htmlspecialchars($customer->name ?? '-') . '</div>';
             echo '<div style="font-size: 9pt;">' . htmlspecialchars($customer->address ?? '-') . '</div>';
             
@@ -169,7 +152,7 @@
           <div class="min-h-30">
             @if($klienRelasi)
                 <?php renderKlienSimple($klienUtama, $tipeRelasi); ?>
-                <?php renderKlienSimple($klienRelasi, $tipeRelasiKedua); ?>
+                <?php renderKlienSimple($klienRelasi, null); ?>
             @else
                 <?php renderKlienSimple($klienUtama, 'Klien'); ?>
             @endif
