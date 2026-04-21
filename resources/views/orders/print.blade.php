@@ -129,6 +129,64 @@
           </div>
         </td>
         <td class="va-top">
+          <div class="label">Klien Relasi</div>
+          <div class="min-h-30">
+            <?php
+            // Cek apakah ada related order
+            $relatedCustomer = null;
+            $relationType = null;
+            
+            if ($order->relatedOrder && $order->relatedOrder->customer) {
+                $relatedCustomer = $order->relatedOrder->customer;
+                $relationType = $order->relation_type;
+            } elseif ($order->relatedOrders->count() > 0) {
+                $relatedOrder = $order->relatedOrders->first();
+                if ($relatedOrder && $relatedOrder->customer) {
+                    $relatedCustomer = $relatedOrder->customer;
+                    $relationType = $relatedOrder->relation_type;
+                }
+            }
+            ?>
+            
+            @if($relatedCustomer)
+                <div class="value">{{ $relatedCustomer->name ?? '-' }}</div>
+                <div>{{ $relatedCustomer->address ?? '-' }}</div>
+                
+                <?php
+                // Tampilkan nomor telepon related customer
+                $relatedPhones = [];
+                if ($relatedCustomer->phone) {
+                    $relatedPhones[] = $relatedCustomer->phone;
+                }
+                
+                if (property_exists($relatedCustomer, 'meta') && $relatedCustomer->meta) {
+                    foreach ($relatedCustomer->meta as $meta) {
+                        if (str_starts_with($meta->meta_key, 'phone_') && !empty($meta->meta_value)) {
+                            $relatedPhones[] = $meta->meta_value;
+                        }
+                    }
+                }
+                ?>
+                
+                @if(!empty($relatedPhones))
+                    @foreach($relatedPhones as $phone)
+                        <div>{{ $phone }}</div>
+                    @endforeach
+                @else
+                    <div>-</div>
+                @endif
+                
+                @if($relationType)
+                    <div style="margin-top: 2mm; padding: 1mm 3mm; background: #e5e7eb; color: #111827; font-size: 8pt; border-radius: 2mm; display: inline-block;">
+                        {{ ucfirst($relationType) }}
+                    </div>
+                @endif
+            @else
+                <div>-</div>
+            @endif
+          </div>
+        </td>
+        <td class="va-top">
           <div class="label">Jenis Order</div>
           <div>
             <div class="min-h-30">{{ $order->product->name ?? '-' }}</div>

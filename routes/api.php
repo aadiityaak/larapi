@@ -79,6 +79,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Order stats endpoint
     Route::get('orders/stats', [OrderController::class, 'stats']);
+    
+    // Order list for dropdown
+    Route::get('orders/list', [OrderController::class, 'list']);
 
     // Order print (PDF)
     Route::get('orders/{order}/print', [OrderController::class, 'print'])->name('orders.print');

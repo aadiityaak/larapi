@@ -40,6 +40,8 @@ class OrderController extends Controller
         $query = Order::with([
             'customer',
             'customer.meta',
+            'relatedOrder.customer',
+            'relatedOrders.customer',
             'jobdesks:id,order_id,status,description',
             'product:id,name,category,description',
             'product.metaProducts:id,product_id,meta_id',
@@ -64,6 +66,8 @@ class OrderController extends Controller
                 'billing_notes',
                 'meta',
                 'lampiran',
+                'related_order_id',
+                'relation_type',
                 'created_at'
             ]);
 
@@ -244,6 +248,33 @@ class OrderController extends Controller
                     ];
                 }) : []
             ] : null,
+            'related_order_id' => $order->related_order_id,
+            'relation_type' => $order->relation_type,
+            'related_order' => $order->relatedOrder ? [
+                'id' => $order->relatedOrder->id,
+                'no_order' => $order->relatedOrder->no_order,
+                'customer' => $order->relatedOrder->customer ? [
+                    'id' => $order->relatedOrder->customer->id,
+                    'name' => $order->relatedOrder->customer->name,
+                    'phone' => $order->relatedOrder->customer->phone,
+                    'phones' => $order->relatedOrder->customer->phones,
+                    'address' => $order->relatedOrder->customer->address,
+                ] : null,
+            ] : null,
+            'related_orders' => $order->relatedOrders ? $order->relatedOrders->map(function ($relatedOrder) {
+                return [
+                    'id' => $relatedOrder->id,
+                    'no_order' => $relatedOrder->no_order,
+                    'relation_type' => $relatedOrder->relation_type,
+                    'customer' => $relatedOrder->customer ? [
+                        'id' => $relatedOrder->customer->id,
+                        'name' => $relatedOrder->customer->name,
+                        'phone' => $relatedOrder->customer->phone,
+                        'phones' => $relatedOrder->customer->phones,
+                        'address' => $relatedOrder->customer->address,
+                    ] : null,
+                ];
+            }) : [],
             'jobdesks' => $order->jobdesks ? $order->jobdesks->map(function ($jobdesk) {
                 return [
                     'id' => $jobdesk->id,
@@ -297,7 +328,18 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        $order = Order::find($order->id)->load('customer');
+        $order = Order::with([
+            'customer',
+            'customer.meta',
+            'relatedOrder.customer',
+            'relatedOrders.customer',
+            'jobdesks',
+            'product',
+            'product.metaProducts.meta',
+            'maker',
+            'pic'
+        ])->findOrFail($order->id);
+
         return response()->json($order);
     }
 
@@ -337,6 +379,8 @@ class OrderController extends Controller
                 'payment_method' => 'required',
                 'meta' => 'nullable',
                 'customer' => 'required',
+                'related_order_id' => 'nullable|exists:orders,id',
+                'relation_type' => 'nullable|in:penjual,pembeli,lainnya',
                 'pemberi_order' => 'nullable|string|max:255',
                 'pemberi_phone' => 'nullable|string|max:50',
                 'billing_notes' => 'nullable|string|max:10000',
@@ -399,6 +443,8 @@ class OrderController extends Controller
             'payment_method' => 'required',
             'meta' => 'nullable',
             'customer_id' => 'required|exists:customers,id',
+            'related_order_id' => 'nullable|exists:orders,id',
+            'relation_type' => 'nullable|in:penjual,pembeli,lainnya',
             'pemberi_order' => 'nullable|string|max:255',
             'pemberi_phone' => 'nullable|string|max:50',
             'billing_notes' => 'nullable|string|max:10000',
@@ -521,6 +567,36 @@ class OrderController extends Controller
         ]);
     }
 
+    public function list(Request $request)
+    {
+        $excludeId = $request->query('exclude_id');
+
+        $query = Order::with('customer')
+            ->select(['id', 'no_order', 'customer_id', 'order_date'])
+            ->orderBy('created_at', 'desc');
+
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+
+        $orders = $query->get()->map(function ($order) {
+            return [
+                'id' => $order->id,
+                'no_order' => $order->no_order,
+                'customer_name' => $order->customer?->name,
+                'customer' => $order->customer ? [
+                    'id' => $order->customer->id,
+                    'name' => $order->customer->name,
+                    'phone' => $order->customer->phone,
+                    'phones' => $order->customer->phones,
+                    'address' => $order->customer->address,
+                ] : null,
+            ];
+        });
+
+        return response()->json($orders);
+    }
+
     /**
      * Generate printable PDF for an order
      */
@@ -529,6 +605,10 @@ class OrderController extends Controller
         $order = Order::with([
             'customer',
             'customer.meta',
+            'relatedOrder.customer',
+            'relatedOrder.customer.meta',
+            'relatedOrders.customer',
+            'relatedOrders.customer.meta',
             'jobdesks:id,order_id,user_id,status,description',
             'jobdesks.user:id,name',
             'product:id,name,category,description',

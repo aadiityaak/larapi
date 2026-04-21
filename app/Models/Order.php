@@ -42,6 +42,8 @@ class Order extends Model
     protected $fillable = [
         'no_order',
         'customer_id',
+        'related_order_id',
+        'relation_type',
         'created_by',
         'maker_id',
         'pic_id',
@@ -84,5 +86,15 @@ class Order extends Model
     public function pic()
     {
         return $this->belongsTo(User::class, 'pic_id');
+    }
+
+    public function relatedOrder()
+    {
+        return $this->belongsTo(Order::class, 'related_order_id');
+    }
+
+    public function relatedOrders()
+    {
+        return $this->hasMany(Order::class, 'related_order_id');
     }
 }
