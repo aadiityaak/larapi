@@ -58,6 +58,7 @@ class OrderController extends Controller
                 'pic_id',
                 'pemberi_order',
                 'pemberi_phone',
+                'contact_persons',
                 'product_id',
                 'order_date',
                 'price',
@@ -218,6 +219,7 @@ class OrderController extends Controller
             'customer_id' => $order->customer?->id,
             'pemberi_order' => $order->pemberi_order,
             'pemberi_phone' => $order->pemberi_phone,
+            'contact_persons' => $order->contact_persons,
             'maker_id' => $order->maker_id,
             'pic_id' => $order->pic_id,
             'maker_name' => $order->maker?->name,
@@ -383,6 +385,10 @@ class OrderController extends Controller
                 'relation_type' => 'nullable|string|max:255',
                 'pemberi_order' => 'nullable|string|max:255',
                 'pemberi_phone' => 'nullable|string|max:50',
+                'contact_persons' => 'nullable|array',
+                'contact_persons.*' => 'array',
+                'contact_persons.*.name' => 'nullable|string|max:255',
+                'contact_persons.*.phone' => 'nullable|string|max:50',
                 'billing_notes' => 'nullable|string|max:10000',
                 'maker_id' => 'nullable|exists:users,id',
                 'pic_id' => 'nullable|exists:users,id',
@@ -394,6 +400,36 @@ class OrderController extends Controller
                 'customer.required' => 'Pelanggan harus diisi.',
             ]);
 
+            if (array_key_exists('contact_persons', $validatedData)) {
+                $contactPersons = is_array($validatedData['contact_persons']) ? $validatedData['contact_persons'] : [];
+                $contactPersons = array_values(array_filter($contactPersons, function ($item) {
+                    if (!is_array($item)) return false;
+                    $name = trim((string)($item['name'] ?? ''));
+                    $phone = trim((string)($item['phone'] ?? ''));
+                    return $name !== '' || $phone !== '';
+                }));
+                $validatedData['contact_persons'] = $contactPersons;
+
+                $first = $contactPersons[0] ?? null;
+                if (is_array($first)) {
+                    if (empty($validatedData['pemberi_order'] ?? null) && !empty($first['name'] ?? null)) {
+                        $validatedData['pemberi_order'] = $first['name'];
+                    }
+                    if (empty($validatedData['pemberi_phone'] ?? null) && !empty($first['phone'] ?? null)) {
+                        $validatedData['pemberi_phone'] = $first['phone'];
+                    }
+                }
+            } else {
+                $name = trim((string)($validatedData['pemberi_order'] ?? ''));
+                $phone = trim((string)($validatedData['pemberi_phone'] ?? ''));
+                if ($name !== '' || $phone !== '') {
+                    $validatedData['contact_persons'] = [[
+                        'name' => $name !== '' ? $name : null,
+                        'phone' => $phone !== '' ? $phone : null,
+                    ]];
+                }
+            }
+
             // Update order dengan data yang sudah divalidasi
             $order->update($validatedData);
         }
@@ -404,6 +440,9 @@ class OrderController extends Controller
             'id' => $order->id,
             'no_order' => $order->no_order,
             'customer_id' => $order->customer->id,
+            'pemberi_order' => $order->pemberi_order,
+            'pemberi_phone' => $order->pemberi_phone,
+            'contact_persons' => $order->contact_persons,
             'order_date' => $order->order_date,
             'product_id' => $order->product->id,
             'price' => $user->role !== 'staff' ? $order->price : 0,
@@ -447,6 +486,10 @@ class OrderController extends Controller
             'relation_type' => 'nullable|string|max:255',
             'pemberi_order' => 'nullable|string|max:255',
             'pemberi_phone' => 'nullable|string|max:50',
+            'contact_persons' => 'nullable|array',
+            'contact_persons.*' => 'array',
+            'contact_persons.*.name' => 'nullable|string|max:255',
+            'contact_persons.*.phone' => 'nullable|string|max:50',
             'billing_notes' => 'nullable|string|max:10000',
             'maker_id' => 'nullable|exists:users,id',
             'pic_id' => 'nullable|exists:users,id',
@@ -459,7 +502,39 @@ class OrderController extends Controller
             ], 422);
         }
 
-        $order = Order::create($validator->validated());
+        $validatedData = $validator->validated();
+
+        if (array_key_exists('contact_persons', $validatedData)) {
+            $contactPersons = is_array($validatedData['contact_persons']) ? $validatedData['contact_persons'] : [];
+            $contactPersons = array_values(array_filter($contactPersons, function ($item) {
+                if (!is_array($item)) return false;
+                $name = trim((string)($item['name'] ?? ''));
+                $phone = trim((string)($item['phone'] ?? ''));
+                return $name !== '' || $phone !== '';
+            }));
+            $validatedData['contact_persons'] = $contactPersons;
+
+            $first = $contactPersons[0] ?? null;
+            if (is_array($first)) {
+                if (empty($validatedData['pemberi_order'] ?? null) && !empty($first['name'] ?? null)) {
+                    $validatedData['pemberi_order'] = $first['name'];
+                }
+                if (empty($validatedData['pemberi_phone'] ?? null) && !empty($first['phone'] ?? null)) {
+                    $validatedData['pemberi_phone'] = $first['phone'];
+                }
+            }
+        } else {
+            $name = trim((string)($validatedData['pemberi_order'] ?? ''));
+            $phone = trim((string)($validatedData['pemberi_phone'] ?? ''));
+            if ($name !== '' || $phone !== '') {
+                $validatedData['contact_persons'] = [[
+                    'name' => $name !== '' ? $name : null,
+                    'phone' => $phone !== '' ? $phone : null,
+                ]];
+            }
+        }
+
+        $order = Order::create($validatedData);
         // set maker (created_by) on create
         if (!$order->created_by && $user) {
             $order->created_by = $user->id;
@@ -492,6 +567,7 @@ class OrderController extends Controller
             'customer_id' => $order->customer->id,
             'pemberi_order' => $order->pemberi_order,
             'pemberi_phone' => $order->pemberi_phone,
+            'contact_persons' => $order->contact_persons,
             'order_date' => $order->order_date,
             'product_id' => $order->product->id,
             'price' => $user->role !== 'staff' ? $order->price : 0,

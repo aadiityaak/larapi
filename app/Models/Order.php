@@ -49,6 +49,7 @@ class Order extends Model
         'pic_id',
         'pemberi_order',
         'pemberi_phone',
+        'contact_persons',
         'order_date',
         'product_id',
         'price',
@@ -61,6 +62,7 @@ class Order extends Model
 
     protected $casts = [
         'meta' => 'array',
+        'contact_persons' => 'array',
     ];
 
     public function customer()

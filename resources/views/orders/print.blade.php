@@ -65,32 +65,51 @@
             <div class="label" style="margin-top: 2mm;">Contact Person</div>
             
             <?php
-            // Tampilkan semua nomor telepon untuk contact person
-            $contactPhones = [];
-            if ($order->pemberi_phone) {
-                $contactPhones[] = $order->pemberi_phone;
-            } else {
-                if ($order->customer->phone) {
-                    $contactPhones[] = $order->customer->phone;
-                }
-                
-                // Tambahkan nomor telepon dari customer_meta (phone_*)
-                if ($order->customer->meta) {
-                    foreach ($order->customer->meta as $meta) {
-                        if (str_starts_with($meta->meta_key, 'phone_') && !empty($meta->meta_value)) {
-                            $contactPhones[] = $meta->meta_value;
+            $contactPersons = is_array($order->contact_persons ?? null) ? $order->contact_persons : [];
+            $contactPersons = array_values(array_filter($contactPersons, function ($item) {
+                if (!is_array($item)) return false;
+                $name = trim((string)($item['name'] ?? ''));
+                $phone = trim((string)($item['phone'] ?? ''));
+                return $name !== '' || $phone !== '';
+            }));
+            ?>
+            
+            @if(!empty($contactPersons))
+                @foreach($contactPersons as $cp)
+                    <?php
+                    $cpName = trim((string)($cp['name'] ?? ''));
+                    $cpPhone = trim((string)($cp['phone'] ?? ''));
+                    $line = trim($cpName . ($cpName !== '' && $cpPhone !== '' ? ' - ' : '') . $cpPhone);
+                    ?>
+                    <div class="value">{{ $line !== '' ? $line : '-' }}</div>
+                @endforeach
+            @else
+                <?php
+                $contactPhones = [];
+                if ($order->pemberi_phone) {
+                    $contactPhones[] = $order->pemberi_phone;
+                } else {
+                    if ($order->customer->phone) {
+                        $contactPhones[] = $order->customer->phone;
+                    }
+                    
+                    if ($order->customer->meta) {
+                        foreach ($order->customer->meta as $meta) {
+                            if (str_starts_with($meta->meta_key, 'phone_') && !empty($meta->meta_value)) {
+                                $contactPhones[] = $meta->meta_value;
+                            }
                         }
                     }
                 }
-            }
-            ?>
-            
-            @if(!empty($contactPhones))
-                @foreach($contactPhones as $phone)
-                    <div class="value">{{ $phone }}</div>
-                @endforeach
-            @else
-                <div class="value">-</div>
+                ?>
+
+                @if(!empty($contactPhones))
+                    @foreach($contactPhones as $phone)
+                        <div class="value">{{ $phone }}</div>
+                    @endforeach
+                @else
+                    <div class="value">-</div>
+                @endif
             @endif
           </div>
         </td>
