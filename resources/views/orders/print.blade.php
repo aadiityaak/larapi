@@ -11,7 +11,7 @@
     * { box-sizing: border-box; }
     body { font-family: DejaVu Sans, Arial, Helvetica, sans-serif; color: #000; margin: 0; }
     .sheet { width: calc(100% - 2mm); max-width: calc(100% - 18mm); border: none; padding: 6mm; margin: 0 auto; }
-    .letterhead-space { height: 65mm; }
+    .letterhead-space { height: 60mm; }
     .header { text-align: center; margin-bottom: 4mm; }
     .title { font-size: 14pt; font-weight: 700; font-family: 'Playfair Display', DejaVu Serif, 'Times New Roman', Times, serif; }
     .subtitle { font-size: 8pt; margin-top: 2mm; }
@@ -38,7 +38,9 @@
     .fw-700 { font-weight: 700; }
     .fw-800 { font-weight: 800; }
     .outer td.va-top { vertical-align: top; }
-    .min-h-30 { min-height: 20mm; }
+    .min-h-10 { min-height: 10mm; }
+    .min-h-20 { min-height: 20mm; }
+    .min-h-30 { min-height: 30mm; }
   </style>
 </head>
 <body>
@@ -46,13 +48,13 @@
     <div class="letterhead-space"></div>
     <table class="outer">
       <tr>
-        <td class="noorder" rowspan="2" style="width:55%; height:36mm;">
+        <td class="noorder" rowspan="3" style="width:55%; height:36mm;">
           <div class="label" style="color:#fff;">No Order</div>
           {{ $order->no_order }}
         </td>
         <td style="width:45%;">
           <div class="label">Tanggal Order</div>
-          <div class="min-h-30">
+          <div class="min-h-10">
             {{ \Carbon\Carbon::parse($order->order_date ?? $order->created_at)->locale('id')->translatedFormat('j F Y') }}
           </div>
         </td>
@@ -60,8 +62,14 @@
       <tr>
         <td>
           <div class="label">Pemberi Order</div>
-          <div class="min-h-30">
+          <div class="min-h-10">
             <div class="value">{{ $order->pemberi_order ?? ($order->customer->name ?? '') }}</div>
+          </div>
+        </td>
+        </tr>
+        <tr>
+        <td>
+          <div class="min-h-10">
             <div class="label" style="margin-top: 2mm;">Contact Person</div>
             
             <?php
@@ -169,7 +177,7 @@
         
         <td class="va-top" style="width: 55%;">
           <div class="label">Klien</div>
-          <div class="min-h-30">
+          <div class="min-h-20">
             @if($klienRelasi)
                 <?php renderKlienSimple($klienUtama, $tipeRelasi, 'Klien 1'); ?>
                 <?php renderKlienSimple($klienRelasi, null, 'Klien 2'); ?>
@@ -180,7 +188,7 @@
         </td>
         <td class="va-top" style="width: 45%;">
           <div class="label">Jenis Order</div>
-          <div class="min-h-30">
+          <div class="min-h-20">
             <div>{{ $order->product->name ?? '-' }}</div>
           </div>
         </td>
@@ -188,7 +196,7 @@
         <tr>
           <td colspan="2">
             <div class="label">Jaminan / Agunan / Objek</div>
-            <div class="min-h-30">
+            <div class="min-h-20">
               {{ data_get($order->meta, '8') ?: (data_get($order->meta, '17') ?: '-') }}
             </div>
           </td>
@@ -196,7 +204,7 @@
       <tr>
         <td colspan="2">
           <div class="label">Catatan & Keterangan</div>
-          <div class="min-h-30">
+          <div class="min-h-20">
             {{ data_get($order->meta, '1') ?? '' }}
           </div>
         </td>
@@ -204,7 +212,7 @@
       <tr>
         <td colspan="2">
           <div class="label">Catatan & Keterangan Tagihan <span class="muted">(diisi Div. Keuangan)</span></div>
-          <div class="min-h-30">{{ $order->billing_notes ?? '' }}</div>
+          <div class="min-h-20">{{ $order->billing_notes ?? '' }}</div>
         </td>
       </tr>
       <tr class="footer-cells">
