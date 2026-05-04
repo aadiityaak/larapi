@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Role;
@@ -24,7 +25,15 @@ class KaryawanController extends Controller
         $role = $request->query('role');
         $jobdeskRoles = $request->boolean('jobdesk_roles', false);
 
-        $query = User::with(['roles', 'jobdesk']);
+        $query = User::query()->with(['roles', 'jobdesk']);
+        if (Schema::hasTable('login_histories')) {
+            $lastLoginSub = DB::table('login_histories')
+                ->select('user_id', DB::raw('MAX(created_at) as last_login_at'))
+                ->groupBy('user_id');
+            $query->leftJoinSub($lastLoginSub, 'lh', function ($join) {
+                $join->on('users.id', '=', 'lh.user_id');
+            })->addSelect('users.*', 'lh.last_login_at');
+        }
 
         if ($role) {
             $query->whereHas('roles', function ($q) use ($role) {
@@ -41,7 +50,7 @@ class KaryawanController extends Controller
             $query->where('name', 'like', '%' . $name . '%');
         }
 
-        $query->orderByDesc('created_at');
+        $query->orderByDesc('users.created_at');
 
         $transformUser = function ($user) {
             return [
@@ -56,6 +65,7 @@ class KaryawanController extends Controller
                 'total_jobdesk' => $user->jobdesk->count(),
                 'jobdesk_on_progress' => $user->jobdesk->where('status', 'Progress')->count(),
                 'jobdesk_selesai' => $user->jobdesk->where('status', 'Selesai')->count(),
+                'last_login_at' => $user->last_login_at,
             ];
         };
 
@@ -145,6 +155,7 @@ class KaryawanController extends Controller
             'jobdesk_on_progress' => $user->jobdesk->where('status', 'Progress')->count(),
             'jobdesk_selesai' => $user->jobdesk->where('status', 'Selesai')->count(),
             'login_histories' => $loginHistories,
+            'last_login_at' => $loginHistories->first()->created_at ?? null,
         ];
 
         return response()->json($response);

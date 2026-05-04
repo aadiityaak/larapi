@@ -8,6 +8,7 @@ use App\Models\Jobdesk;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class DashboardController extends Controller
 {
@@ -104,6 +105,89 @@ class DashboardController extends Controller
             ];
         }
 
+        $karyawanLoginActivity = null;
+        if ($user && $user->can('user:read')) {
+            try {
+                if (Schema::hasTable('login_histories')) {
+                    $cutoff = now()->subDays(30);
+
+                    $lastLoginSub = DB::table('login_histories')
+                        ->select('user_id', DB::raw('MAX(created_at) as last_login_at'))
+                        ->groupBy('user_id');
+
+                    $loginCount30dSub = DB::table('login_histories')
+                        ->where('created_at', '>=', $cutoff)
+                        ->select('user_id', DB::raw('COUNT(*) as login_count_30d'))
+                        ->groupBy('user_id');
+
+                    $users = User::query()
+                        ->leftJoinSub($lastLoginSub, 'lh_last', function ($join) {
+                            $join->on('users.id', '=', 'lh_last.user_id');
+                        })
+                        ->leftJoinSub($loginCount30dSub, 'lh_30d', function ($join) {
+                            $join->on('users.id', '=', 'lh_30d.user_id');
+                        })
+                        ->addSelect('users.id', 'users.name', 'users.email', 'users.avatar', 'lh_last.last_login_at', 'lh_30d.login_count_30d')
+                        ->orderByRaw('lh_last.last_login_at IS NULL')
+                        ->orderByDesc('lh_last.last_login_at')
+                        ->orderBy('users.name')
+                        ->get();
+
+                    $buckets = [
+                        '0_1' => 0,
+                        '2_7' => 0,
+                        '8_30' => 0,
+                        'gt_30' => 0,
+                        'never' => 0,
+                    ];
+
+                    $usersPayload = $users->map(function ($u) use (&$buckets) {
+                        $lastLoginAt = $u->last_login_at ? \Carbon\Carbon::parse($u->last_login_at) : null;
+                        $days = $lastLoginAt ? now()->diffInDays($lastLoginAt) : null;
+
+                        if ($days === null) {
+                            $buckets['never']++;
+                        } elseif ($days <= 1) {
+                            $buckets['0_1']++;
+                        } elseif ($days <= 7) {
+                            $buckets['2_7']++;
+                        } elseif ($days <= 30) {
+                            $buckets['8_30']++;
+                        } else {
+                            $buckets['gt_30']++;
+                        }
+
+                        return [
+                            'id' => $u->id,
+                            'name' => $u->name,
+                            'email' => $u->email,
+                            'avatar' => $u->avatar,
+                            'last_login_at' => $u->last_login_at,
+                            'days_since_last_login' => $days,
+                            'login_count_30d' => (int) ($u->login_count_30d ?? 0),
+                        ];
+                    });
+
+                    $karyawanLoginActivity = [
+                        'buckets' => $buckets,
+                        'users' => $usersPayload,
+                    ];
+                }
+            } catch (\Throwable $e) {
+                report($e);
+                $karyawanLoginActivity = [
+                    'buckets' => [
+                        '0_1' => 0,
+                        '2_7' => 0,
+                        '8_30' => 0,
+                        'gt_30' => 0,
+                        'never' => 0,
+                    ],
+                    'users' => [],
+                ];
+            }
+        }
+
         // Menyiapkan data untuk response
         $data = [
             'total_customers' => $totalCustomers,
@@ -115,6 +199,20 @@ class DashboardController extends Controller
             'total_tagihan' => $user->role !== 'staff' ? $totalTagihan : 0,
             'total_tagihan_bulan_ini' => $user->role !== 'staff' ? $totalTagihanBulanIni : 0,
             'total_karyawan' => $totalKaryawan,
+            'last_login_at' => (function () use ($user) {
+                try {
+                    if (!Schema::hasTable('login_histories')) {
+                        return null;
+                    }
+                    return DB::table('login_histories')
+                        ->where('user_id', $user->id)
+                        ->max('created_at');
+                } catch (\Throwable $e) {
+                    report($e);
+                    return null;
+                }
+            })(),
+            'karyawan_login_activity' => $karyawanLoginActivity,
             'total_jobdesks' => [
                 'Masuk' => (int) $totalJobdesk->get('Masuk', 0),
                 'Progress' => (int) $totalJobdesk->get('Progress', 0),
