@@ -106,7 +106,15 @@ class DashboardController extends Controller
         }
 
         $karyawanLoginActivity = null;
-        if ($user && $user->can('user:read')) {
+        $isAdminUser = false;
+        if ($user) {
+            $isAdminUser = (int) ($user->is_admin ?? 0) === 1;
+            if (!$isAdminUser && method_exists($user, 'hasRole')) {
+                $isAdminUser = $user->hasRole('admin');
+            }
+        }
+
+        if ($isAdminUser) {
             try {
                 if (Schema::hasTable('login_histories')) {
                     $cutoff = now()->subDays(30);
@@ -120,6 +128,11 @@ class DashboardController extends Controller
                         ->select('user_id', DB::raw('COUNT(*) as login_count_30d'))
                         ->groupBy('user_id');
 
+                    $loginDays30dSub = DB::table('login_histories')
+                        ->where('created_at', '>=', $cutoff)
+                        ->select('user_id', DB::raw('COUNT(DISTINCT DATE(created_at)) as login_days_30d'))
+                        ->groupBy('user_id');
+
                     $users = User::query()
                         ->leftJoinSub($lastLoginSub, 'lh_last', function ($join) {
                             $join->on('users.id', '=', 'lh_last.user_id');
@@ -127,7 +140,10 @@ class DashboardController extends Controller
                         ->leftJoinSub($loginCount30dSub, 'lh_30d', function ($join) {
                             $join->on('users.id', '=', 'lh_30d.user_id');
                         })
-                        ->addSelect('users.id', 'users.name', 'users.email', 'users.avatar', 'lh_last.last_login_at', 'lh_30d.login_count_30d')
+                        ->leftJoinSub($loginDays30dSub, 'lh_days_30d', function ($join) {
+                            $join->on('users.id', '=', 'lh_days_30d.user_id');
+                        })
+                        ->addSelect('users.id', 'users.name', 'users.email', 'users.avatar', 'lh_last.last_login_at', 'lh_30d.login_count_30d', 'lh_days_30d.login_days_30d')
                         ->orderByRaw('lh_last.last_login_at IS NULL')
                         ->orderByDesc('lh_last.last_login_at')
                         ->orderBy('users.name')
@@ -165,6 +181,7 @@ class DashboardController extends Controller
                             'last_login_at' => $u->last_login_at,
                             'days_since_last_login' => $days,
                             'login_count_30d' => (int) ($u->login_count_30d ?? 0),
+                            'login_days_30d' => (int) ($u->login_days_30d ?? 0),
                         ];
                     });
 
