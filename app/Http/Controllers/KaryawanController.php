@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Role;
@@ -116,9 +117,20 @@ class KaryawanController extends Controller
 
     public function show($id)
     {
-        $this->authorize('view', User::find($id));
-        $user = User::find($id);
-        $user->load('jobdesk');
+        $user = User::findOrFail($id);
+        $this->authorize('view', $user);
+        $user->load(['jobdesk', 'roles']);
+
+        try {
+            $loginHistories = DB::table('login_histories')
+                ->where('user_id', $user->id)
+                ->orderByDesc('created_at')
+                ->limit(20)
+                ->get(['id', 'ip_address', 'user_agent', 'created_at']);
+        } catch (\Throwable $e) {
+            report($e);
+            $loginHistories = collect();
+        }
 
         $response = [
             'id' => $user->id,
@@ -132,6 +144,7 @@ class KaryawanController extends Controller
             'total_jobdesk' => $user->jobdesk->count(),
             'jobdesk_on_progress' => $user->jobdesk->where('status', 'Progress')->count(),
             'jobdesk_selesai' => $user->jobdesk->where('status', 'Selesai')->count(),
+            'login_histories' => $loginHistories,
         ];
 
         return response()->json($response);
