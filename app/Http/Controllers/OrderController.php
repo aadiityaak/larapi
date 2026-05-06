@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -23,6 +24,59 @@ class OrderController extends Controller
         'meta' => 'nullable',
         'customer_id' => 'required|exists:customers,id',
     ];
+
+    private function getSelectedProductIds(Order $order): array
+    {
+        $meta = is_array($order->meta) ? $order->meta : [];
+        $ids = [];
+
+        if (isset($meta['product_ids']) && is_array($meta['product_ids'])) {
+            $ids = $meta['product_ids'];
+        }
+
+        if (!$ids && !empty($order->product_id)) {
+            $ids = [$order->product_id];
+        }
+
+        $ids = array_values(array_unique(array_filter(array_map(function ($v) {
+            if ($v === null || $v === '') return null;
+            return (int) $v;
+        }, $ids))));
+
+        return $ids;
+    }
+
+    private function buildProductsResponse(Order $order): array
+    {
+        $ids = $this->getSelectedProductIds($order);
+        if (!count($ids)) return [];
+
+        $products = Product::with(['metaProducts.meta'])
+            ->whereIn('id', $ids)
+            ->get()
+            ->keyBy('id');
+
+        $result = [];
+        foreach ($ids as $id) {
+            $p = $products->get($id);
+            if (!$p) continue;
+            $result[] = [
+                'id' => $p->id,
+                'name' => $p->name,
+                'category' => $p->category,
+                'description' => $p->description,
+                'meta_products' => $p->metaProducts ? $p->metaProducts->map(function ($metaProduct) {
+                    return $metaProduct->meta ? [
+                        'id' => $metaProduct->meta->id,
+                        'name' => $metaProduct->meta->name,
+                        'type' => $metaProduct->meta->type
+                    ] : null;
+                })->filter()->values() : [],
+            ];
+        }
+
+        return $result;
+    }
 
     public function index(Request $request)
     {
@@ -297,6 +351,7 @@ class OrderController extends Controller
                     ] : null;
                 })->filter() : [],
             ] : null,
+            'products' => $this->buildProductsResponse($order),
             'role' => $user->role,
             // Added fields for frontend convenience
             'is_completed' => $jobdeskCount > 0 && $completedJobdesks === $jobdeskCount,
@@ -375,7 +430,9 @@ class OrderController extends Controller
             // Jika tidak ada lampiran, validasi field lain
             $validatedData = $request->validate([
                 'order_date' => 'required',
-                'product_id' => 'required',
+                'product_id' => 'required_without:product_ids|exists:products,id',
+                'product_ids' => 'required_without:product_id|array|min:1',
+                'product_ids.*' => 'integer|exists:products,id',
                 'price' => 'required',
                 'paid' => 'nullable',
                 'payment_method' => 'required',
@@ -399,6 +456,16 @@ class OrderController extends Controller
                 'payment_method.required' => 'Metode pembayaran harus dipilih.',
                 'customer.required' => 'Pelanggan harus diisi.',
             ]);
+
+            if (empty($validatedData['product_id'] ?? null) && !empty($validatedData['product_ids'] ?? null)) {
+                $validatedData['product_id'] = (int) ($validatedData['product_ids'][0] ?? null);
+            }
+            if (array_key_exists('product_ids', $validatedData)) {
+                $meta = is_array($validatedData['meta'] ?? null) ? $validatedData['meta'] : [];
+                $meta['product_ids'] = $validatedData['product_ids'];
+                $validatedData['meta'] = $meta;
+                unset($validatedData['product_ids']);
+            }
 
             if (array_key_exists('contact_persons', $validatedData)) {
                 $contactPersons = is_array($validatedData['contact_persons']) ? $validatedData['contact_persons'] : [];
@@ -465,7 +532,8 @@ class OrderController extends Controller
                 'category' => $order->product->category,
                 'description' => $order->product->description,
                 'meta_products' => $order->product->metaProducts->pluck('meta'),
-            ]
+            ],
+            'products' => $this->buildProductsResponse($order),
         ];
 
         return response()->json($response);
@@ -476,7 +544,9 @@ class OrderController extends Controller
         $user = $request->user();
         $validator = Validator::make($request->all(), [
             'order_date' => 'required',
-            'product_id' => 'required',
+            'product_id' => 'required_without:product_ids|exists:products,id',
+            'product_ids' => 'required_without:product_id|array|min:1',
+            'product_ids.*' => 'integer|exists:products,id',
             'price' => 'required',
             'paid' => 'required',
             'payment_method' => 'required',
@@ -503,6 +573,16 @@ class OrderController extends Controller
         }
 
         $validatedData = $validator->validated();
+
+        if (empty($validatedData['product_id'] ?? null) && !empty($validatedData['product_ids'] ?? null)) {
+            $validatedData['product_id'] = (int) ($validatedData['product_ids'][0] ?? null);
+        }
+        if (array_key_exists('product_ids', $validatedData)) {
+            $meta = is_array($validatedData['meta'] ?? null) ? $validatedData['meta'] : [];
+            $meta['product_ids'] = $validatedData['product_ids'];
+            $validatedData['meta'] = $meta;
+            unset($validatedData['product_ids']);
+        }
 
         if (array_key_exists('contact_persons', $validatedData)) {
             $contactPersons = is_array($validatedData['contact_persons']) ? $validatedData['contact_persons'] : [];
@@ -558,7 +638,11 @@ class OrderController extends Controller
         }
         $recipients = $users->concat($extraRecipients)->unique('id')->values();
         if ($recipients->isNotEmpty()) {
-            Notification::send($recipients, new NewOrderNotification($order));
+            try {
+                Notification::send($recipients, new NewOrderNotification($order));
+            } catch (\Throwable $e) {
+                report($e);
+            }
         }
 
         $response = [
@@ -591,7 +675,8 @@ class OrderController extends Controller
                 'category' => $order->product->category,
                 'description' => $order->product->description,
                 'meta_products' => $order->product->metaProducts->pluck('meta'),
-            ]
+            ],
+            'products' => $this->buildProductsResponse($order),
         ];
         return response()->json($response);
     }

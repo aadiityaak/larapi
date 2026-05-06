@@ -43,12 +43,12 @@ class PendingJobdesk extends Notification
     public function via($notifiable)
     {
         $channels = ['database'];
-        
-        // Hanya kirim email jika user mengaktifkan notifikasi email
-        if ($notifiable->email_notifications ?? true) {
+
+        $email = $notifiable->email ?? null;
+        if (($notifiable->email_notifications ?? true) && is_string($email) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $channels[] = 'mail';
         }
-        
+
         return $channels;
     }
 
