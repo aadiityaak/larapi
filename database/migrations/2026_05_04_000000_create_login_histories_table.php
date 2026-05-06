@@ -8,9 +8,14 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('login_histories')) {
+            return;
+        }
+
         Schema::create('login_histories', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->unsignedBigInteger('user_id');
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
             $table->string('guard', 50)->nullable();
@@ -18,6 +23,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['user_id', 'created_at']);
+            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
         });
     }
 
