@@ -29,18 +29,51 @@ class ProductController extends Controller
     // Paginate the results
     if ($paginate === 'false') {
       $products = $query->get()->map(function ($data) {
+        $metaProducts = $data->metaProducts
+          ->pluck('meta')
+          ->filter()
+          ->values()
+          ->map(function ($meta) {
+            return [
+              'id' => $meta->id,
+              'name' => $meta->name,
+              'type' => $meta->type,
+            ];
+          });
         return [
           'id' => $data->id,
           'name' => $data->name,
           'description' => $data->description,
           'category' => $data->category,
-          'meta' => $data->metaProducts->pluck('meta')->pluck('id'),
-          'meta_products' => $data->metaProducts->pluck('meta'),
+          'meta' => $metaProducts->pluck('id'),
+          'meta_products' => $metaProducts,
           'order_count' => $data->orders->count(),
         ];
       });
     } else {
       $products = $query->paginate(25);
+      $products->getCollection()->transform(function ($data) {
+        $metaProducts = $data->metaProducts
+          ->pluck('meta')
+          ->filter()
+          ->values()
+          ->map(function ($meta) {
+            return [
+              'id' => $meta->id,
+              'name' => $meta->name,
+              'type' => $meta->type,
+            ];
+          });
+        return [
+          'id' => $data->id,
+          'name' => $data->name,
+          'description' => $data->description,
+          'category' => $data->category,
+          'meta' => $metaProducts->pluck('id'),
+          'meta_products' => $metaProducts,
+          'order_count' => $data->orders->count(),
+        ];
+      });
     }
 
     return response()->json($products, 200);
@@ -70,7 +103,18 @@ class ProductController extends Controller
       'name' => $product->name,
       'description' => $product->description,
       'category' => $product->category,
-      'meta_products' => $product->metaProducts->pluck('meta')->pluck('id'),
+      'meta' => $product->metaProducts->pluck('meta')->pluck('id'),
+      'meta_products' => $product->metaProducts
+        ->pluck('meta')
+        ->filter()
+        ->values()
+        ->map(function ($meta) {
+          return [
+            'id' => $meta->id,
+            'name' => $meta->name,
+            'type' => $meta->type,
+          ];
+        }),
       'order_count' => $product->orders->count(),
     ];
     return response()->json($response, 201);
@@ -116,7 +160,18 @@ class ProductController extends Controller
       'name' => $product->name,
       'description' => $product->description,
       'category' => $product->category,
-      'meta_products' => $product->metaProducts->pluck('meta')->pluck('id'),
+      'meta' => $product->metaProducts->pluck('meta')->pluck('id'),
+      'meta_products' => $product->metaProducts
+        ->pluck('meta')
+        ->filter()
+        ->values()
+        ->map(function ($meta) {
+          return [
+            'id' => $meta->id,
+            'name' => $meta->name,
+            'type' => $meta->type,
+          ];
+        }),
       'order_count' => $product->orders->count(),
     ];
     return response()->json($response, 200);
