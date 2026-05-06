@@ -787,6 +787,7 @@ class OrderController extends Controller
             'phone' => $settings['phone'] ?? '',
             'email' => $settings['email'] ?? '',
             'order' => $order,
+            'products' => $this->buildProductsResponse($order),
             'maker' => $order->maker?->name ?: $order->jobdesks->pluck('user.name')->filter()->unique()->implode(', '),
             'pic' => $order->pic?->name ?: '',
         ];

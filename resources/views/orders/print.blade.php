@@ -178,18 +178,44 @@
         <td class="va-top" style="width: 55%;">
           <div class="label">Klien</div>
           <div class="min-h-20">
-            @if($klienRelasi)
-                <?php renderKlienSimple($klienUtama, $tipeRelasi, 'Klien 1'); ?>
-                <?php renderKlienSimple($klienRelasi, null, 'Klien 2'); ?>
+            <?php
+            $customKlienHtml = data_get($order->meta, 'custom_client_html');
+            $customKlienHtml = is_string($customKlienHtml) ? trim($customKlienHtml) : '';
+            $allowedTags = '<p><br><strong><b><em><i><u><ul><ol><li><span><div>';
+            $customKlienSafe = $customKlienHtml !== '' ? strip_tags($customKlienHtml, $allowedTags) : '';
+            ?>
+
+            @if($customKlienSafe !== '')
+              <div class="value font-sans" style="font-size: 11pt; font-weight: 700;">
+                {!! $customKlienSafe !!}
+              </div>
             @else
-                <?php renderKlienSimple($klienUtama, null, 'Klien'); ?>
+              @if($klienRelasi)
+                  <?php renderKlienSimple($klienUtama, $tipeRelasi, 'Klien 1'); ?>
+                  <?php renderKlienSimple($klienRelasi, null, 'Klien 2'); ?>
+              @else
+                  <?php renderKlienSimple($klienUtama, null, 'Klien'); ?>
+              @endif
             @endif
           </div>
         </td>
         <td class="va-top" style="width: 45%;">
           <div class="label">Jenis Order</div>
           <div class="min-h-20">
-            <div>{{ $order->product->name ?? '-' }}</div>
+            <?php
+            $productNames = '-';
+            if (isset($products) && is_array($products) && count($products)) {
+                $names = array_values(array_filter(array_map(function ($p) {
+                    return is_array($p) ? ($p['name'] ?? null) : null;
+                }, $products)));
+                if (!empty($names)) {
+                    $productNames = implode(', ', $names);
+                }
+            } elseif (!empty($order->product->name ?? null)) {
+                $productNames = $order->product->name;
+            }
+            ?>
+            <div>{{ $productNames }}</div>
           </div>
         </td>
       </tr>
