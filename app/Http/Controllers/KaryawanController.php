@@ -93,11 +93,14 @@ class KaryawanController extends Controller
         if (!$user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-        // Allow users who can read/create orders or access menu:orders
+        // Allow users who can work with orders/jobdesks (for selection dropdowns)
         if (
             !$user->can('order:read') &&
             !$user->can('order:create') &&
-            !$user->can('menu:orders')
+            !$user->can('menu:orders') &&
+            !$user->can('jobdesk:read') &&
+            !$user->can('jobdesk:create') &&
+            !$user->can('menu:jobdesks')
         ) {
             return response()->json(['message' => 'Forbidden'], 403);
         }

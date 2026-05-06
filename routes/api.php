@@ -89,6 +89,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Jobdesk stats endpoint
     Route::get('jobdesks/stats', [JobdeskController::class, 'stats']);
 
+    // Minimal karyawan list for order workflows
+    Route::get('karyawans/min', [KaryawanController::class, 'min']);
+
     // API Resources
     Route::apiResources([
         'posts' => PostController::class,
@@ -111,7 +114,4 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('{action}', [MaintenanceController::class, 'run'])
             ->where('action', 'migrate|migrate-fresh|cache-clear|config-clear|route-clear|view-clear|optimize-clear|queue-restart|storage-link');
     });
-
-    // Minimal karyawan list for order workflows
-    Route::get('karyawans/min', [KaryawanController::class, 'min']);
 });

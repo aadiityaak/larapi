@@ -6,6 +6,7 @@ use App\Models\Jobdesk;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Validation\ValidationException;
 
 class JobdeskController extends Controller
 {
@@ -171,6 +172,12 @@ class JobdeskController extends Controller
                 'tanggal_pengerjaan' => 'nullable|date',
                 'tanggal_selesai' => 'nullable|date',
                 'status' => 'nullable|string',
+            ], [
+                'order_id.required' => 'Order wajib dipilih.',
+                'order_id.exists' => 'Order tidak valid.',
+                'user_id.required' => 'Penanggung jawab wajib dipilih.',
+                'user_id.exists' => 'Penanggung jawab tidak valid.',
+                'description.required' => 'Deskripsi pekerjaan wajib diisi.',
             ]);
 
             $validatedData['tanggal_pengerjaan'] = $validatedData['tanggal_pengerjaan'] ? Carbon::parse($validatedData['tanggal_pengerjaan'])->setTimezone('Asia/Jakarta')->startOfDay() : null;
@@ -185,8 +192,19 @@ class JobdeskController extends Controller
                 'order.product'
             ]);
             return response()->json($jobdesk, 201);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validasi gagal',
+                'errors' => $e->errors(),
+            ], 422);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Server Error', 'error' => $e->getMessage()], 500);
+            report($e);
+            return response()->json([
+                'message' => 'Server Error',
+                'error' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => basename($e->getFile())
+            ], 500);
         }
     }
     public function update(Request $request, $id)
@@ -200,6 +218,12 @@ class JobdeskController extends Controller
                 'tanggal_pengerjaan' => 'nullable|date',
                 'tanggal_selesai' => 'nullable|date',
                 'status' => 'nullable|string',
+            ], [
+                'order_id.required' => 'Order wajib dipilih.',
+                'order_id.exists' => 'Order tidak valid.',
+                'user_id.required' => 'Penanggung jawab wajib dipilih.',
+                'user_id.exists' => 'Penanggung jawab tidak valid.',
+                'description.required' => 'Deskripsi pekerjaan wajib diisi.',
             ]);
 
             $validatedData['tanggal_pengerjaan'] = $validatedData['tanggal_pengerjaan'] ? Carbon::parse($validatedData['tanggal_pengerjaan'])->setTimezone('Asia/Jakarta')->startOfDay() : null;
@@ -213,8 +237,19 @@ class JobdeskController extends Controller
                 'order.product'
             ]);
             return response()->json($jobdesk);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validasi gagal',
+                'errors' => $e->errors(),
+            ], 422);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Server Error', 'error' => $e->getMessage()], 500);
+            report($e);
+            return response()->json([
+                'message' => 'Server Error',
+                'error' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => basename($e->getFile())
+            ], 500);
         }
     }
 
