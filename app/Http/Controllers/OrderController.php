@@ -383,7 +383,7 @@ class OrderController extends Controller
         ];
     }
 
-    public function show(Order $order)
+    public function show(Request $request, Order $order)
     {
         $order = Order::with([
             'customer',
@@ -397,7 +397,8 @@ class OrderController extends Controller
             'pic'
         ])->findOrFail($order->id);
 
-        return response()->json($order);
+        $user = $request->user();
+        return response()->json($this->formatOrderResponse($order, $user));
     }
 
     public function update(Request $request, Order $order)
