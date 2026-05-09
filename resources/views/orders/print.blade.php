@@ -73,12 +73,23 @@
             <div class="label" style="margin-top: 2mm;">Contact Person</div>
             
             <?php
+            $primaryName = trim((string)($order->pemberi_order ?? ''));
+            $primaryPhone = trim((string)($order->pemberi_phone ?? ''));
             $contactPersons = is_array($order->contact_persons ?? null) ? $order->contact_persons : [];
             $contactPersons = array_values(array_filter($contactPersons, function ($item) {
                 if (!is_array($item)) return false;
                 $name = trim((string)($item['name'] ?? ''));
                 $phone = trim((string)($item['phone'] ?? ''));
                 return $name !== '' || $phone !== '';
+            }));
+            $contactPersons = array_values(array_filter($contactPersons, function ($item) use ($primaryName, $primaryPhone) {
+                if (!is_array($item)) return false;
+                $name = trim((string)($item['name'] ?? ''));
+                $phone = trim((string)($item['phone'] ?? ''));
+                if ($primaryName === '' && $primaryPhone === '') return true;
+                if ($primaryName !== '' && $name === $primaryName && ($primaryPhone === '' || $phone === $primaryPhone)) return false;
+                if ($primaryPhone !== '' && $phone === $primaryPhone && ($primaryName === '' || $name === $primaryName)) return false;
+                return true;
             }));
             ?>
             
@@ -94,18 +105,14 @@
             @else
                 <?php
                 $contactPhones = [];
-                if ($order->pemberi_phone) {
-                    $contactPhones[] = $order->pemberi_phone;
-                } else {
-                    if ($order->customer->phone) {
-                        $contactPhones[] = $order->customer->phone;
-                    }
-                    
-                    if ($order->customer->meta) {
-                        foreach ($order->customer->meta as $meta) {
-                            if (str_starts_with($meta->meta_key, 'phone_') && !empty($meta->meta_value)) {
-                                $contactPhones[] = $meta->meta_value;
-                            }
+                if ($order->customer->phone) {
+                    $contactPhones[] = $order->customer->phone;
+                }
+                
+                if ($order->customer->meta) {
+                    foreach ($order->customer->meta as $meta) {
+                        if (str_starts_with($meta->meta_key, 'phone_') && !empty($meta->meta_value)) {
+                            $contactPhones[] = $meta->meta_value;
                         }
                     }
                 }
