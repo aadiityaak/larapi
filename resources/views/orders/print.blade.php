@@ -231,36 +231,53 @@
             <div class="label">Jaminan / Agunan / Objek</div>
             <div class="min-h-20">
               <?php
-              $jaminanItems = [];
+              $groups = [];
               $metaMap = is_array($order->meta ?? null) ? $order->meta : [];
+              $byProduct = data_get($order->meta, 'meta_by_product');
+              $byProduct = is_array($byProduct) ? $byProduct : [];
               $selectedIdsRaw = data_get($order->meta, 'print_meta_ids');
               $selectedIds = is_array($selectedIdsRaw) ? array_values(array_unique(array_filter(array_map(function ($v) {
                   if ($v === null || $v === '') return null;
                   return (int) $v;
               }, $selectedIdsRaw)))) : [];
               $hasSelection = !empty($selectedIds);
+              $selectedMetaRows = $hasSelection
+                ? \App\Models\Meta::whereIn('id', $selectedIds)->get(['id', 'name', 'type'])->keyBy('id')
+                : collect();
               $productsList = isset($products) && is_array($products) ? $products : [];
-              $seenMetaIds = [];
-
+              $usedMetaIds = [];
               foreach ($productsList as $p) {
+                  if (!is_array($p)) continue;
+                  $productId = (int) ($p['id'] ?? 0);
+                  $productName = (string) ($p['name'] ?? 'Produk');
+                  $items = [];
                   $metaProducts = is_array($p['meta_products'] ?? null) ? $p['meta_products'] : [];
+
+                  $bucket = $byProduct[(string) $productId] ?? $byProduct[$productId] ?? null;
+                  $bucket = is_array($bucket) ? $bucket : [];
+
                   foreach ($metaProducts as $mp) {
                       if (!is_array($mp)) continue;
                       $metaId = (int) ($mp['id'] ?? 0);
                       if (!$metaId) continue;
+
                       if ($hasSelection) {
                           if (!in_array($metaId, $selectedIds, true)) continue;
                       } else {
                           if (!($mp['show_in_print'] ?? false)) continue;
                       }
-                      if (in_array($metaId, $seenMetaIds, true)) continue;
-                      $seenMetaIds[] = $metaId;
 
-                      $raw = $metaMap[(string) $metaId] ?? $metaMap[$metaId] ?? null;
+                      $selectedMeta = $selectedMetaRows->get($metaId);
+                      $label = (string) (($selectedMeta?->name) ?? ($mp['name'] ?? ('Meta ' . $metaId)));
+                      $type = (string) (($selectedMeta?->type) ?? ($mp['type'] ?? ''));
+
+                      $raw = $bucket[(string) $metaId] ?? $bucket[$metaId] ?? null;
+                      if ($raw === null) {
+                          $raw = $metaMap[(string) $metaId] ?? $metaMap[$metaId] ?? null;
+                      }
                       $raw = is_string($raw) ? trim($raw) : $raw;
 
                       $value = $raw;
-                      $type = (string) ($mp['type'] ?? '');
                       if ($type === 'date' && $raw) {
                           try {
                               $value = \Carbon\Carbon::parse($raw)->locale('id')->translatedFormat('j F Y');
@@ -272,19 +289,73 @@
                           $value = $number !== null ? 'Rp ' . number_format($number, 0, ',', '.') : $raw;
                       }
 
-                      $jaminanItems[] = [
-                          'label' => (string) ($mp['name'] ?? ('Meta ' . $metaId)),
+                      $items[] = [
+                          'meta_id' => $metaId,
+                          'label' => $label,
                           'value' => ($value === null || $value === '') ? '-' : $value,
+                      ];
+                      $usedMetaIds[] = $metaId;
+                  }
+
+                  if (!empty($items)) {
+                      $groups[] = [
+                          'product' => $productName,
+                          'items' => $items,
+                      ];
+                  }
+              }
+
+              if ($hasSelection) {
+                  $remaining = array_values(array_diff($selectedIds, $usedMetaIds));
+                  $extraItems = [];
+                  foreach ($remaining as $metaId) {
+                      $metaId = (int) $metaId;
+                      if (!$metaId) continue;
+                      $selectedMeta = $selectedMetaRows->get($metaId);
+                      $label = (string) (($selectedMeta?->name) ?? ('Meta ' . $metaId));
+                      $type = (string) (($selectedMeta?->type) ?? '');
+
+                      $raw = $metaMap[(string) $metaId] ?? $metaMap[$metaId] ?? null;
+                      $raw = is_string($raw) ? trim($raw) : $raw;
+
+                      $value = $raw;
+                      if ($type === 'date' && $raw) {
+                          try {
+                              $value = \Carbon\Carbon::parse($raw)->locale('id')->translatedFormat('j F Y');
+                          } catch (\Throwable $e) {
+                              $value = $raw;
+                          }
+                      } elseif ($type === 'currency' && $raw !== null && $raw !== '') {
+                          $number = is_numeric($raw) ? (float) $raw : null;
+                          $value = $number !== null ? 'Rp ' . number_format($number, 0, ',', '.') : $raw;
+                      }
+
+                      $extraItems[] = [
+                          'meta_id' => $metaId,
+                          'label' => $label,
+                          'value' => ($value === null || $value === '') ? '-' : $value,
+                      ];
+                  }
+
+                  if (!empty($extraItems)) {
+                      $groups[] = [
+                          'product' => 'Lainnya',
+                          'items' => $extraItems,
                       ];
                   }
               }
               ?>
 
-              @if(!empty($jaminanItems))
-                @foreach($jaminanItems as $item)
+              @if(!empty($groups))
+                @foreach($groups as $group)
                   <div class="value font-sans" style="font-size: 11pt; font-weight: 700;">
-                    {{ $item['label'] }}: {{ $item['value'] }}
+                    #{{ $group['product'] }}:
                   </div>
+                  @foreach(($group['items'] ?? []) as $item)
+                    <div class="font-sans" style="font-size: 11pt; font-weight: 400;">
+                      {{ $item['label'] }}: {{ $item['value'] }}
+                    </div>
+                  @endforeach
                 @endforeach
               @else
                 {{ data_get($order->meta, '8') ?: (data_get($order->meta, '17') ?: '-') }}
