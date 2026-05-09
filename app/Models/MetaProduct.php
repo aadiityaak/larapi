@@ -24,6 +24,11 @@ class MetaProduct extends Model
   protected $fillable = [
     'meta_id',
     'product_id',
+    'show_in_print',
+  ];
+
+  protected $casts = [
+    'show_in_print' => 'boolean',
   ];
 
   /**

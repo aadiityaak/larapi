@@ -30,14 +30,15 @@ class ProductController extends Controller
     if ($paginate === 'false') {
       $products = $query->get()->map(function ($data) {
         $metaProducts = $data->metaProducts
-          ->pluck('meta')
-          ->filter()
+          ->filter(fn ($mp) => $mp->meta)
           ->values()
-          ->map(function ($meta) {
+          ->map(function ($mp) {
+            $meta = $mp->meta;
             return [
               'id' => $meta->id,
               'name' => $meta->name,
               'type' => $meta->type,
+              'show_in_print' => (bool) $mp->show_in_print,
             ];
           });
         return [
@@ -45,7 +46,8 @@ class ProductController extends Controller
           'name' => $data->name,
           'description' => $data->description,
           'category' => $data->category,
-          'meta' => $metaProducts->pluck('id'),
+          'meta' => $data->metaProducts->pluck('meta_id'),
+          'meta_print_ids' => $data->metaProducts->where('show_in_print', true)->pluck('meta_id')->values(),
           'meta_products' => $metaProducts,
           'order_count' => $data->orders->count(),
         ];
@@ -54,14 +56,15 @@ class ProductController extends Controller
       $products = $query->paginate(25);
       $products->getCollection()->transform(function ($data) {
         $metaProducts = $data->metaProducts
-          ->pluck('meta')
-          ->filter()
+          ->filter(fn ($mp) => $mp->meta)
           ->values()
-          ->map(function ($meta) {
+          ->map(function ($mp) {
+            $meta = $mp->meta;
             return [
               'id' => $meta->id,
               'name' => $meta->name,
               'type' => $meta->type,
+              'show_in_print' => (bool) $mp->show_in_print,
             ];
           });
         return [
@@ -69,7 +72,8 @@ class ProductController extends Controller
           'name' => $data->name,
           'description' => $data->description,
           'category' => $data->category,
-          'meta' => $metaProducts->pluck('id'),
+          'meta' => $data->metaProducts->pluck('meta_id'),
+          'meta_print_ids' => $data->metaProducts->where('show_in_print', true)->pluck('meta_id')->values(),
           'meta_products' => $metaProducts,
           'order_count' => $data->orders->count(),
         ];
@@ -89,30 +93,43 @@ class ProductController extends Controller
       'category' => 'string',
       'description' => 'string|nullable',
       'meta_products' => 'array|nullable',
+      'meta_print_ids' => 'array|nullable',
     ]);
 
     $product = Product::create($validatedData);
 
     if ($request->has('meta_products')) {
+      $printIds = collect($request->input('meta_print_ids', []))
+        ->map(fn ($v) => (int) $v)
+        ->filter()
+        ->values()
+        ->all();
       foreach ($request->input('meta_products') as $metaId) {
-        $product->metaProducts()->create(['meta_id' => $metaId]);
+        $metaId = (int) $metaId;
+        $product->metaProducts()->create([
+          'meta_id' => $metaId,
+          'show_in_print' => in_array($metaId, $printIds, true),
+        ]);
       }
     }
+    $product->load('metaProducts.meta', 'orders');
     $response = [
       'id' => $product->id,
       'name' => $product->name,
       'description' => $product->description,
       'category' => $product->category,
-      'meta' => $product->metaProducts->pluck('meta')->pluck('id'),
+      'meta' => $product->metaProducts->pluck('meta_id'),
+      'meta_print_ids' => $product->metaProducts->where('show_in_print', true)->pluck('meta_id')->values(),
       'meta_products' => $product->metaProducts
-        ->pluck('meta')
-        ->filter()
+        ->filter(fn ($mp) => $mp->meta)
         ->values()
-        ->map(function ($meta) {
+        ->map(function ($mp) {
+          $meta = $mp->meta;
           return [
             'id' => $meta->id,
             'name' => $meta->name,
             'type' => $meta->type,
+            'show_in_print' => (bool) $mp->show_in_print,
           ];
         }),
       'order_count' => $product->orders->count(),
@@ -140,6 +157,7 @@ class ProductController extends Controller
       'description' => 'string|nullable',
       'meta_products' => 'array|nullable',
       'meta_id' => 'array|nullable',
+      'meta_print_ids' => 'array|nullable',
     ]);
 
     $product = Product::with('metaProducts.meta', 'orders')->findOrFail($id);
@@ -148,9 +166,18 @@ class ProductController extends Controller
 
     // Update meta_id
     if ($request->has('meta_products')) {
+      $printIds = collect($request->input('meta_print_ids', []))
+        ->map(fn ($v) => (int) $v)
+        ->filter()
+        ->values()
+        ->all();
       $product->metaProducts()->delete();
       foreach ($request->input('meta_products') as $metaId) {
-        $product->metaProducts()->create(['meta_id' => $metaId]);
+        $metaId = (int) $metaId;
+        $product->metaProducts()->create([
+          'meta_id' => $metaId,
+          'show_in_print' => in_array($metaId, $printIds, true),
+        ]);
       }
     }
     $product->load('metaProducts.meta', 'orders');
@@ -160,16 +187,18 @@ class ProductController extends Controller
       'name' => $product->name,
       'description' => $product->description,
       'category' => $product->category,
-      'meta' => $product->metaProducts->pluck('meta')->pluck('id'),
+      'meta' => $product->metaProducts->pluck('meta_id'),
+      'meta_print_ids' => $product->metaProducts->where('show_in_print', true)->pluck('meta_id')->values(),
       'meta_products' => $product->metaProducts
-        ->pluck('meta')
-        ->filter()
+        ->filter(fn ($mp) => $mp->meta)
         ->values()
-        ->map(function ($meta) {
+        ->map(function ($mp) {
+          $meta = $mp->meta;
           return [
             'id' => $meta->id,
             'name' => $meta->name,
             'type' => $meta->type,
+            'show_in_print' => (bool) $mp->show_in_print,
           ];
         }),
       'order_count' => $product->orders->count(),

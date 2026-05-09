@@ -774,6 +774,7 @@ class OrderController extends Controller
             'jobdesks:id,order_id,user_id,status,description',
             'jobdesks.user:id,name',
             'product:id,name,category,description',
+            'product.metaProducts.meta',
             'maker:id,name',
             'pic:id,name'
         ])->findOrFail($order->id);

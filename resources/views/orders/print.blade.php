@@ -230,7 +230,49 @@
           <td colspan="2">
             <div class="label">Jaminan / Agunan / Objek</div>
             <div class="min-h-20">
-              {{ data_get($order->meta, '8') ?: (data_get($order->meta, '17') ?: '-') }}
+              <?php
+              $jaminanItems = [];
+              $metaMap = is_array($order->meta ?? null) ? $order->meta : [];
+              $metaProducts = $order->product?->metaProducts ?? null;
+
+              if ($metaProducts) {
+                  foreach ($metaProducts as $mp) {
+                      if (!($mp->show_in_print ?? false)) continue;
+                      $meta = $mp->meta ?? null;
+                      if (!$meta) continue;
+
+                      $raw = $metaMap[(string) $meta->id] ?? $metaMap[$meta->id] ?? null;
+                      $raw = is_string($raw) ? trim($raw) : $raw;
+
+                      $value = $raw;
+                      if ($meta->type === 'date' && $raw) {
+                          try {
+                              $value = \Carbon\Carbon::parse($raw)->locale('id')->translatedFormat('j F Y');
+                          } catch (\Throwable $e) {
+                              $value = $raw;
+                          }
+                      } elseif ($meta->type === 'currency' && $raw !== null && $raw !== '') {
+                          $number = is_numeric($raw) ? (float) $raw : null;
+                          $value = $number !== null ? 'Rp ' . number_format($number, 0, ',', '.') : $raw;
+                      }
+
+                      $jaminanItems[] = [
+                          'label' => $meta->name,
+                          'value' => ($value === null || $value === '') ? '-' : $value,
+                      ];
+                  }
+              }
+              ?>
+
+              @if(!empty($jaminanItems))
+                @foreach($jaminanItems as $item)
+                  <div class="value font-sans" style="font-size: 11pt; font-weight: 700;">
+                    {{ $item['label'] }}: {{ $item['value'] }}
+                  </div>
+                @endforeach
+              @else
+                {{ data_get($order->meta, '8') ?: (data_get($order->meta, '17') ?: '-') }}
+              @endif
             </div>
           </td>
         </tr>
