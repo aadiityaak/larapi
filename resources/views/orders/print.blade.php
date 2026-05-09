@@ -233,31 +233,47 @@
               <?php
               $jaminanItems = [];
               $metaMap = is_array($order->meta ?? null) ? $order->meta : [];
-              $metaProducts = $order->product?->metaProducts ?? null;
+              $selectedIdsRaw = data_get($order->meta, 'print_meta_ids');
+              $selectedIds = is_array($selectedIdsRaw) ? array_values(array_unique(array_filter(array_map(function ($v) {
+                  if ($v === null || $v === '') return null;
+                  return (int) $v;
+              }, $selectedIdsRaw)))) : [];
+              $hasSelection = !empty($selectedIds);
+              $productsList = isset($products) && is_array($products) ? $products : [];
+              $seenMetaIds = [];
 
-              if ($metaProducts) {
+              foreach ($productsList as $p) {
+                  $metaProducts = is_array($p['meta_products'] ?? null) ? $p['meta_products'] : [];
                   foreach ($metaProducts as $mp) {
-                      if (!($mp->show_in_print ?? false)) continue;
-                      $meta = $mp->meta ?? null;
-                      if (!$meta) continue;
+                      if (!is_array($mp)) continue;
+                      $metaId = (int) ($mp['id'] ?? 0);
+                      if (!$metaId) continue;
+                      if ($hasSelection) {
+                          if (!in_array($metaId, $selectedIds, true)) continue;
+                      } else {
+                          if (!($mp['show_in_print'] ?? false)) continue;
+                      }
+                      if (in_array($metaId, $seenMetaIds, true)) continue;
+                      $seenMetaIds[] = $metaId;
 
-                      $raw = $metaMap[(string) $meta->id] ?? $metaMap[$meta->id] ?? null;
+                      $raw = $metaMap[(string) $metaId] ?? $metaMap[$metaId] ?? null;
                       $raw = is_string($raw) ? trim($raw) : $raw;
 
                       $value = $raw;
-                      if ($meta->type === 'date' && $raw) {
+                      $type = (string) ($mp['type'] ?? '');
+                      if ($type === 'date' && $raw) {
                           try {
                               $value = \Carbon\Carbon::parse($raw)->locale('id')->translatedFormat('j F Y');
                           } catch (\Throwable $e) {
                               $value = $raw;
                           }
-                      } elseif ($meta->type === 'currency' && $raw !== null && $raw !== '') {
+                      } elseif ($type === 'currency' && $raw !== null && $raw !== '') {
                           $number = is_numeric($raw) ? (float) $raw : null;
                           $value = $number !== null ? 'Rp ' . number_format($number, 0, ',', '.') : $raw;
                       }
 
                       $jaminanItems[] = [
-                          'label' => $meta->name,
+                          'label' => (string) ($mp['name'] ?? ('Meta ' . $metaId)),
                           'value' => ($value === null || $value === '') ? '-' : $value,
                       ];
                   }

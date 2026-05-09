@@ -69,7 +69,8 @@ class OrderController extends Controller
                     return $metaProduct->meta ? [
                         'id' => $metaProduct->meta->id,
                         'name' => $metaProduct->meta->name,
-                        'type' => $metaProduct->meta->type
+                        'type' => $metaProduct->meta->type,
+                        'show_in_print' => (bool) ($metaProduct->show_in_print ?? false),
                     ] : null;
                 })->filter()->values() : [],
             ];
