@@ -478,25 +478,6 @@ class OrderController extends Controller
                     return $name !== '' || $phone !== '';
                 }));
                 $validatedData['contact_persons'] = $contactPersons;
-
-                $first = $contactPersons[0] ?? null;
-                if (is_array($first)) {
-                    if (empty($validatedData['pemberi_order'] ?? null) && !empty($first['name'] ?? null)) {
-                        $validatedData['pemberi_order'] = $first['name'];
-                    }
-                    if (empty($validatedData['pemberi_phone'] ?? null) && !empty($first['phone'] ?? null)) {
-                        $validatedData['pemberi_phone'] = $first['phone'];
-                    }
-                }
-            } else {
-                $name = trim((string)($validatedData['pemberi_order'] ?? ''));
-                $phone = trim((string)($validatedData['pemberi_phone'] ?? ''));
-                if ($name !== '' || $phone !== '') {
-                    $validatedData['contact_persons'] = [[
-                        'name' => $name !== '' ? $name : null,
-                        'phone' => $phone !== '' ? $phone : null,
-                    ]];
-                }
             }
 
             // Update order dengan data yang sudah divalidasi
@@ -595,25 +576,6 @@ class OrderController extends Controller
                 return $name !== '' || $phone !== '';
             }));
             $validatedData['contact_persons'] = $contactPersons;
-
-            $first = $contactPersons[0] ?? null;
-            if (is_array($first)) {
-                if (empty($validatedData['pemberi_order'] ?? null) && !empty($first['name'] ?? null)) {
-                    $validatedData['pemberi_order'] = $first['name'];
-                }
-                if (empty($validatedData['pemberi_phone'] ?? null) && !empty($first['phone'] ?? null)) {
-                    $validatedData['pemberi_phone'] = $first['phone'];
-                }
-            }
-        } else {
-            $name = trim((string)($validatedData['pemberi_order'] ?? ''));
-            $phone = trim((string)($validatedData['pemberi_phone'] ?? ''));
-            if ($name !== '' || $phone !== '') {
-                $validatedData['contact_persons'] = [[
-                    'name' => $name !== '' ? $name : null,
-                    'phone' => $phone !== '' ? $phone : null,
-                ]];
-            }
         }
 
         $order = Order::create($validatedData);

@@ -63,7 +63,14 @@
         <td>
           <div class="label">Pemberi Order</div>
           <div class="min-h-10">
-            <div class="value">{{ $order->pemberi_order ?? ($order->customer->name ?? '') }}</div>
+            <?php
+            $pemberiName = trim((string)($order->pemberi_order ?? ''));
+            $pemberiPhone = trim((string)($order->pemberi_phone ?? ''));
+            $fallbackName = trim((string)($order->customer->name ?? ''));
+            $displayName = $pemberiName !== '' ? $pemberiName : $fallbackName;
+            $line = trim($displayName . ($displayName !== '' && $pemberiPhone !== '' ? ' - ' : '') . $pemberiPhone);
+            ?>
+            <div class="value">{{ $line !== '' ? $line : '-' }}</div>
           </div>
         </td>
         </tr>
