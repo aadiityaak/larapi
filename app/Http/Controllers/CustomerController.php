@@ -124,7 +124,7 @@ class CustomerController extends Controller
         $validatedData = $request->validate(
             [
                 'name' => 'required|string|max:255',
-                'phone' => 'required|string|max:20|unique:customers,phone',
+                'phone' => 'required|string|max:20',
                 'address' => 'required|string',
                 'meta' => 'nullable|array',
                 'phones' => 'nullable|array',
@@ -132,7 +132,6 @@ class CustomerController extends Controller
             [
                 'name.required' => 'Nama harus diisi.',
                 'phone.required' => 'Nomor telepon harus diisi.',
-                'phone.unique' => 'Nomor telepon sudah ada.',
                 'address.required' => 'Alamat harus diisi.',
                 'meta.array' => 'Meta harus berupa array.',
                 'phones.array' => 'Phones harus berupa array.',
@@ -195,7 +194,7 @@ class CustomerController extends Controller
         $validatedData = $request->validate(
             [
                 'name' => 'required|string|max:255',
-                'phone' => 'required|string|max:20|unique:customers,phone,' . $customer->id,
+                'phone' => 'required|string|max:20',
                 'address' => 'required|string',
                 'meta' => 'nullable|array',
                 'phones' => 'nullable|array',
@@ -203,7 +202,6 @@ class CustomerController extends Controller
             [
                 'name.required' => 'Nama harus diisi.',
                 'phone.required' => 'Nomor telepon harus diisi.',
-                'phone.unique' => 'Nomor telepon sudah ada.',
                 'address.required' => 'Alamat harus diisi.',
                 'meta.array' => 'Meta harus berupa array.',
                 'phones.array' => 'Phones harus berupa array.',
