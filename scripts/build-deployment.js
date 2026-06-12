@@ -21,12 +21,11 @@ const publicDirName = "public_html";
 const buildDirName = noVendor
     ? "build-deployment-novendor"
     : "build-deployment";
-const zipBaseName = noVendor
-    ? "notaris-deployment-novendor.zip"
-    : "notaris-deployment.zip";
+const distDir = join(projectRoot, "dist");
+const zipBaseName = noVendor ? "production-novendor.zip" : "production.zip";
 
 const buildDir = join(projectRoot, buildDirName);
-const zipFile = join(projectRoot, zipBaseName);
+const zipFile = join(distDir, zipBaseName);
 
 // ── Clean previous build ────────────────────────────────────────────
 if (existsSync(buildDir)) {
@@ -37,6 +36,7 @@ if (existsSync(zipFile)) {
 }
 
 mkdirSync(buildDir, { recursive: true });
+mkdirSync(distDir, { recursive: true });
 
 // ── Directory structure ─────────────────────────────────────────────
 //
