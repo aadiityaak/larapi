@@ -315,27 +315,32 @@ class ProductSeeder extends Seeder
     // Membuat 5 customer
 
     foreach ($metas as $id => $meta) {
-      Meta::factory()->create([
-        'id' => $id,
-        'name' => $meta['title'],
-        'type' => $meta['type'],
-      ]);
+      Meta::firstOrCreate(
+        ['id' => $id],
+        [
+          'name' => $meta['title'],
+          'type' => $meta['type'],
+        ]
+      );
     }
 
     // Insert meta ke tabel 'products' dan 'meta_product'
     foreach ($products as $slug => $product) {
       // Insert data ke tabel 'products'
-      $productId = Product::factory()->create([
-        'name' => $product['title'],
-        'description' => '-',
-        'category' => $product['category']
-      ]);
+      $productModel = Product::firstOrCreate(
+        ['name' => $product['title']],
+        [
+          'description' => '-',
+          'category' => $product['category']
+        ]
+      );
+      $productId = $productModel->id;
 
       // Insert data ke tabel 'meta_product'
       foreach ($product['meta'] as $metaId) {
         // Pastikan meta_id ada di tabel 'metas'
         if (Meta::where('id', $metaId)->exists()) {
-          MetaProduct::factory()->create([
+          \App\Models\MetaProduct::firstOrCreate([
             'meta_id' => $metaId,
             'product_id' => $productId
           ]);

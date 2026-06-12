@@ -86,6 +86,11 @@ class SettingSeeder extends Seeder
             ['setting_key' => 'banks', 'setting_value' => json_encode($banks)]
         ];
 
-        Setting::insert($templates); // Batch insert
+        foreach ($templates as $template) {
+            Setting::updateOrCreate(
+                ['setting_key' => $template['setting_key']],
+                $template
+            );
+        }
     }
 }

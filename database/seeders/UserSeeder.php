@@ -12,60 +12,53 @@ class UserSeeder extends Seeder
 {
   public function run()
   {
-    $admin = User::factory()->create([
-      'name' => 'Test Admin',
-      'email' => 'user1@example.com',
-      'is_admin' => true,
-      'avatar' => null,
-      'phone' => '08123456789',
-      'address' => 'Jl. Kebon Jeruk No. 1',
-      'password' => Hash::make('password'),
-    ]);
+    $users = [
+      [
+        'email' => 'user1@example.com',
+        'name' => 'Test Admin',
+        'is_admin' => true,
+        'role' => 'admin',
+      ],
+      [
+        'email' => 'user2@example.com',
+        'name' => 'Test Manager',
+        'is_admin' => false,
+        'role' => 'manager',
+      ],
+      [
+        'email' => 'user3@example.com',
+        'name' => 'Test Keuangan',
+        'is_admin' => false,
+        'role' => 'keuangan',
+      ],
+      [
+        'email' => 'user4@example.com',
+        'name' => 'Test Staff',
+        'is_admin' => false,
+        'role' => 'staff',
+      ],
+      [
+        'email' => 'user5@example.com',
+        'name' => 'Test Staff 2',
+        'is_admin' => false,
+        'role' => 'staff',
+      ],
+    ];
 
-    $manager = User::factory()->create([
-      'name' => 'Test Manager',
-      'email' => 'user2@example.com',
-      'is_admin' => false,
-      'avatar' => null,
-      'phone' => '08123456789',
-      'address' => 'Jl. Kebon Jeruk No. 1',
-      'password' => Hash::make('password'),
-    ]);
+    foreach ($users as $userData) {
+      $user = User::firstOrCreate(
+        ['email' => $userData['email']],
+        [
+          'name' => $userData['name'],
+          'is_admin' => $userData['is_admin'],
+          'avatar' => null,
+          'phone' => '08123456789',
+          'address' => 'Jl. Kebon Jeruk No. 1',
+          'password' => Hash::make('password'),
+        ]
+      );
 
-    $finance = User::factory()->create([
-      'name' => 'Test Keuangan',
-      'email' => 'user3@example.com',
-      'is_admin' => false,
-      'avatar' => null,
-      'phone' => '08123456789',
-      'address' => 'Jl. Kebon Jeruk No. 1',
-      'password' => Hash::make('password'),
-    ]);
-
-    $staff1 = User::factory()->create([
-      'name' => 'Test Staff',
-      'email' => 'user4@example.com',
-      'is_admin' => false,
-      'avatar' => null,
-      'phone' => '08123456789',
-      'address' => 'Jl. Kebon Jeruk No. 1',
-      'password' => Hash::make('password'),
-    ]);
-
-    $staff2 = User::factory()->create([
-      'name' => 'Test Staff 2',
-      'email' => 'user5@example.com',
-      'is_admin' => false,
-      'avatar' => null,
-      'phone' => '08123456789',
-      'address' => 'Jl. Kebon Jeruk No. 1',
-      'password' => Hash::make('password'),
-    ]);
-
-    $admin->assignRole('admin');
-    $manager->assignRole('manager');
-    $finance->assignRole('keuangan');
-    $staff1->assignRole('staff');
-    $staff2->assignRole('staff');
+      $user->assignRole($userData['role']);
+    }
   }
 }

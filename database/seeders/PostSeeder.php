@@ -7,7 +7,6 @@ use App\Models\User;
 use App\Models\Category;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
-use Faker\Factory as Faker;
 
 class PostSeeder extends Seeder
 {
@@ -16,8 +15,6 @@ class PostSeeder extends Seeder
    */
   public function run(): void
   {
-    $faker = Faker::create('id_ID'); // Indonesian locale
-
     // Get all users and categories
     $users = User::all();
     $categories = Category::all();
@@ -61,11 +58,19 @@ class PostSeeder extends Seeder
       'Dunia bisnis terus berkembang dengan munculnya berbagai inovasi dan teknologi baru. Para entrepreneur perlu memahami tren terkini dan strategi yang efektif untuk dapat bersaing di pasar yang kompetitif.',
     ];
 
-    // Create 50 sample posts
-    for ($i = 0; $i < 50; $i++) {
-      $title = $faker->randomElement($articleTitles) . ' - ' . $faker->words(2, true);
-      $slug = Str::slug($title);
+    $additionalParagraphs = [
+      'Salah satu hal yang penting untuk diperhatikan adalah konsistensi dalam menjalankan setiap langkah. Tanpa konsistensi, bahkan rencana terbaik pun tidak akan memberikan hasil yang optimal.',
+      'Banyak orang seringkali menghadapi tantangan di awal perjalanan mereka. Namun, dengan semangat yang tidak mudah menyerah dan kemauan untuk terus belajar, hambatan tersebut bisa diatasi.',
+      'Teknologi telah membawa banyak perubahan positif dalam berbagai sektor kehidupan. Mulai dari akses informasi yang lebih mudah hingga cara berkomunikasi yang lebih efektif.',
+      'Penting untuk selalu membuka wawasan dan mengikuti perkembangan terbaru. Hal ini akan membantu kita untuk tetap relevan dan kompetitif di tengah persaingan yang ketat.',
+      'Kolaborasi dan kerja sama tim menjadi kunci kesuksesan dalam banyak bidang. Dengan bekerja bersama, kita bisa mencapai hal-hal yang mungkin sulit dilakukan sendirian.',
+    ];
 
+    // Create sample posts
+    $postCount = 0;
+    foreach ($articleTitles as $index => $title) {
+      $slug = Str::slug($title);
+      
       // Make sure slug is unique
       $originalSlug = $slug;
       $counter = 1;
@@ -74,22 +79,26 @@ class PostSeeder extends Seeder
         $counter++;
       }
 
-      $content = $faker->randomElement($contentTemplates);
-      $content .= "\n\n" . $faker->paragraphs(4, true);
-      $content .= "\n\n## Kesimpulan\n\n" . $faker->paragraph(3);
+      $content = $contentTemplates[$index % count($contentTemplates)];
+      $content .= "\n\n" . $additionalParagraphs[$index % count($additionalParagraphs)];
+      $content .= "\n\n" . $additionalParagraphs[($index + 1) % count($additionalParagraphs)];
+      $content .= "\n\n## Kesimpulan\n\n" . $additionalParagraphs[($index + 2) % count($additionalParagraphs)];
 
-      Post::create([
-        'title' => $title,
-        'content' => $content,
-        'slug' => $slug,
-        'user_id' => $users->random()->id,
-        'category_id' => $categories->random()->id,
-        'featured_image' => $faker->optional(0.7)->imageUrl(800, 400, 'business'),
-        'created_at' => $faker->dateTimeBetween('-6 months', 'now'),
-        'updated_at' => now(),
-      ]);
+      Post::firstOrCreate(
+        ['slug' => $slug],
+        [
+          'title' => $title,
+          'content' => $content,
+          'user_id' => $users[$index % count($users)]->id,
+          'category_id' => $categories[$index % count($categories)]->id,
+          'featured_image' => null,
+          'created_at' => now()->subDays($index),
+          'updated_at' => now()->subDays($index),
+        ]
+      );
+      $postCount++;
     }
 
-    $this->command->info('50 posts have been created successfully!');
+    $this->command->info($postCount . ' posts have been created successfully!');
   }
 }
