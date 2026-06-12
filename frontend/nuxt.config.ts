@@ -65,8 +65,7 @@ export default defineNuxtConfig({
     mode: 'cookie',
     baseUrl: (() => {
       const raw = process.env.API_URL || 'http://localhost:8000';
-      // Handle relative URLs (e.g. "/api" for same-origin deployment)
-      if (raw.startsWith('/')) return `http://localhost${raw}`;
+      if (raw.startsWith('/')) return raw;
       const u = new URL(raw);
       const path = u.pathname.replace(/\/$/, '');
       return `${u.protocol}//${u.host}${path}`;

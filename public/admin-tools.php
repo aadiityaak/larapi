@@ -1,0 +1,1519 @@
+<?php
+
+/**
+ * Emergency Admin Tools - Refactored
+ *
+ * This file provides basic admin functions when the main application is not accessible.
+ * Access: http://yoursite.com/admin-tools.php
+ *
+ * Security: This file should be removed or secured in production.
+ * You can add HTTP basic auth or IP restrictions for additional security.
+ */
+
+// Security check - only allow admin access
+session_start();
+
+// Dynamically get password from Laravel .env file
+function getAdminPasswordFromEnv()
+{
+  // Get the Laravel root directory
+  // admin-tools.php is in public_html, laravel-app is at /../laravel-app (one level up)
+  $currentDir = __DIR__;
+  $possiblePaths = [
+    // Priority 1: Standard structure - laravel-app one level up from public_html
+    dirname($currentDir) . '/laravel-app',
+    // Priority 2: Alternative hosting structures
+    dirname(dirname($currentDir)) . '/laravel-app',
+    dirname(dirname(dirname($currentDir))) . '/laravel-app',
+    // Priority 3: Development structure
+    dirname(__DIR__),
+    // Priority 4: Same level (unlikely but possible)
+    $currentDir . '/laravel-app',
+  ];
+
+  $laravelRoot = null;
+  foreach ($possiblePaths as $path) {
+    if (is_dir($path) && file_exists($path . '/artisan')) {
+      $laravelRoot = $path;
+      break;
+    }
+  }
+
+  if (! $laravelRoot) {
+    return 'admin123'; // Fallback if Laravel not found
+  }
+
+  $envPath = $laravelRoot . '/.env';
+  if (! file_exists($envPath)) {
+    return 'admin123'; // Fallback if .env not found
+  }
+
+  $envContent = file_get_contents($envPath);
+  if (! is_string($envContent) || trim($envContent) === '') {
+    return 'admin123';
+  }
+
+  if (preg_match('/^ADMIN_TOOLS_PASSWORD=(.+)$/m', $envContent, $matches)) {
+    $password = trim($matches[1], "\"'\r\n\t ");
+    return $password !== '' ? $password : 'admin123';
+  }
+
+  return 'admin123';
+}
+
+$admin_password = getAdminPasswordFromEnv();
+
+if (! isset($_SESSION['admin_authenticated'])) {
+  if (isset($_POST['password']) && $_POST['password'] === $admin_password) {
+    $_SESSION['admin_authenticated'] = true;
+  } else {
+    showLoginForm();
+    exit;
+  }
+}
+
+// Get Laravel root directory
+function getLaravelRoot()
+{
+  static $laravelRoot = null;
+
+  if ($laravelRoot !== null) {
+    return $laravelRoot;
+  }
+
+  $currentDir = __DIR__;
+  $possiblePaths = [
+    dirname($currentDir) . '/laravel-app',
+    dirname(dirname($currentDir)) . '/laravel-app',
+    dirname(dirname(dirname($currentDir))) . '/laravel-app',
+    dirname(__DIR__),
+    $currentDir . '/laravel-app',
+  ];
+
+  foreach ($possiblePaths as $path) {
+    if (is_dir($path) && file_exists($path . '/artisan')) {
+      $laravelRoot = $path;
+
+      return $laravelRoot;
+    }
+  }
+
+  $laravelRoot = dirname($currentDir) . '/laravel-app'; // Default assumption
+
+  return $laravelRoot;
+}
+
+function executeCommand($command)
+{
+  $laravelRoot = getLaravelRoot();
+
+  $command = trim((string) $command);
+  if ($command === '') {
+    return 'Error: Empty command';
+  }
+
+  if (strpos($command, 'php artisan ') === 0) {
+    return executeArtisanCommand(substr($command, strlen('php artisan ')), $laravelRoot);
+  }
+
+  if (! function_exists('shell_exec')) {
+    return 'Error: shell_exec function is disabled on this server';
+  }
+
+  // Add full path to PHP if needed
+  if (strpos($command, 'php ') === 0) {
+    // Try multiple methods to find PHP executable
+    $phpPath = null;
+
+    // Method 1: Use PHP_BINARY constant (most reliable)
+    if (defined('PHP_BINARY') && is_executable(PHP_BINARY)) {
+      $phpPath = PHP_BINARY;
+    }
+    // Method 2: Try common shared hosting paths
+    elseif (is_executable('/usr/bin/php')) {
+      $phpPath = '/usr/bin/php';
+    } elseif (is_executable('/usr/local/bin/php')) {
+      $phpPath = '/usr/local/bin/php';
+    } elseif (is_executable('/opt/cpanel/ea-php81/root/usr/bin/php')) {
+      $phpPath = '/opt/cpanel/ea-php81/root/usr/bin/php';
+    } elseif (is_executable('/opt/cpanel/ea-php82/root/usr/bin/php')) {
+      $phpPath = '/opt/cpanel/ea-php82/root/usr/bin/php';
+    } elseif (is_executable('/opt/cpanel/ea-php83/root/usr/bin/php')) {
+      $phpPath = '/opt/cpanel/ea-php83/root/usr/bin/php';
+    } elseif (is_executable('/opt/cpanel/ea-php84/root/usr/bin/php')) {
+      $phpPath = '/opt/cpanel/ea-php84/root/usr/bin/php';
+    }
+    // Method 3: Try to use 'php' directly (might work on some hosting)
+    else {
+      // Test if 'php' command works directly
+      $testResult = @shell_exec('php --version 2>&1');
+      if ($testResult && strpos($testResult, 'PHP') !== false) {
+        $phpPath = 'php';
+      }
+    }
+
+    // Method 4: Use which/where command (if available)
+    if (! $phpPath) {
+      $which = trim(@shell_exec('which php 2>&1') ?: '');
+      if ($which && is_executable($which)) {
+        $phpPath = $which;
+      }
+    }
+
+    // Method 5: Try common hosting-specific paths
+    if (! $phpPath) {
+      $commonPaths = [
+        '/usr/local/php83/bin/php',    // PHP 8.3 prioritized
+        '/usr/local/php84/bin/php',    // PHP 8.4 for future
+        '/usr/local/php82/bin/php',
+        '/usr/local/php81/bin/php',
+        '/usr/local/lsws/lsphp83/bin/php',  // LiteSpeed PHP 8.3
+        '/usr/local/lsws/lsphp84/bin/php',  // LiteSpeed PHP 8.4
+        '/usr/local/lsws/lsphp82/bin/php',
+        '/usr/local/lsws/lsphp81/bin/php',
+        '/home/' . get_current_user() . '/public_html/cgi-bin/php83',
+        '/home/' . get_current_user() . '/public_html/cgi-bin/php',
+        '/usr/local/bin/php83',
+        '/usr/bin/php83',
+      ];
+
+      foreach ($commonPaths as $path) {
+        if (is_executable($path)) {
+          $phpPath = $path;
+          break;
+        }
+      }
+    }
+
+    if ($phpPath) {
+      // Only escape if it's a full path (contains /)
+      if (strpos($phpPath, '/') !== false) {
+        $command = str_replace('php ', escapeshellarg($phpPath) . ' ', $command);
+      } else {
+        $command = str_replace('php ', $phpPath . ' ', $command);
+      }
+    } else {
+      // Last resort: try without path (some hosting allows this)
+      $debugInfo = "PHP Detection Debug:\n";
+      $debugInfo .= 'PHP_BINARY: ' . (defined('PHP_BINARY') ? PHP_BINARY : 'Not defined') . "\n";
+      $debugInfo .= 'PHP_BINARY executable: ' . (defined('PHP_BINARY') && is_executable(PHP_BINARY) ? 'Yes' : 'No') . "\n";
+      $debugInfo .= 'Current user: ' . get_current_user() . "\n";
+      $debugInfo .= 'Server software: ' . ($_SERVER['SERVER_SOFTWARE'] ?? 'Unknown') . "\n";
+      $debugInfo .= 'PHP SAPI: ' . php_sapi_name() . "\n";
+
+      return 'Error: Could not find PHP executable. ' . $debugInfo .
+        'Contact your hosting provider for the correct PHP path.';
+    }
+  }
+
+  $cdPrefix = '';
+  if (is_string($laravelRoot) && $laravelRoot !== '' && is_dir($laravelRoot)) {
+    $quoted = escapeshellarg($laravelRoot);
+    $cdPrefix = 'cd ' . $quoted . ' && ';
+  }
+
+  $output = shell_exec($cdPrefix . $command . ' 2>&1');
+
+  return $output ?: 'Command executed (no output)';
+}
+
+function executeArtisanCommand(string $artisanArgs, string $laravelRoot): string
+{
+  $artisanArgs = trim($artisanArgs);
+  if ($artisanArgs === '') {
+    return 'Error: Missing artisan command';
+  }
+
+  $purgeResult = purgeRouteCacheFiles($laravelRoot);
+
+  $artisanPath = rtrim($laravelRoot, '/\\') . DIRECTORY_SEPARATOR . 'artisan';
+  $autoloadPath = rtrim($laravelRoot, '/\\') . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
+  $bootstrapPath = rtrim($laravelRoot, '/\\') . DIRECTORY_SEPARATOR . 'bootstrap' . DIRECTORY_SEPARATOR . 'app.php';
+
+  if (! file_exists($artisanPath) || ! file_exists($autoloadPath) || ! file_exists($bootstrapPath)) {
+    return 'Error: Laravel bootstrap files not found. Expected artisan/vendor/autoload.php/bootstrap/app.php inside: ' . $laravelRoot;
+  }
+
+  $prevCwd = getcwd();
+  if (is_string($laravelRoot) && $laravelRoot !== '' && is_dir($laravelRoot)) {
+    @chdir($laravelRoot);
+  }
+
+  try {
+    require_once $autoloadPath;
+    $app = require $bootstrapPath;
+    $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+
+    [$name, $params] = parseArtisanArgs($artisanArgs);
+    if ($name === '') {
+      return 'Error: Invalid artisan command';
+    }
+
+    $code = $kernel->call($name, $params);
+    $output = (string) $kernel->output();
+    if ($output === '') {
+      $output = 'Command executed (no output)';
+    }
+    $purgeNote = $purgeResult['deleted'] > 0
+      ? "Note: route cache file(s) removed: {$purgeResult['deleted']}\n"
+      : '';
+    return $purgeNote . "Exit code: {$code}\n" . $output;
+  } catch (\Throwable $e) {
+    return 'Error: ' . $e->getMessage() . "\n" . $e->getTraceAsString();
+  } finally {
+    if (is_string($prevCwd) && $prevCwd !== '') {
+      @chdir($prevCwd);
+    }
+  }
+}
+
+function parseArtisanArgs(string $args): array
+{
+  $args = trim($args);
+  if ($args === '') return ['', []];
+
+  $tokens = preg_split('/\s+/', $args) ?: [];
+  $name = array_shift($tokens) ?? '';
+  $params = [];
+
+  foreach ($tokens as $token) {
+    if ($token === '') continue;
+    if (strpos($token, '--') === 0) {
+      $eqPos = strpos($token, '=');
+      if ($eqPos !== false) {
+        $key = substr($token, 0, $eqPos);
+        $val = substr($token, $eqPos + 1);
+        $params[$key] = $val;
+      } else {
+        $params[$token] = true;
+      }
+      continue;
+    }
+    $params[] = $token;
+  }
+
+  return [$name, $params];
+}
+
+function purgeRouteCacheFiles(string $laravelRoot): array
+{
+  $bootstrapCache = rtrim($laravelRoot, '/\\') . DIRECTORY_SEPARATOR . 'bootstrap' . DIRECTORY_SEPARATOR . 'cache';
+  if (! is_dir($bootstrapCache)) {
+    return ['deleted' => 0, 'errors' => 0];
+  }
+
+  $patterns = [
+    $bootstrapCache . DIRECTORY_SEPARATOR . 'routes-*.php',
+    $bootstrapCache . DIRECTORY_SEPARATOR . 'routes.php',
+  ];
+
+  $files = [];
+  foreach ($patterns as $pattern) {
+    $matches = glob($pattern) ?: [];
+    foreach ($matches as $f) {
+      if (is_string($f) && $f !== '') {
+        $files[$f] = true;
+      }
+    }
+  }
+
+  $deleted = 0;
+  $errors = 0;
+  foreach (array_keys($files) as $file) {
+    if (! file_exists($file)) {
+      continue;
+    }
+    if (@unlink($file)) {
+      $deleted++;
+    } else {
+      $errors++;
+    }
+  }
+
+  return ['deleted' => $deleted, 'errors' => $errors];
+}
+
+// Format bytes to human readable
+function formatBytes($bytes, $precision = 2)
+{
+  $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+
+  for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
+    $bytes /= 1024;
+  }
+
+  return round($bytes, $precision) . ' ' . $units[$i];
+}
+
+// Get directory size
+function getDirSize($dir)
+{
+  if (! is_dir($dir)) {
+    return 0;
+  }
+
+  $size = 0;
+  $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS));
+  foreach ($files as $file) {
+    $size += $file->getSize();
+  }
+
+  return $size;
+}
+
+// Remove directory recursively
+function removeDirectory($dir)
+{
+  if (! is_dir($dir)) {
+    return false;
+  }
+
+  $files = array_diff(scandir($dir), ['.', '..']);
+  foreach ($files as $file) {
+    $path = $dir . '/' . $file;
+    if (is_dir($path)) {
+      removeDirectory($path);
+    } else {
+      unlink($path);
+    }
+  }
+
+  return rmdir($dir);
+}
+
+// Define admin tool actions with grouping
+$toolGroups = [
+  'cache' => [
+    'title' => 'Cache Management',
+    'description' => 'Clear and manage application cache',
+    'actions' => [
+      'clear_cache' => [
+        'label' => 'Clear All Cache',
+        'description' => 'Clear cache, config, routes, and views',
+        'variant' => 'primary',
+        'commands' => [
+          'php artisan cache:clear',
+          'php artisan config:clear',
+          'php artisan route:clear',
+          'php artisan view:clear',
+        ],
+      ],
+      'optimize_clear' => [
+        'label' => 'Clear Optimization',
+        'description' => 'Clear all optimized files',
+        'variant' => 'secondary',
+        'commands' => ['php artisan optimize:clear'],
+      ],
+      'fix_route_cache_files' => [
+        'label' => 'Fix Route Cache',
+        'description' => 'Delete cached route files (routes-*.php) that can break this app',
+        'variant' => 'warning',
+        'custom' => 'handleFixRouteCache',
+      ],
+    ],
+  ],
+  'optimization' => [
+    'title' => 'Application Optimization',
+    'description' => 'Optimize application performance',
+    'actions' => [
+      'optimize' => [
+        'label' => 'Optimize App',
+        'description' => 'Optimize routes, config, and views',
+        'variant' => 'success',
+        'commands' => ['php artisan optimize --except=route:cache --no-interaction'],
+      ],
+      'config_cache' => [
+        'label' => 'Cache Config',
+        'description' => 'Cache configuration files',
+        'variant' => 'secondary',
+        'commands' => ['php artisan config:cache'],
+      ],
+    ],
+  ],
+  'storage' => [
+    'title' => 'Storage Management',
+    'description' => 'Manage storage links and permissions',
+    'actions' => [
+      'storage_link' => [
+        'label' => 'Create Storage Link',
+        'description' => 'Create symbolic link for storage',
+        'variant' => 'primary',
+        'custom' => 'handleStorageLink',
+      ],
+      'fix_storage_permissions' => [
+        'label' => 'Fix Storage Permissions',
+        'description' => 'Set proper storage permissions',
+        'variant' => 'warning',
+        'custom' => 'handleStoragePermissions',
+      ],
+      'clear_logs' => [
+        'label' => 'Clear Log Files',
+        'description' => 'Delete all log files',
+        'variant' => 'warning',
+        'custom' => 'handleClearLogs',
+      ],
+    ],
+  ],
+  'database' => [
+    'title' => 'Database Operations',
+    'description' => 'Database migrations and seeding',
+    'actions' => [
+      'migrate' => [
+        'label' => 'Run Migrations',
+        'description' => 'Execute database migrations',
+        'variant' => 'primary',
+        'commands' => ['php artisan migrate --force'],
+      ],
+      'db_seed' => [
+        'label' => 'Run Database Seeder',
+        'description' => 'Seed database with sample data',
+        'variant' => 'success',
+        'commands' => ['php artisan db:seed --force'],
+      ],
+      'migrate_fresh' => [
+        'label' => 'Fresh Migration',
+        'description' => 'Drop all tables and re-migrate',
+        'variant' => 'destructive',
+        'commands' => ['php artisan migrate:fresh --force'],
+        'confirm' => 'This will delete all data. Are you sure?',
+      ],
+    ],
+  ],
+  'maintenance' => [
+    'title' => 'Maintenance Mode',
+    'description' => 'Control application maintenance mode',
+    'actions' => [
+      'maintenance_down' => [
+        'label' => 'Enable Maintenance',
+        'description' => 'Put application in maintenance mode',
+        'variant' => 'warning',
+        'commands' => ['php artisan down --secret=admin-secret'],
+      ],
+      'maintenance_up' => [
+        'label' => 'Disable Maintenance',
+        'description' => 'Bring application back online',
+        'variant' => 'success',
+        'commands' => ['php artisan up'],
+      ],
+    ],
+  ],
+  'security' => [
+    'title' => 'Security',
+    'description' => 'Security and key management',
+    'actions' => [
+      'key_generate' => [
+        'label' => 'Generate App Key',
+        'description' => 'Generate new application encryption key',
+        'variant' => 'destructive',
+        'commands' => ['php artisan key:generate --force'],
+        'confirm' => 'This will generate a new APP_KEY. Continue?',
+      ],
+    ],
+  ],
+  'environment' => [
+    'title' => 'Environment',
+    'description' => 'Environment file management',
+    'actions' => [
+      'check_env' => [
+        'label' => 'Check .env File',
+        'description' => 'Validate environment configuration',
+        'variant' => 'secondary',
+        'custom' => 'handleCheckEnv',
+      ],
+      'show_env' => [
+        'label' => 'Show .env Content',
+        'description' => 'Display environment file (masked)',
+        'variant' => 'secondary',
+        'custom' => 'handleShowEnv',
+      ],
+      'backup_env' => [
+        'label' => 'Backup .env File',
+        'description' => 'Create backup of environment file',
+        'variant' => 'warning',
+        'custom' => 'handleBackupEnv',
+      ],
+    ],
+  ],
+  'diagnostics' => [
+    'title' => 'System Diagnostics',
+    'description' => 'System health and debugging tools',
+    'actions' => [
+      'health_check' => [
+        'label' => 'System Health Check',
+        'description' => 'Complete system health diagnosis',
+        'variant' => 'primary',
+        'custom' => 'handleHealthCheck',
+      ],
+      'debug_500_error' => [
+        'label' => 'Debug 500 Error',
+        'description' => 'Diagnose HTTP 500 errors',
+        'variant' => 'destructive',
+        'custom' => 'handleDebug500',
+      ],
+      'debug_hosting_structure' => [
+        'label' => 'Debug Hosting Structure',
+        'description' => 'Analyze hosting directory structure',
+        'variant' => 'destructive',
+        'custom' => 'handleDebugHosting',
+      ],
+      'disk_space' => [
+        'label' => 'Disk Space Usage',
+        'description' => 'Check disk space and file sizes',
+        'variant' => 'secondary',
+        'custom' => 'handleDiskSpace',
+      ],
+    ],
+  ],
+];
+
+$output = '';
+$error = '';
+
+// Handle AJAX requests
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+  $action = $_POST['action'];
+
+  if ($action === 'logout') {
+    session_destroy();
+    header('Location: ' . $_SERVER['PHP_SELF']);
+    exit;
+  }
+
+  try {
+    $laravelRoot = getLaravelRoot();
+
+    if (! is_dir($laravelRoot) || ! file_exists($laravelRoot . '/artisan')) {
+      throw new Exception('Laravel directory not found at: ' . $laravelRoot);
+    }
+
+    chdir($laravelRoot);
+
+    // Find the action in tool groups
+    $actionFound = false;
+    foreach ($toolGroups as $group) {
+      if (isset($group['actions'][$action])) {
+        $actionConfig = $group['actions'][$action];
+        $actionFound = true;
+
+        if (isset($actionConfig['commands'])) {
+          // Execute commands
+          $outputs = [];
+          foreach ($actionConfig['commands'] as $command) {
+            $outputs[] = executeCommand($command);
+          }
+          $output = implode("\n\n", $outputs);
+        } elseif (isset($actionConfig['custom'])) {
+          // Execute custom handler
+          $handler = $actionConfig['custom'];
+          if (function_exists($handler)) {
+            $output = $handler();
+          } else {
+            throw new Exception("Custom handler not found: {$handler}");
+          }
+        }
+        break;
+      }
+    }
+
+    if (! $actionFound) {
+      throw new Exception("Unknown action: {$action}");
+    }
+  } catch (Exception $e) {
+    $error = 'Error: ' . $e->getMessage();
+  }
+}
+
+// Custom action handlers
+function handleStorageLink()
+{
+  $laravelRoot = getLaravelRoot();
+  $currentDir = dirname($laravelRoot); // Parent of laravel-app
+  $publicDir = $currentDir . '/public_html'; // Assuming standard structure
+
+  $storagePath = $publicDir . '/storage';
+  $storageTarget = $laravelRoot . '/storage/app/public';
+
+  $output = "Storage Link Management:\n";
+  $output .= "Public Directory: {$publicDir}\n";
+  $output .= "Storage Link Path: {$storagePath}\n";
+  $output .= "Storage Target: {$storageTarget}\n";
+  $output .= 'Target exists: ' . (is_dir($storageTarget) ? 'Yes' : 'No') . "\n";
+  $output .= 'Link exists: ' . (file_exists($storagePath) ? 'Yes' : 'No') . "\n\n";
+
+  if (file_exists($storagePath)) {
+    if (is_link($storagePath)) {
+      $target = readlink($storagePath);
+      $output .= "Current link target: {$target}\n";
+      if ($target !== $storageTarget) {
+        $output .= "Recreating link with correct target...\n";
+        unlink($storagePath);
+        if (symlink($storageTarget, $storagePath)) {
+          $output .= "✅ Link recreated successfully!\n";
+        } else {
+          $output .= "❌ Failed to recreate link\n";
+        }
+      } else {
+        $output .= "✅ Link is correct\n";
+      }
+    } else {
+      $output .= "⚠️ Storage exists but is not a symlink\n";
+    }
+  } else {
+    if (is_dir($storageTarget)) {
+      $output .= "Creating new storage link...\n";
+      if (symlink($storageTarget, $storagePath)) {
+        $output .= "✅ Storage link created successfully!\n";
+      } else {
+        $output .= "❌ Failed to create storage link\n";
+      }
+    } else {
+      $output .= "❌ Target directory does not exist\n";
+    }
+  }
+
+  return $output;
+}
+
+function handleFixRouteCache()
+{
+  $laravelRoot = getLaravelRoot();
+  $result = purgeRouteCacheFiles($laravelRoot);
+
+  $output = "Route Cache Fix:\n";
+  $output .= "Laravel Root: {$laravelRoot}\n";
+  $output .= "Deleted route cache files: {$result['deleted']}\n";
+  if (($result['errors'] ?? 0) > 0) {
+    $output .= "Errors while deleting: {$result['errors']}\n";
+  }
+  $output .= "\nNext step:\n";
+  $output .= "- Run: Optimize App (safe)\n";
+
+  return $output;
+}
+
+function handleStoragePermissions()
+{
+  $laravelRoot = getLaravelRoot();
+  $storageDir = $laravelRoot . '/storage';
+
+  $output = "Fixing Storage Permissions:\n";
+
+  if (! is_dir($storageDir)) {
+    return "❌ Storage directory not found: {$storageDir}";
+  }
+
+  $dirs = ['storage', 'storage/app', 'storage/logs', 'storage/framework', 'bootstrap/cache'];
+  $fixed = 0;
+
+  foreach ($dirs as $dir) {
+    $path = $laravelRoot . '/' . $dir;
+    if (is_dir($path)) {
+      if (chmod($path, 0755)) {
+        $output .= "✅ Fixed permissions for {$dir}\n";
+        $fixed++;
+      } else {
+        $output .= "❌ Failed to fix permissions for {$dir}\n";
+      }
+    }
+  }
+
+  $output .= "\n✅ Fixed permissions for {$fixed} directories\n";
+
+  return $output;
+}
+
+function handleClearLogs()
+{
+  $laravelRoot = getLaravelRoot();
+  $logPath = $laravelRoot . '/storage/logs';
+
+  if (! is_dir($logPath)) {
+    return 'Log directory not found';
+  }
+
+  $files = glob($logPath . '/*.log');
+  $count = 0;
+  foreach ($files as $file) {
+    if (unlink($file)) {
+      $count++;
+    }
+  }
+
+  return "Deleted {$count} log files";
+}
+
+function handleCheckEnv()
+{
+  $laravelRoot = getLaravelRoot();
+  $envPath = $laravelRoot . '/.env';
+  $envExamplePath = $laravelRoot . '/.env.example';
+
+  $output = "Environment File Check:\n";
+  $output .= '.env exists: ' . (file_exists($envPath) ? 'Yes' : 'No') . "\n";
+  $output .= '.env.example exists: ' . (file_exists($envExamplePath) ? 'Yes' : 'No') . "\n";
+
+  if (file_exists($envPath)) {
+    $envSize = filesize($envPath);
+    $output .= '.env size: ' . $envSize . " bytes\n";
+    $output .= '.env modified: ' . date('Y-m-d H:i:s', filemtime($envPath)) . "\n";
+
+    $envContent = file_get_contents($envPath);
+    $requiredVars = ['APP_KEY', 'DB_CONNECTION', 'DB_DATABASE'];
+    foreach ($requiredVars as $var) {
+      $exists = strpos($envContent, $var . '=') !== false;
+      $output .= "{$var}: " . ($exists ? 'Set' : 'Missing') . "\n";
+    }
+  }
+
+  return $output;
+}
+
+function handleShowEnv()
+{
+  $laravelRoot = getLaravelRoot();
+  $envPath = $laravelRoot . '/.env';
+
+  if (! file_exists($envPath)) {
+    return '❌ Environment file not found';
+  }
+
+  $envContent = file_get_contents($envPath);
+  // Mask sensitive values
+  $maskedContent = preg_replace('/(APP_KEY|DB_PASSWORD|ADMIN_TOOLS_PASSWORD|.*_SECRET|.*_TOKEN|.*_KEY)=(.+)/i', '$1=***MASKED***', $envContent);
+
+  return "Environment File Content (sensitive values masked):\n\n" . $maskedContent;
+}
+
+function handleBackupEnv()
+{
+  $laravelRoot = getLaravelRoot();
+  $envPath = $laravelRoot . '/.env';
+  $backupPath = $laravelRoot . '/.env.backup.' . date('Y-m-d_H-i-s');
+
+  if (! file_exists($envPath)) {
+    return '❌ Environment file not found';
+  }
+
+  if (copy($envPath, $backupPath)) {
+    return '✅ Environment file backed up to: ' . basename($backupPath);
+  } else {
+    return '❌ Failed to backup environment file';
+  }
+}
+
+function handleHealthCheck()
+{
+  $laravelRoot = getLaravelRoot();
+
+  $output = "System Health Check:\n\n";
+
+  // PHP Info
+  $output .= "🔧 PHP Information:\n";
+  $output .= 'PHP Version: ' . PHP_VERSION . "\n";
+  $output .= 'Memory Limit: ' . ini_get('memory_limit') . "\n";
+  $output .= 'Max Execution Time: ' . ini_get('max_execution_time') . "s\n";
+  $output .= 'Upload Max Size: ' . ini_get('upload_max_filesize') . "\n";
+
+  // Extensions
+  $output .= "\n🔌 Extensions:\n";
+  $requiredExtensions = ['pdo', 'mbstring', 'tokenizer', 'json', 'openssl', 'curl'];
+  foreach ($requiredExtensions as $ext) {
+    $loaded = extension_loaded($ext);
+    $output .= "{$ext}: " . ($loaded ? '✅ Loaded' : '❌ Missing') . "\n";
+  }
+
+  // Laravel Files
+  $output .= "\n📁 Laravel Files:\n";
+  $files = ['artisan', 'composer.json', '.env', 'bootstrap/app.php'];
+  foreach ($files as $file) {
+    $exists = file_exists($laravelRoot . '/' . $file);
+    $output .= "{$file}: " . ($exists ? '✅ Exists' : '❌ Missing') . "\n";
+  }
+
+  // Directories
+  $output .= "\n📂 Directories:\n";
+  $dirs = ['storage', 'storage/app', 'storage/logs', 'storage/framework', 'bootstrap/cache'];
+  foreach ($dirs as $dir) {
+    $path = $laravelRoot . '/' . $dir;
+    $exists = is_dir($path);
+    $writable = $exists ? is_writable($path) : false;
+    $output .= "{$dir}: " . ($exists ? '✅ Exists' : '❌ Missing') .
+      ($writable ? ' (Writable)' : ($exists ? ' (Not Writable)' : '')) . "\n";
+  }
+
+  return $output;
+}
+
+function handleDebug500()
+{
+  $laravelRoot = getLaravelRoot();
+
+  $output = "HTTP 500 Error Diagnostic:\n\n";
+
+  // Check PHP version and extensions
+  $output .= "1. PHP Environment:\n";
+  $output .= '   Version: ' . phpversion() . "\n";
+  $output .= '   SAPI: ' . php_sapi_name() . "\n";
+
+  $requiredExtensions = ['openssl', 'pdo', 'mbstring', 'tokenizer', 'xml', 'ctype', 'json', 'curl'];
+  $output .= "   Required Extensions:\n";
+  foreach ($requiredExtensions as $ext) {
+    $loaded = extension_loaded($ext);
+    $output .= "   - $ext: " . ($loaded ? '✅ Loaded' : '❌ Missing') . "\n";
+  }
+
+  // Check critical files
+  $output .= "\n2. Critical Files Check:\n";
+  $criticalFiles = [
+    '.env' => $laravelRoot . '/.env',
+    'artisan' => $laravelRoot . '/artisan',
+    'index.php' => dirname($laravelRoot) . '/public_html/index.php',
+    'composer.json' => $laravelRoot . '/composer.json',
+  ];
+
+  foreach ($criticalFiles as $name => $path) {
+    $exists = file_exists($path);
+    $readable = $exists && is_readable($path);
+    $output .= "   - $name: " . ($readable ? '✅ OK' : ($exists ? '⚠️ Not readable' : '❌ Missing')) . "\n";
+  }
+
+  // Quick fixes
+  $output .= "\n3. Quick Fix Recommendations:\n";
+  $output .= "   1. Generate APP_KEY: Use 'Generate App Key' button\n";
+  $output .= "   2. Fix Permissions: Use 'Fix Storage Permissions' button\n";
+  $output .= "   3. Clear Cache: Use 'Clear All Cache' button\n";
+  $output .= "   4. Check .env: Use 'Show .env Content' button\n";
+
+  return $output;
+}
+
+function handleDebugHosting()
+{
+  $laravelRoot = getLaravelRoot();
+
+  $output = "Hosting Structure Diagnostic:\n\n";
+
+  // Current location info
+  $output .= "1. Current Location:\n";
+  $output .= '   Current Dir: ' . __DIR__ . "\n";
+  $output .= '   Document Root: ' . ($_SERVER['DOCUMENT_ROOT'] ?? 'Unknown') . "\n";
+
+  // Path analysis
+  $output .= "\n2. Laravel Root Detection:\n";
+  $output .= "   Selected Laravel Root: {$laravelRoot}\n";
+  $output .= '   Directory exists: ' . (is_dir($laravelRoot) ? 'Yes' : 'No') . "\n";
+  $output .= '   Artisan exists: ' . (file_exists($laravelRoot . '/artisan') ? 'Yes' : 'No') . "\n";
+
+  return $output;
+}
+
+function handleDiskSpace()
+{
+  $laravelRoot = getLaravelRoot();
+
+  $output = "Disk Space Information:\n";
+
+  // Laravel directory size
+  $laravelSize = getDirSize($laravelRoot);
+  $output .= 'Laravel directory: ' . formatBytes($laravelSize) . "\n";
+
+  // Storage directory size
+  $storageSize = getDirSize($laravelRoot . '/storage');
+  $output .= 'Storage directory: ' . formatBytes($storageSize) . "\n";
+
+  // Available disk space
+  $freeSpace = disk_free_space($laravelRoot);
+  $totalSpace = disk_total_space($laravelRoot);
+  $usedSpace = $totalSpace - $freeSpace;
+
+  $output .= "\nDisk Usage:\n";
+  $output .= 'Used: ' . formatBytes($usedSpace) . "\n";
+  $output .= 'Free: ' . formatBytes($freeSpace) . "\n";
+  $output .= 'Total: ' . formatBytes($totalSpace) . "\n";
+  $output .= 'Usage: ' . round(($usedSpace / $totalSpace) * 100, 2) . "%\n";
+
+  return $output;
+}
+
+function showLoginForm()
+{
+?>
+  <!DOCTYPE html>
+  <html lang="en" class="light">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Tools - Login</title>
+    <style>
+      :root {
+        --background: 0 0% 100%;
+        --foreground: 222.2 84% 4.9%;
+        --card: 0 0% 100%;
+        --card-foreground: 222.2 84% 4.9%;
+        --primary: 222.2 47.4% 11.2%;
+        --primary-foreground: 210 40% 98%;
+        --muted: 210 40% 98%;
+        --muted-foreground: 215.4 16.3% 46.9%;
+        --border: 214.3 31.8% 91.4%;
+        --input: 214.3 31.8% 91.4%;
+        --radius: 0.5rem;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+        background: hsl(210 40% 98%);
+        color: hsl(var(--foreground));
+        line-height: 1.6;
+        margin: 0;
+        padding: 2rem;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .login-container {
+        background: hsl(var(--background));
+        border: 1px solid hsl(var(--border));
+        border-radius: 0.75rem;
+        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        padding: 2rem;
+        width: 100%;
+        max-width: 400px;
+      }
+
+      .login-header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .login-header h1 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0 0 0.5rem 0;
+        color: hsl(var(--foreground));
+      }
+
+      .login-header p {
+        color: hsl(var(--muted-foreground));
+        font-size: 0.875rem;
+      }
+
+      .alert {
+        border-radius: var(--radius);
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.875rem;
+        border: 1px solid;
+      }
+
+      .alert-warning {
+        background: hsl(38 100% 97%);
+        border-color: hsl(38 92% 50% / 0.2);
+        color: hsl(38 92% 30%);
+      }
+
+      .alert-info {
+        background: hsl(204 100% 97%);
+        border-color: hsl(204 93% 85%);
+        color: hsl(204 90% 30%);
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: hsl(var(--foreground));
+      }
+
+      .form-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid hsl(var(--border));
+        border-radius: calc(var(--radius) - 2px);
+        font-size: 0.875rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        background: hsl(var(--background));
+      }
+
+      .form-input:focus {
+        outline: none;
+        border-color: hsl(var(--primary));
+        box-shadow: 0 0 0 3px hsl(var(--primary) / 0.1);
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+        border-radius: calc(var(--radius) - 2px);
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+        padding: 0.75rem 1.5rem;
+        width: 100%;
+        cursor: pointer;
+        background: hsl(var(--primary));
+        color: hsl(var(--primary-foreground));
+      }
+
+      .btn:hover {
+        background: hsl(var(--primary) / 0.9);
+      }
+
+      .btn:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px hsl(var(--primary) / 0.2);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="login-container">
+      <div class="login-header">
+        <h1>Admin Tools</h1>
+        <p>Emergency administration interface</p>
+      </div>
+
+      <div class="alert alert-warning">
+        <strong>Warning:</strong> This is an emergency admin tool. Remove this file in production.
+      </div>
+
+      <div class="alert alert-info">
+        <strong>Info:</strong> Password is retrieved from Laravel .env ADMIN_TOOLS_PASSWORD.<br>
+        <small>Fallback to 'admin123' if .env file not found or ADMIN_TOOLS_PASSWORD empty.</small>
+      </div>
+
+      <form method="post">
+        <div class="form-group">
+          <label for="password" class="form-label">Password</label>
+          <input
+            type="password"
+            name="password"
+            id="password"
+            class="form-input"
+            required
+            autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn">Sign In</button>
+      </form>
+    </div>
+  </body>
+
+  </html>
+<?php
+}
+
+$laravelRoot = getLaravelRoot();
+?>
+<!DOCTYPE html>
+<html lang="en" class="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emergency Admin Tools</title>
+  <style>
+    :root {
+      --background: 0 0% 100%;
+      --foreground: 222.2 84% 4.9%;
+      --card: 0 0% 100%;
+      --card-foreground: 222.2 84% 4.9%;
+      --primary: 222.2 47.4% 11.2%;
+      --primary-foreground: 210 40% 98%;
+      --secondary: 210 40% 96%;
+      --secondary-foreground: 222.2 47.4% 11.2%;
+      --muted: 210 40% 98%;
+      --muted-foreground: 215.4 16.3% 46.9%;
+      --accent: 210 40% 96%;
+      --accent-foreground: 222.2 47.4% 11.2%;
+      --destructive: 0 84.2% 60.2%;
+      --destructive-foreground: 210 40% 98%;
+      --warning: 38 92% 50%;
+      --warning-foreground: 222.2 84% 4.9%;
+      --success: 142 76% 36%;
+      --success-foreground: 210 40% 98%;
+      --border: 214.3 31.8% 91.4%;
+      --input: 214.3 31.8% 91.4%;
+      --ring: 222.2 84% 4.9%;
+      --radius: 0.5rem;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      background: hsl(210 40% 98%);
+      color: hsl(var(--foreground));
+      line-height: 1.6;
+      margin: 0;
+      padding: 1.5rem;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: hsl(var(--background));
+      border-radius: 0.75rem;
+      border: 1px solid hsl(var(--border));
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      overflow: hidden;
+    }
+
+    .header {
+      background: hsl(var(--card));
+      border-bottom: 1px solid hsl(var(--border));
+      padding: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .header-content h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: hsl(var(--foreground));
+      margin: 0 0 0.5rem 0;
+      letter-spacing: -0.025em;
+    }
+
+    .header-content p {
+      color: hsl(var(--muted-foreground));
+      margin: 0;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .system-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 2rem;
+      padding: 1.5rem;
+      background: hsl(var(--muted));
+      border-radius: var(--radius);
+      border: 1px solid hsl(var(--border));
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.875rem;
+    }
+
+    .info-label {
+      font-weight: 500;
+      color: hsl(var(--foreground));
+    }
+
+    .info-value {
+      color: hsl(var(--muted-foreground));
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.8rem;
+    }
+
+    .content {
+      padding: 2rem;
+    }
+
+    .tools-grid {
+      display: grid;
+      gap: 2rem;
+    }
+
+    .tool-group {
+      background: hsl(var(--card));
+      border: 1px solid hsl(var(--border));
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+
+    .group-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .group-header h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0 0 0.25rem 0;
+      color: hsl(var(--foreground));
+    }
+
+    .group-header p {
+      color: hsl(var(--muted-foreground));
+      font-size: 0.875rem;
+      margin: 0;
+    }
+
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .action-card {
+      background: hsl(var(--background));
+      border: 1px solid hsl(var(--border));
+      border-radius: calc(var(--radius) - 2px);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .action-info h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0 0 0.25rem 0;
+      color: hsl(var(--foreground));
+    }
+
+    .action-info p {
+      color: hsl(var(--muted-foreground));
+      font-size: 0.8rem;
+      margin: 0;
+      line-height: 1.4;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      border-radius: calc(var(--radius) - 2px);
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: hsl(var(--primary));
+      color: hsl(var(--primary-foreground));
+    }
+
+    .btn-primary:hover {
+      background: hsl(var(--primary) / 0.9);
+    }
+
+    .btn-secondary {
+      background: hsl(var(--secondary));
+      color: hsl(var(--secondary-foreground));
+      border-color: hsl(var(--border));
+    }
+
+    .btn-secondary:hover {
+      background: hsl(var(--secondary) / 0.8);
+    }
+
+    .btn-warning {
+      background: hsl(var(--warning));
+      color: hsl(var(--warning-foreground));
+    }
+
+    .btn-warning:hover {
+      background: hsl(var(--warning) / 0.9);
+    }
+
+    .btn-success {
+      background: hsl(var(--success));
+      color: hsl(var(--success-foreground));
+    }
+
+    .btn-success:hover {
+      background: hsl(var(--success) / 0.9);
+    }
+
+    .btn-destructive {
+      background: hsl(var(--destructive));
+      color: hsl(var(--destructive-foreground));
+    }
+
+    .btn-destructive:hover {
+      background: hsl(var(--destructive) / 0.9);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: hsl(var(--foreground));
+      border-color: hsl(var(--border));
+    }
+
+    .btn-ghost:hover {
+      background: hsl(var(--accent));
+    }
+
+    .btn-sm {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.8rem;
+    }
+
+    .btn:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px hsl(var(--ring) / 0.2);
+    }
+
+    .output-area {
+      margin-top: 2rem;
+      background: hsl(var(--muted));
+      border: 1px solid hsl(var(--border));
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+
+    .output-area h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0 0 1rem 0;
+      color: hsl(var(--foreground));
+    }
+
+    .output-content {
+      background: hsl(var(--background));
+      border: 1px solid hsl(var(--border));
+      border-radius: calc(var(--radius) - 2px);
+      padding: 1rem;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.8rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 500px;
+      overflow-y: auto;
+      color: hsl(var(--foreground));
+    }
+
+    .output-error {
+      color: hsl(var(--destructive));
+    }
+
+    .alert {
+      border-radius: var(--radius);
+      padding: 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+      border: 1px solid;
+    }
+
+    .alert-warning {
+      background: hsl(38 100% 97%);
+      border-color: hsl(38 92% 50% / 0.2);
+      color: hsl(38 92% 30%);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-content">
+        <h1>Emergency Admin Tools</h1>
+        <p>Quick administration interface when main app is down</p>
+      </div>
+      <div class="header-actions">
+        <form method="post" style="margin: 0;">
+          <input type="hidden" name="action" value="logout">
+          <button type="submit" class="btn btn-ghost btn-sm">Logout</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="system-info">
+      <div class="info-item">
+        <span class="info-label">PHP Version</span>
+        <span class="info-value"><?php echo phpversion(); ?></span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Laravel Root</span>
+        <span class="info-value" style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="<?php echo htmlspecialchars($laravelRoot); ?>"><?php echo htmlspecialchars($laravelRoot); ?></span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Current Directory</span>
+        <span class="info-value" style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="<?php echo htmlspecialchars(__DIR__); ?>"><?php echo htmlspecialchars(__DIR__); ?></span>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="alert alert-warning">
+        <strong>Warning:</strong> This is an emergency tool. Remove this file in production!
+      </div>
+
+      <?php if ($error): ?>
+        <div class="alert alert-warning" style="background: hsl(0 100% 97%); border-color: hsl(0 84% 60% / 0.2); color: hsl(0 84% 40%);">
+          <strong>Error:</strong> <?php echo htmlspecialchars($error); ?>
+        </div>
+      <?php endif; ?>
+
+      <?php if ($output): ?>
+        <div class="output-area">
+          <h3>Command Output</h3>
+          <div class="output-content <?php echo $error ? 'output-error' : ''; ?>"><?php echo htmlspecialchars($output); ?></div>
+        </div>
+      <?php endif; ?>
+
+      <div class="tools-grid">
+        <?php foreach ($toolGroups as $groupKey => $group): ?>
+          <div class="tool-group">
+            <div class="group-header">
+              <h2><?php echo htmlspecialchars($group['title']); ?></h2>
+              <p><?php echo htmlspecialchars($group['description']); ?></p>
+            </div>
+            <div class="actions-grid">
+              <?php foreach ($group['actions'] as $actionKey => $action): ?>
+                <div class="action-card">
+                  <div class="action-info">
+                    <h3><?php echo htmlspecialchars($action['label']); ?></h3>
+                    <p><?php echo htmlspecialchars($action['description']); ?></p>
+                  </div>
+                  <form method="post" style="margin: 0;">
+                    <input type="hidden" name="action" value="<?php echo htmlspecialchars($actionKey); ?>">
+                    <?php
+                    $btnClass = 'btn-secondary';
+                    if ($action['variant'] === 'primary') $btnClass = 'btn-primary';
+                    if ($action['variant'] === 'success') $btnClass = 'btn-success';
+                    if ($action['variant'] === 'warning') $btnClass = 'btn-warning';
+                    if ($action['variant'] === 'destructive') $btnClass = 'btn-destructive';
+                    ?>
+                    <button
+                      type="submit"
+                      class="btn <?php echo $btnClass; ?>"
+                      <?php if (isset($action['confirm'])): ?>
+                      onclick="return confirm('<?php echo htmlspecialchars($action['confirm']); ?>');"
+                      <?php endif; ?>>
+                      Execute
+                    </button>
+                  </form>
+                </div>
+              <?php endforeach; ?>
+            </div>
+          </div>
+        <?php endforeach; ?>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
