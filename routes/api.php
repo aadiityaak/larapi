@@ -22,6 +22,12 @@ use App\Http\Controllers\{
     CategoryController,
     RoleController,
     Auth\ProfileController,
+    Auth\AuthenticatedSessionController,
+    Auth\EmailVerificationSendNotificationController,
+    Auth\NewPasswordController,
+    Auth\PasswordResetLinkController,
+    Auth\RegisteredUserController,
+    Auth\VerifyEmailController,
     MaintenanceController
 };
 use Spatie\Permission\Models\Permission;
@@ -30,6 +36,17 @@ use Spatie\Permission\Models\Permission;
 Route::get('/settings/background', [SettingLoginController::class, 'index']);
 Route::get('/settings/favicon', [SettingFaviconController::class, 'index']);
 Route::get('/settings', [SettingController::class, 'index']);
+
+// Auth routes for API (use web middleware for session support)
+Route::middleware('web')->group(function () {
+    Route::post('/register', [RegisteredUserController::class, 'store'])->middleware('guest')->name('api.register');
+    Route::post('/login', [AuthenticatedSessionController::class, 'store'])->middleware('guest')->name('api.login');
+    Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->middleware('guest')->name('api.password.email');
+    Route::post('/reset-password', [NewPasswordController::class, 'store'])->middleware('guest')->name('api.password.store');
+    Route::get('/verify-email/{id}/{hash}', [VerifyEmailController::class])->middleware(['auth:sanctum', 'signed', 'throttle:6,1'])->name('api.verification.verify');
+    Route::post('/email/verification-notification', [EmailVerificationSendNotificationController::class, 'store'])->middleware(['auth:sanctum', 'throttle:6,1'])->name('api.verification.send');
+    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->middleware('auth:sanctum')->name('api.logout');
+});
 
 // Routes dengan middleware 'auth:sanctum'
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -79,7 +96,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Order stats endpoint
     Route::get('orders/stats', [OrderController::class, 'stats']);
-    
+
     // Order list for dropdown
     Route::get('orders/list', [OrderController::class, 'list']);
 

@@ -1012,6 +1012,6 @@ class CustomerSeeder extends Seeder
         }
 
         // Create additional random customers if needed
-        Customer::factory(50)->create();
+        // Customer::factory(50)->create();
     }
 }

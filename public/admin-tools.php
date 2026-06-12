@@ -479,6 +479,24 @@ $toolGroups = [
       ],
     ],
   ],
+  'routes' => [
+    'title' => 'Route Management',
+    'description' => 'List and check application routes',
+    'actions' => [
+      'list_routes' => [
+        'label' => 'List All Routes',
+        'description' => 'Show all registered routes',
+        'variant' => 'primary',
+        'custom' => 'handleListRoutes',
+      ],
+      'route_cache_clear' => [
+        'label' => 'Clear Route Cache',
+        'description' => 'Clear the route cache',
+        'variant' => 'secondary',
+        'commands' => ['php artisan route:clear'],
+      ],
+    ],
+  ],
   'maintenance' => [
     'title' => 'Maintenance Mode',
     'description' => 'Control application maintenance mode',
@@ -933,6 +951,58 @@ function handleDiskSpace()
   $output .= 'Usage: ' . round(($usedSpace / $totalSpace) * 100, 2) . "%\n";
 
   return $output;
+}
+
+function handleListRoutes()
+{
+  $laravelRoot = getLaravelRoot();
+
+  // Change to Laravel root
+  $prevCwd = getcwd();
+  if (is_string($laravelRoot) && $laravelRoot !== '' && is_dir($laravelRoot)) {
+    @chdir($laravelRoot);
+  }
+
+  try {
+    // Require autoload and bootstrap app
+    require_once $laravelRoot . '/vendor/autoload.php';
+    $app = require $laravelRoot . '/bootstrap/app.php';
+
+    // Make kernel and bootstrap
+    $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+    $kernel->bootstrap();
+
+    // Get all routes
+    $routeCollection = Illuminate\Support\Facades\Route::getRoutes();
+
+    $output = "Registered Routes:\n\n";
+
+    foreach ($routeCollection as $route) {
+      $methods = implode('|', $route->methods());
+      $uri = $route->uri();
+      $name = $route->getName() ?? '-';
+      $action = $route->getActionName();
+      $middleware = implode(', ', $route->middleware());
+
+      $output .= str_pad($methods, 20);
+      $output .= str_pad($uri, 50);
+      $output .= str_pad($name, 30);
+      $output .= $action . "\n";
+      if ($middleware) {
+        $output .= "  Middleware: " . $middleware . "\n";
+      }
+      $output .= "\n";
+    }
+
+    return $output;
+  } catch (Exception $e) {
+    return "Error listing routes: " . $e->getMessage() . "\n" . $e->getTraceAsString();
+  } finally {
+    // Restore previous working directory
+    if (is_string($prevCwd) && $prevCwd !== '') {
+      @chdir($prevCwd);
+    }
+  }
 }
 
 function showLoginForm()
