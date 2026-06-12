@@ -152,18 +152,23 @@ for (const dir of laravelPublicDirs) {
 
 process.stdout.write("\n");
 
-// ── 5. Rewrite api/index.php to point to ../laravel-app/ ────────────
+// ── 5. Rewrite api/index.php to point to ../../laravel-app/ ────────────
 const apiIndexPath = join(apiDir, "index.php");
 if (existsSync(apiIndexPath)) {
     let content = readFileSync(apiIndexPath, "utf8");
-    // Rewrite paths: from __DIR__.'/../vendor/ to __DIR__.'/../laravel-app/vendor/
+    // Rewrite paths: from __DIR__.'/../vendor/ to __DIR__.'/../../laravel-app/vendor/
     content = content.replace(
         /require\s+__DIR__\s*\.\s*'\/\.\.\/vendor\/autoload\.php'/g,
-        "require __DIR__.'/../laravel-app/vendor/autoload.php'",
+        "require __DIR__.'/../../laravel-app/vendor/autoload.php'",
     );
     content = content.replace(
         /require_once\s+__DIR__\s*\.\s*'\/\.\.\/bootstrap\/app\.php'/g,
-        "require_once __DIR__.'/../laravel-app/bootstrap/app.php'",
+        "require_once __DIR__.'/../../laravel-app/bootstrap/app.php'",
+    );
+    // Also fix maintenance.php path
+    content = content.replace(
+        /file_exists\(\$maintenance\s*=\s*__DIR__\s*\.\s*'\/\.\.\/storage\/framework\/maintenance\.php'\)/g,
+        "file_exists($maintenance = __DIR__.'/../../laravel-app/storage/framework/maintenance.php')",
     );
     writeFileSync(apiIndexPath, content);
 }

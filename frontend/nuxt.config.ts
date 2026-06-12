@@ -64,7 +64,7 @@ export default defineNuxtConfig({
   sanctum: {
     mode: 'cookie',
     baseUrl: (() => {
-      const raw = process.env.API_URL || 'http://localhost:8000';
+      const raw = process.env.API_URL || (process.dev ? 'http://localhost:8000' : '/api');
       if (raw.startsWith('/')) return raw;
       const u = new URL(raw);
       const path = u.pathname.replace(/\/$/, '');
@@ -104,9 +104,8 @@ export default defineNuxtConfig({
         {
           urlPattern: (() => {
             const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const raw = process.env.API_URL || 'http://localhost:8000';
+            const raw = process.env.API_URL || (process.dev ? 'http://localhost:8000' : '/api');
             if (raw.startsWith('/')) {
-              // Relative URL: same-origin deployment — match /api/... paths
               return new RegExp(`^${esc(raw.replace(/\/$/, ''))}\\/.*`, 'i');
             }
             const u = new URL(raw);

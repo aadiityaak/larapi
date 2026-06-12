@@ -61,7 +61,7 @@
             "@php artisan config:cache",
             "@php artisan route:cache",
             "@php artisan view:cache",
-            "cd frontend && npm ci && cp .env.production .env && npx nuxt generate && rm -f .env",
+            "cd frontend && npm ci && npx nuxt generate",
             "node scripts/build-deployment.js",
             "@php artisan config:clear"
         ],
@@ -70,7 +70,7 @@
             "@php artisan config:cache",
             "@php artisan route:cache",
             "@php artisan view:cache",
-            "cd frontend && npm ci && cp .env.production .env && npx nuxt generate && rm -f .env",
+            "cd frontend && npm ci && npx nuxt generate",
             "node scripts/build-deployment.js --no-vendor"
         ]
     },
