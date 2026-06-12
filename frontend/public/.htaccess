@@ -1,0 +1,47 @@
+# Aktifkan mod_rewrite untuk mendukung routing
+RewriteEngine On
+
+# Jangan arahkan folder /api ke index.html (untuk API endpoints)
+RewriteCond %{REQUEST_URI} ^/api/ [NC]
+RewriteRule ^ - [L]
+
+# Jangan arahkan folder _nuxt (untuk assets Nuxt)
+RewriteCond %{REQUEST_URI} ^/_nuxt/ [NC]
+RewriteRule ^ - [L]
+
+# Jangan arahkan file statis umum
+RewriteCond %{REQUEST_URI} \.(js|css|jpg|jpeg|png|gif|ico|svg|eot|ttf|woff|woff2|webp|pdf|zip|json|xml)$ [NC]
+RewriteRule ^ - [L]
+
+# Routing untuk SPA - semua request yang bukan file/folder nyata diarahkan ke index.html
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ /index.html [QSA,L]
+
+# Cache Control untuk file statis
+<FilesMatch "\.(js|css|jpg|jpeg|png|gif|ico|svg|eot|ttf|woff|woff2|webmanifest|webp)$">
+  Header set Cache-Control "public, max-age=31536000, immutable"
+</FilesMatch>
+
+# Cache Control untuk HTML (lebih pendek untuk development)
+<FilesMatch "\.html$">
+  Header set Cache-Control "public, max-age=3600"
+</FilesMatch>
+
+# Gzip compression untuk performa
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript
+  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE application/xml application/xhtml+xml
+  AddOutputFilterByType DEFLATE application/manifest+json
+</IfModule>
+
+# Security headers (opsional tapi disarankan)
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options nosniff
+  Header always set X-Frame-Options DENY
+  Header always set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Follow symlinks
+Options +FollowSymLinks -Indexes

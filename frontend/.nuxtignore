@@ -1,0 +1,19 @@
+# Nuxt ignore file to prevent build issues
+
+/node_modules
+/.nuxt
+/dist
+/.nitro
+/.output
+/.env
+/.env._
+!.env.example
+/coverage
+/logs
+_.log
+.DS_Store
+Thumbs.db
+_.sw_
+_.tmp
+_.temp
+/src/deploy.js

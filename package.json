@@ -3,12 +3,16 @@
     "version": "1.0.1",
     "description": "Backend Aplikasi Notaris",
     "main": "index.js",
+    "type": "module",
     "scripts": {
-        "build": "node src/script.js"
+        "build": "node src/script.js",
+        "build:production": "composer run build:production",
+        "build:production-novendor": "composer run build:production-novendor"
     },
     "dependencies": {
         "archiver": "^5.3.1",
         "fs": "0.0.1-security",
+        "jszip": "^3.10.1",
         "tailwindcss": "^4.1.13"
     }
 }

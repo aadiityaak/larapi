@@ -1,0 +1,53 @@
+{
+  "name": "nuxt-app",
+  "version": "1.1.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "pregenerate": "bun build-version.js",
+    "build": "bun run pregenerate && nuxt build",
+    "dev": "nuxt dev",
+    "generate": "bun run pregenerate && nuxt generate",
+    "generate:notaris": "cp .env.notaris .env && bun run pregenerate && nuxt generate",
+    "generate:asisten": "cp .env.asisten .env && bun run pregenerate && nuxt generate",
+    "generate:notasua": "cp .env.notasua .env && bun run pregenerate && nuxt generate",
+    "generate:yossi": "cp .env.yossi .env && bun run pregenerate && nuxt generate",
+    "deploy": "bun run pregenerate && nuxt generate && node src/deploy.js",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@intlify/vue-i18n-bridge": "^1.0.0",
+    "@nuxt/icon": "^1.6.1",
+    "@nuxtjs/i18n": "^9.0.0",
+    "@pinia/nuxt": "^0.7.0",
+    "@primevue/forms": "^4.2.1",
+    "@primevue/themes": "^4.1.1",
+    "@vite-pwa/nuxt": "^0.10.6",
+    "archiver": "^7.0.1",
+    "basic-ftp": "^5.0.5",
+    "chart.js": "^4.4.7",
+    "dotenv": "^16.4.7",
+    "nuxt": "^3.15.0",
+    "nuxt-auth-sanctum": "^0.5.1",
+    "nuxt-zod-i18n": "^1.10.0",
+    "pinia": "^2.2.6",
+    "primevue": "^4.1.1",
+    "quill": "^2.0.3",
+    "vue": "latest",
+    "vue-router": "latest",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@primevue/nuxt-module": "^4.1.1",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14"
+  },
+  "overrides": {
+    "@intlify/shared": "10.0.8",
+    "@intlify/core-base": "10.0.8",
+    "@intlify/message-compiler": "10.0.8",
+    "vue-i18n": "10.0.8"
+  }
+}

@@ -1,0 +1,11 @@
+# API routes - don't redirect to index.html
+/api/* 200
+
+# Static assets - don't redirect
+/_nuxt/* 200
+/sw.js 200
+/workbox-*.js 200
+/manifest.webmanifest 200
+
+# SPA fallback for all other routes
+/* /index.html 200

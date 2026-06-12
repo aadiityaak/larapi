@@ -1,0 +1,26 @@
+# Mengaktifkan Rewrites Engine
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Redirect semua permintaan ke file index.html Nuxt
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ index.html [L]
+
+  # Opsional: Setel caching untuk file statis
+  <IfModule mod_headers.c>
+    <FilesMatch "\.(jpg|jpeg|png|gif|css|js|ico|woff|woff2|ttf|svg|eot|otf|webp|mp4|webm|ogg|ogv|mp3|wav|m4a|m3u8|ts)$">
+      Header set Cache-Control "max-age=31536000, public"
+    </FilesMatch>
+  </IfModule>
+</IfModule>
+
+# Opsional: Proteksi terhadap direktori
+<IfModule mod_autoindex.c>
+  Options -Indexes
+</IfModule>
+
+# Opsional: Setel CORS (Cross-Origin Resource Sharing) jika perlu
+<IfModule mod_headers.c>
+  Header set Access-Control-Allow-Origin "*"
+</IfModule>
