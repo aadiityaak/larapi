@@ -53,7 +53,7 @@ function getAdminPasswordFromEnv()
     return 'admin123';
   }
 
-  if (preg_match('/^ADMIN_TOOLS_PASSWORD=(.+)$/m', $envContent, $matches)) {
+  if (preg_match('/^ADMIN_TOOLS_PASS=(.+)$/m', $envContent, $matches)) {
     $password = trim($matches[1], "\"'\r\n\t ");
     return $password !== '' ? $password : 'admin123';
   }
@@ -797,7 +797,7 @@ function handleShowEnv()
 
   $envContent = file_get_contents($envPath);
   // Mask sensitive values
-  $maskedContent = preg_replace('/(APP_KEY|DB_PASSWORD|ADMIN_TOOLS_PASSWORD|.*_SECRET|.*_TOKEN|.*_KEY)=(.+)/i', '$1=***MASKED***', $envContent);
+  $maskedContent = preg_replace('/(APP_KEY|DB_PASSWORD|ADMIN_TOOLS_PASS|.*_SECRET|.*_TOKEN|.*_KEY)=(.+)/i', '$1=***MASKED***', $envContent);
 
   return "Environment File Content (sensitive values masked):\n\n" . $maskedContent;
 }
@@ -1162,8 +1162,8 @@ function showLoginForm()
       </div>
 
       <div class="alert alert-info">
-        <strong>Info:</strong> Password is retrieved from Laravel .env ADMIN_TOOLS_PASSWORD.<br>
-        <small>Fallback to 'admin123' if .env file not found or ADMIN_TOOLS_PASSWORD empty.</small>
+        <strong>Info:</strong> Password is retrieved from Laravel .env ADMIN_TOOLS_PASS.<br>
+        <small>Fallback to 'admin123' if .env file not found or ADMIN_TOOLS_PASS empty.</small>
       </div>
 
       <form method="post">
