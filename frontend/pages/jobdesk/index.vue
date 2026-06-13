@@ -850,7 +850,7 @@ onMounted(async () => {
   
   // Fetch stats data
   try {
-    const response = await client('/api/jobdesks/stats');
+    const response = await client('/jobdesks/stats');
     statsData.value = response;
   } catch (error) {
     console.error('Error fetching stats:', error);
@@ -858,21 +858,21 @@ onMounted(async () => {
   
   // Load makers & PICs
   try {
-    const resUsers = await client('/api/karyawans?paginate=false')
+    const resUsers = await client('/karyawans?paginate=false')
     makers.value = normalizeList(resUsers)
   } catch (e) {
     console.log('Error load makers', e)
   }
   try {
-    const resPICs = await client('/api/karyawans?paginate=false')
+    const resPICs = await client('/karyawans?paginate=false')
     pics.value = normalizeList(resPICs)
     if (!pics.value?.length) {
-      const resPICsMin = await client('/api/karyawans/min')
+      const resPICsMin = await client('/karyawans/min')
       pics.value = normalizeList(resPICsMin)
     }
   } catch (e) {
     try {
-      const resPICsMin = await client('/api/karyawans/min')
+      const resPICsMin = await client('/karyawans/min')
       pics.value = normalizeList(resPICsMin)
     } catch (err) {
       console.log('Error load PICs', err)
@@ -948,7 +948,7 @@ function fetchJobdesk() {
   } else {
     query.delete('status');
   }
-  return client(`/api/jobdesks?page=${page.value}&order_id=${order_id.value}&${query.toString()}`);
+  return client(`/jobdesks?page=${page.value}&order_id=${order_id.value}&${query.toString()}`);
 }
 
 const onError = (error: string) => {
@@ -968,7 +968,7 @@ const confirmDelete = async () => {
   isLoading.value[id] = true;
   
   try {
-    await client(`/api/jobdesks/${id}`, {
+    await client(`/jobdesks/${id}`, {
       method: 'DELETE',
     });
     isLoading.value[id] = false;

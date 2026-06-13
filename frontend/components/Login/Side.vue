@@ -140,7 +140,7 @@
 
   onMounted(async () => {
     try {
-      const response = await client('/api/settings/favicon')
+      const response = await client('/settings/favicon')
 
       if (response.favicon) {
         logo.value = response.favicon

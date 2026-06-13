@@ -66,7 +66,7 @@ const error = ref(false);
 const fetchData = async () => {
   try {
     const client = useSanctumClient();
-    const response = await client('/api/posts');
+    const response = await client('/posts');
     posts.value = response.data; // Simpan data post
   } catch (err) {
     console.error('Error fetching posts:', err);
@@ -80,7 +80,7 @@ const fetchData = async () => {
 const deletePost = async (id: number) => {
   try {
     const client = useSanctumClient();
-    await client(`/api/posts/${id}`, { method: 'DELETE' });
+    await client(`/posts/${id}`, { method: 'DELETE' });
     posts.value = posts.value.filter((post) => post.id !== id); // Hapus post dari daftar
   } catch (err) {
     console.error('Error deleting post:', err);

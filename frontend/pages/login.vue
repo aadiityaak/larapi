@@ -141,7 +141,7 @@ const backgroundStyle = computed(() => {
 const fetchLoginSettings = async () => {
   try {
     // Ambil pengaturan background (yang juga berisi style login)
-    const response = await client('/api/settings/background');
+    const response = await client('/settings/background');
     
     // Set login style dari response dengan fallback yang jelas
     const newStyle = response.style || 'center';

@@ -386,7 +386,7 @@ const items = ref([
 
 onMounted(async () => {
   try {
-    const response = await client('/api/settings')
+    const response = await client('/settings')
     sidebarStore.setAppName(response.app_name)
     appName.value = response.app_name
   } catch (error) {
@@ -394,7 +394,7 @@ onMounted(async () => {
   }
 
   try {
-    const faviconResponse = await client('/api/settings/favicon')
+    const faviconResponse = await client('/settings/favicon')
     if (faviconResponse.favicon) {
       logoStore.setLogo(faviconResponse.favicon)
     }

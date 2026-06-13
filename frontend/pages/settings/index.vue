@@ -303,7 +303,7 @@ const state = ref({
 }) as any
 onMounted(async () => {
   try {
-    const response = await client('/api/settings');
+    const response = await client('/settings');
     state.value = response
     if (response.pekerjaan) {
       state.value.pekerjaan = JSON.stringify(JSON.parse(response.pekerjaan), null, 2);
@@ -334,7 +334,7 @@ const handleSubmit = async () => {
   setAppName(state.value.app_name);
 
   try {
-    await client('/api/settings', {
+    await client('/settings', {
       method: 'POST',
       body: formData,
     });
@@ -351,7 +351,7 @@ const run = async (action: string) => {
   running.value = action
   lastOutput.value = ''
   try {
-    const res = await client(`/api/maintenance/${action}`, { method: 'POST' })
+    const res = await client(`/maintenance/${action}`, { method: 'POST' })
     if (res?.ok) {
       lastOutput.value = res.output || ''
       toast.add({ severity: 'success', summary: 'Berhasil', detail: `Aksi ${action} berhasil.`, life: 3000 })

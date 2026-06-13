@@ -95,7 +95,7 @@ onUnmounted(() => {
 
 const fetchNotifications = async () => {
   try {
-    const response = await client('/api/notifications/unread');
+    const response = await client('/notifications/unread');
     notifications.value = response || [];
   } catch (error) {
     console.error('Error fetching notifications:', error);
@@ -105,7 +105,7 @@ const fetchNotifications = async () => {
 
 const readNotifikasi = async (notif) => {
   try {
-    await client(`/api/notifications/read/${notif.id}`, { method: 'PUT' });
+    await client(`/notifications/read/${notif.id}`, { method: 'PUT' });
     // Remove the read notification from the list
     notifications.value = notifications.value.filter(n => n.id !== notif.id);
     

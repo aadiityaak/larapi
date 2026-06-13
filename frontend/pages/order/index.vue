@@ -843,7 +843,7 @@ onMounted(async () => {
   
   if (route.query.order_id) {
     try {
-      const detail = await client(`/api/orders/${route.query.order_id}`)
+      const detail = await client(`/orders/${route.query.order_id}`)
       openDialog(detail, 'OrderDetail', 'Detail Order', user);
     } catch (e) {
       // fallback: try find in current list
@@ -857,14 +857,14 @@ onMounted(async () => {
   }
 
   try {
-    const responseBank = await client('/api/settings/banks')
+    const responseBank = await client('/settings/banks')
     banks.value = [{ name: 'Perorangan' }, ...responseBank]
   } catch (error) {
     console.log(error)
   }
 
   try {
-    settingsAll.value = await client('/api/settings')
+    settingsAll.value = await client('/settings')
   } catch (e) {}
 
 });
@@ -887,7 +887,7 @@ const exportToExcel = async () => {
   if (route.query.status) query.append('status', route.query.status as string);
 
   try {
-    const response = await client(`/api/orders?${query.toString()}`);
+    const response = await client(`/orders?${query.toString()}`);
 
     if (!response || !response.length) {
       toast.add({ severity: 'warn', summary: 'Tidak ada data', detail: 'Tidak ada pesanan untuk diekspor.', life: 3000 });
@@ -1034,7 +1034,7 @@ async function fetchOrders() {
   if (filter.value.bank) query.append('bank', filter.value.bank);
   if (filter.value.dari) query.append('dari', filter.value.dari.toISOString().slice(0, 10));
   if (filter.value.sampai) query.append('sampai', filter.value.sampai.toISOString().slice(0, 10));
-  return client(`/api/orders?${query.toString()}`);
+  return client(`/orders?${query.toString()}`);
 }
 
 const openDialog = async (data: any, komponen: string, title: string, user: any) => {
@@ -1042,7 +1042,7 @@ const openDialog = async (data: any, komponen: string, title: string, user: any)
     let baseData = (typeof data === 'object' && data !== null) ? data : {};
     if ((komponen === 'OrderEdit' || komponen === 'OrderDetail') && baseData?.id) {
       // Ambil detail order terbaru agar field tambahan (mis. billing_notes) tidak kosong
-      const detail = await client(`/api/orders/${baseData.id}`);
+      const detail = await client(`/orders/${baseData.id}`);
       baseData = detail || baseData;
     }
     modalData.value = baseData;
@@ -1063,7 +1063,7 @@ const openDialog = async (data: any, komponen: string, title: string, user: any)
 const openCustomerDialog = async (customerData: any) => {
   try {
     // Fetch detailed customer data with orders
-    const detailCustomer = await client(`/api/customers/${customerData.id}`);
+    const detailCustomer = await client(`/customers/${customerData.id}`);
     modalData.value = detailCustomer;
     modalData.value.title = `Detail Konsumen - ${customerData.name}`;
     modalKomponen.value = 'KonsumenDetail';
@@ -1081,7 +1081,7 @@ const goToJobdesk = (id: number, status: string) => {
 
 async function printOrderBackend(order: any) {
   try {
-    const blob = await client(`/api/orders/${order.id}/print`, {
+    const blob = await client(`/orders/${order.id}/print`, {
       method: 'GET',
       responseType: 'blob',
       headers: {
@@ -1263,7 +1263,7 @@ const resetStatusFilter = async () => {
     const queryArchive = new URLSearchParams();
     queryArchive.append('page', '1');
 
-    const response = await client(`/api/orders?customer_id=${konsumenId.value}&${queryArchive.toString()}`);
+    const response = await client(`/orders?customer_id=${konsumenId.value}&${queryArchive.toString()}`);
     data.value = response;
 
     // Navigasi ke halaman tanpa query parameter status
@@ -1286,7 +1286,7 @@ const confirmDelete = async () => {
   
   try {
     isLoading.value[deleteItemId.value] = true;
-    await client(`/api/orders/${deleteItemId.value}`, { method: 'DELETE' });
+    await client(`/orders/${deleteItemId.value}`, { method: 'DELETE' });
     toast.add({ severity: 'success', summary: 'Success', detail: 'Delete order berhasil!', life: 3000 });
     await refresh();
   } catch (error) {
@@ -1311,7 +1311,7 @@ const filterArchive = async (status: string) => {
     queryArchive.append('page', '1');
 
     // Panggil API untuk mendapatkan data
-    const response = await client(`/api/orders?customer_id=${konsumenId.value}&${queryArchive.toString()}`);
+    const response = await client(`/orders?customer_id=${konsumenId.value}&${queryArchive.toString()}`);
     data.value = response;
     page.value = 1;
 

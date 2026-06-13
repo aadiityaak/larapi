@@ -140,7 +140,7 @@ const posts = ref([]);
 const { data, refresh } = await useAsyncData('posts', fetchPost);
 
 function fetchPost() {
-  return client('/api/posts');
+  return client('/posts');
 }
 
 // Computed properties for stats
@@ -172,7 +172,7 @@ const formatDate = (dateString: string) => {
 // Fungsi untuk Menghapus Post
 const deletePost = async (id: number) => {
   try {
-    await client(`/api/posts/${id}`, { method: 'DELETE' });
+    await client(`/posts/${id}`, { method: 'DELETE' });
     await refresh(); // Refresh data setelah menghapus
   } catch (error) {
     console.error('Error deleting post:', error);

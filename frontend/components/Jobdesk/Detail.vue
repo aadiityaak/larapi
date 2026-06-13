@@ -230,7 +230,7 @@ const sendNotification = async (id: number) => {
       description: 'Pemberitahuan Order Baru',
       title: 'Order Baru',
     }
-    await client(`/api/jobdesk-reminder`, {
+    await client(`/jobdesk-reminder`, {
         method: 'POST',
         body: data,
     })

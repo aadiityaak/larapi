@@ -1104,7 +1104,7 @@ const loadOrderList = async () => {
     if (draftDatas.value.id) {
       params.append("exclude_id", String(draftDatas.value.id));
     }
-    const orders = await client(`/api/orders/list?${params.toString()}`);
+    const orders = await client(`/orders/list?${params.toString()}`);
     orderList.value = orders.map((order: any) => ({
       ...order,
       label: getOrderLabel(order),
@@ -1194,15 +1194,15 @@ onMounted(async () => {
 
   // Load daftar users untuk Maker/PIC
   try {
-    const resUsers = await client("/api/karyawans?paginate=false");
+    const resUsers = await client("/karyawans?paginate=false");
     users.value = normalizeList(resUsers);
     if (!users.value?.length) {
-      const resUsersMin = await client("/api/karyawans/min");
+      const resUsersMin = await client("/karyawans/min");
       users.value = normalizeList(resUsersMin);
     }
   } catch (e) {
     try {
-      const resUsersMin = await client("/api/karyawans/min");
+      const resUsersMin = await client("/karyawans/min");
       users.value = normalizeList(resUsersMin);
     } catch (err) {
       console.log("Error fetch users", err);
@@ -1321,15 +1321,15 @@ watch(
 // Load PICs data
 const loadPICs = async () => {
   try {
-    const response = await client("/api/karyawans?role=PIC&paginate=false");
+    const response = await client("/karyawans?role=PIC&paginate=false");
     pics.value = normalizeList(response);
     if (!pics.value?.length) {
-      const resMin = await client("/api/karyawans/min?role=PIC");
+      const resMin = await client("/karyawans/min?role=PIC");
       pics.value = normalizeList(resMin);
     }
   } catch (error) {
     try {
-      const resMin = await client("/api/karyawans/min?role=PIC");
+      const resMin = await client("/karyawans/min?role=PIC");
       pics.value = normalizeList(resMin);
     } catch (err) {
       console.log("Error fetching PICs:", err);
@@ -1351,7 +1351,7 @@ watch(
 
 const loadProducts = async () => {
   try {
-    const response_products = await client("/api/produk?paginate=false");
+    const response_products = await client("/produk?paginate=false");
     products.value = normalizeList(response_products);
   } catch (error) {
     console.log("Error fetching products:", error);
@@ -1362,8 +1362,8 @@ const loadProducts = async () => {
 const loadKonsumen = async () => {
   try {
     const response: any = konsumenId.value
-      ? await client(`/api/customers/${konsumenId.value}`)
-      : await client("/api/customers?paginate=false");
+      ? await client(`/customers/${konsumenId.value}`)
+      : await client("/customers?paginate=false");
 
     if (konsumenId.value) {
       draftDatas.value.customer = Array.isArray(response?.data)
@@ -1518,7 +1518,7 @@ const handleSubmit = async ({ valid }: { valid: boolean }) => {
       // Update existing order
       console.log("Updating order with ID:", draftDatas.value.id);
       const responseUpdate = await client(
-        `/api/orders/${draftDatas.value.id}`,
+        `/orders/${draftDatas.value.id}`,
         {
           method: "PUT",
           body: draftDatas.value,
@@ -1529,7 +1529,7 @@ const handleSubmit = async ({ valid }: { valid: boolean }) => {
     } else {
       // Add new order
       console.log("Adding new order...");
-      const responseAdd = await client("/api/orders", {
+      const responseAdd = await client("/orders", {
         method: "POST",
         body: draftDatas.value,
       });

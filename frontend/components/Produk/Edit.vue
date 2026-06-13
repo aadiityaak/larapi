@@ -220,7 +220,7 @@ onMounted(async () => {
   }
 
   try {
-    const response = await client('/api/metas?paginate=false')
+    const response = await client('/metas?paginate=false')
     selectMeta.value = response
   } catch (error) {
     console.log(error)
@@ -273,7 +273,7 @@ const handleSubmit = async ({ valid }: { valid: boolean }) => {
   }
   if(!draftDatas.value.id) {
       try {
-        const responseadd = await client('/api/produk', {
+        const responseadd = await client('/produk', {
           method: 'POST',
           body: payload
         })
@@ -285,7 +285,7 @@ const handleSubmit = async ({ valid }: { valid: boolean }) => {
       }
   } else {
       try {
-        const responseUpdate = await client(`/api/produk/${draftDatas.value.id}`, {
+        const responseUpdate = await client(`/produk/${draftDatas.value.id}`, {
           method: 'PUT',
           body: payload
         })

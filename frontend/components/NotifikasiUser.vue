@@ -103,13 +103,13 @@ const client = useSanctumClient()
 const { data, error, refresh } = await useAsyncData('notifikasi', fetchNotifikasi);
 
 function fetchNotifikasi() {
-  return client(`/api/notifications`);
+  return client(`/notifications`);
 }
 
 const openNotifikasi = async (item) => {
   try {
     // Mark as read
-    await client(`/api/notifications/${item.id}`, {
+    await client(`/notifications/${item.id}`, {
       method: 'PUT',
     });
     
@@ -127,7 +127,7 @@ const openNotifikasi = async (item) => {
 
 const readNotifikasi = async ($id) => {
   try {
-    await client(`/api/notifications/${$id}`, {
+    await client(`/notifications/${$id}`, {
       method: 'PUT',
     });
     refresh();

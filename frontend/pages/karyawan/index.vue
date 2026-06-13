@@ -461,11 +461,11 @@ function fetchData() {
   if (nameFilter.value.length > 2) {
     query.append('name', nameFilter.value);
   }
-  return client(`/api/karyawans?page=${page.value}&${query.toString()}`);
+  return client(`/karyawans?page=${page.value}&${query.toString()}`);
 }
 
 function fetchDataRoles() {
-    return client('/api/roles')
+    return client('/roles')
 }
 
 const onAddData = (response: any) => {
@@ -486,7 +486,7 @@ const openDialog = async (data: any, komponen: string, title: string, user: any)
   try {
     let baseData = (typeof data === 'object' && data !== null) ? data : {};
     if ((komponen === 'KaryawanDetail' || komponen === 'KaryawanEdit') && baseData?.id) {
-      const detail = await client(`/api/karyawans/${baseData.id}`);
+      const detail = await client(`/karyawans/${baseData.id}`);
       baseData = detail || baseData;
     }
     modalData.value = baseData;
@@ -540,7 +540,7 @@ const confirmDelete = async () => {
   if (deleteItemId.value === null) return;
   
   try {
-    await client(`/api/karyawans/${deleteItemId.value}`, { method: 'DELETE' });
+    await client(`/karyawans/${deleteItemId.value}`, { method: 'DELETE' });
     toast.add({ severity: 'success', summary: 'Success', detail: 'Delete user berhasil!', life: 3000 });
     await refresh();
   } catch (error: any) {

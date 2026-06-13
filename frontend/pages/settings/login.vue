@@ -200,7 +200,7 @@ const loginStyle = ref('center') // Default ke 'Tengah'
 // Fetch existing background settings
 const fetchBackgroundSettings = async () => {
   try {
-    const response = await client('/api/settings/background')
+    const response = await client('/settings/background')
     const { color, image, style } = response
     backgroundColor.value = color || ''
     loginStyle.value = style || 'center'
@@ -237,7 +237,7 @@ const handleSubmitBackground = async () => {
       formData.append('image', backgroundImage.value)
     }
 
-    await client('/api/settings/background', {
+    await client('/settings/background', {
       method: 'POST',
       body: formData,
     })

@@ -305,7 +305,7 @@ const handleUpdate = async () => {
       formData.append('lampiran', selectedFile.value)
     }
     
-    const response = await client(`/api/orders/${datas.value.id}`, {
+    const response = await client(`/orders/${datas.value.id}`, {
       method: 'PUT',
       body: formData,
     })

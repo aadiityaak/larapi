@@ -291,14 +291,14 @@
         formData.append('password', draftDatas.value.password)
         formData.append('password_confirmation', draftDatas.value.password_confirmation)
 
-        const addData = await client(`/api/karyawans`, {
+        const addData = await client(`/karyawans`, {
           method: 'POST',
           body: formData,
         })
         emits('addData', addData)
         isLoading.value = false
       } else {
-        const updateData = await client(`/api/karyawans/${draftDatas.value.id}`, {
+        const updateData = await client(`/karyawans/${draftDatas.value.id}`, {
           method: 'PUT',
           body: formData,
         })

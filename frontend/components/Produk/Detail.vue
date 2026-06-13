@@ -169,7 +169,7 @@ const metaIds = computed(() => {
 
 onMounted(async () => {
   try {
-    const response = await client('/api/metas?paginate=false')
+    const response = await client('/metas?paginate=false')
     selectMeta.value = response
   } catch (error) {
     console.log(error)

@@ -127,7 +127,7 @@ const banks = ref([{ name: '' }]) // Awalnya satu field bank
 
 const fetchBanks = async () => {
   try {
-    const response = await client('/api/settings/banks')
+    const response = await client('/settings/banks')
     banks.value = response.map((bank: any) => ({ name: bank.name })) // Sesuaikan struktur data
   } catch (error) {
     toast.add({ severity: 'error', summary: 'Error', detail: 'Gagal memuat data bank', life: 3000 })
@@ -145,7 +145,7 @@ const removeBank = (index: number) => {
 const handleSubmit = async () => {
   try {
     const bankData = banks.value.filter(bank => bank.name); // Hanya ambil bank yang memiliki nama
-    await client('/api/settings/banks', {
+    await client('/settings/banks', {
       method: 'POST',
       body: JSON.stringify({ banks: bankData }), // Tambahkan kunci 'banks'
       headers: { 'Content-Type': 'application/json' }

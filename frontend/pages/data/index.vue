@@ -379,7 +379,7 @@ const deleteItemId = ref<number | null>(null)
 const { data, error, refresh } = await useAsyncData('datas', fetchDatas);
 
 function fetchDatas() {  
-  return client(`/api/metas?page=${page.value}`);
+  return client(`/metas?page=${page.value}`);
 }
 
 const onRefreshData = ( message : string) => {
@@ -437,7 +437,7 @@ const confirmDelete = async () => {
   
   try {
     isLoading.value[deleteItemId.value] = true;
-    await client(`/api/metas/${deleteItemId.value}`, { method: 'DELETE' });
+    await client(`/metas/${deleteItemId.value}`, { method: 'DELETE' });
     toast.add({ severity: 'success', summary: 'Sukses', detail: 'Data berhasil dihapus!', life: 3000 });
     await refresh();
   } catch (error) {

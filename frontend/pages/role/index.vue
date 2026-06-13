@@ -303,11 +303,11 @@ const allCapabilities = ref([])
 
 // Initial fetch
 const fetchRoles = async () => {
-  const res = await client('/api/roles')
+  const res = await client('/roles')
   roles.value = res
 }
 const fetchCapabilities = async () => {
-  const res = await client('/api/capabilities')
+  const res = await client('/capabilities')
   allCapabilities.value = res
 }
 
@@ -333,8 +333,8 @@ const submitEdit = async () => {
   try {
     const method = form.value.id ? 'PUT' : 'POST'
     const url = form.value.id
-      ? `/api/roles/${form.value.id}`
-      : '/api/roles'
+      ? `/roles/${form.value.id}`
+      : '/roles'
 
     await client(url, {
       method,
@@ -367,7 +367,7 @@ const submitEdit = async () => {
 // Delete Handler
 const deleteRole = async (id: number) => {
   try {
-    await client(`/api/roles/${id}`, { method: 'DELETE' })
+    await client(`/roles/${id}`, { method: 'DELETE' })
     toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Role dihapus', life: 3000 })
     await fetchRoles()
   } catch (err) {

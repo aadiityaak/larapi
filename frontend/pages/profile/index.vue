@@ -356,7 +356,7 @@ const handleUpdate = async ({ valid }: { valid: boolean }) => {
       formData.append('avatar', state.value.avatar);
     }
 
-    const response = await client(`/api/profile`, {
+    const response = await client(`/profile`, {
       method: 'PUT',
       body: formData
     });

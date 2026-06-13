@@ -620,13 +620,13 @@ async function fetchCustomers() {
   if (filter.value.dari) query.append('dari', filter.value.dari.toISOString().slice(0, 10))
   if (filter.value.sampai) query.append('sampai', filter.value.sampai.toISOString().slice(0, 10))
 
-  return client(`/api/customers?page=${page.value}&${query.toString()}`)
+  return client(`/customers?page=${page.value}&${query.toString()}`)
 }
 
 const { data, error, refresh } = await useAsyncData('customers', fetchCustomers)
 
 onMounted(async () => {
-  const responseBank = await client('/api/settings/banks')
+  const responseBank = await client('/settings/banks')
   banks.value = [{ name: 'Perorangan' }, ...responseBank]
 })
 
@@ -770,7 +770,7 @@ const confirmDelete = async () => {
   isLoading.value[id] = true;
   
   try {
-    await client(`/api/customers/${id}`, { method: 'DELETE' });
+    await client(`/customers/${id}`, { method: 'DELETE' });
     isLoading.value[id] = false;
     toast.add({ severity: 'success', summary: 'Sukses', detail: 'Konsumen berhasil dihapus!', life: 3000 });
     refresh();

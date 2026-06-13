@@ -326,7 +326,7 @@ const resolver = () => {
 // Load banks data on mount
 onMounted(async () => {
   try {
-    const responseBank = await client('/api/settings/banks')
+    const responseBank = await client('/settings/banks')
     banks.value = [{ name: 'Perorangan' }, ...responseBank]
   } catch (error) {
     console.error('Error loading banks:', error)
@@ -381,7 +381,7 @@ const handleSubmit = async ({ valid }: { valid: boolean }) => {
     if (!draftDatas.value.id) {
       // Add new customer
       console.log('Adding new customer...') // Debug log
-      const responseAdd = await client('/api/customers', {
+      const responseAdd = await client('/customers', {
         method: 'POST',
         body: draftDatas.value,
       })
@@ -390,7 +390,7 @@ const handleSubmit = async ({ valid }: { valid: boolean }) => {
     } else {
       // Update existing customer
       console.log('Updating customer with ID:', draftDatas.value.id) // Debug log
-      const responseUpdate = await client(`/api/customers/${draftDatas.value.id}`, {
+      const responseUpdate = await client(`/customers/${draftDatas.value.id}`, {
         method: 'PUT',
         body: draftDatas.value,
       })

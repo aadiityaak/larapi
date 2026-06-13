@@ -173,7 +173,7 @@ const state = ref({
 
 onMounted(async () => {
   try {
-    const response = await client('/api/settings');
+    const response = await client('/settings');
       state.value = response
   } catch (error: any) {
     toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch settings: ' + error.message, life: 3000 });
@@ -189,7 +189,7 @@ const handleSubmit = async () => {
     }
   });
   try {
-    await client('/api/settings', {
+    await client('/settings', {
       method: 'POST',
       body: formData,
     });

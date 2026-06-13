@@ -64,12 +64,18 @@ export default defineNuxtConfig({
   sanctum: {
     mode: 'cookie',
     baseUrl: (() => {
-      const raw = process.env.API_URL || (process.dev ? 'http://localhost:8000' : '/api');
+      const raw = process.env.API_URL || (process.dev ? 'http://localhost:8000/api' : '/api/api');
       if (raw.startsWith('/')) return raw;
       const u = new URL(raw);
       const path = u.pathname.replace(/\/$/, '');
       return `${u.protocol}//${u.host}${path}`;
     })(),
+    endpoints: {
+      csrf: '/sanctum/csrf-cookie',
+      login: '/login',
+      logout: '/logout',
+      user: '/user'
+    },
     redirectIfAuthenticated: true,
     redirectIfUnauthenticated: true,
     redirect: {
@@ -104,7 +110,7 @@ export default defineNuxtConfig({
         {
           urlPattern: (() => {
             const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const raw = process.env.API_URL || (process.dev ? 'http://localhost:8000' : '/api');
+            const raw = process.env.API_URL || (process.dev ? 'http://localhost:8000/api' : '/api/api');
             if (raw.startsWith('/')) {
               return new RegExp(`^${esc(raw.replace(/\/$/, ''))}\\/.*`, 'i');
             }

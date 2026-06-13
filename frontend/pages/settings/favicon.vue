@@ -135,7 +135,7 @@ const previewFavicon = ref<string | null>(null)
 // Fetch existing favicon settings
 const fetchFaviconSettings = async () => {
   try {
-    const response = await client('/api/settings/favicon')
+    const response = await client('/settings/favicon')
 
     const { favicon: image } = response
     if (image) {
@@ -173,7 +173,7 @@ const handleSubmitFavicon = async () => {
     const formData = new FormData()
     formData.append('favicon', favicon.value)
 
-    await client('/api/settings/favicon', {
+    await client('/settings/favicon', {
       method: 'POST',
       body: formData,
     })

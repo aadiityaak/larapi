@@ -1209,7 +1209,7 @@ const setKaryawanLoginTopChartOptions = () => {
 };
 // Move this after data initialization
 const { data, pending, error, refresh } = await useAsyncData("dashboard", () =>
-  client("/api/home", {
+  client("/home", {
     params: {
       date_from: dateFrom.value,
       date_to: dateTo.value,
@@ -1562,7 +1562,7 @@ onMounted(async () => {
   karyawanLoginTopChartOptions.value = setKaryawanLoginTopChartOptions() as any;
 
   try {
-    const response = await client(`/api/karyawans/${user.value.id}`);
+    const response = await client(`/karyawans/${user.value.id}`);
     dataJobdesk.value = response;
   } catch (error) {
     console.log(error);

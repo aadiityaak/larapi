@@ -128,7 +128,7 @@
   onMounted(async () => {
     try {
       // Fetch favicon/logo
-      const faviconResponse = await client('/api/settings/favicon')
+      const faviconResponse = await client('/settings/favicon')
       if (faviconResponse.favicon) {
         logo.value = faviconResponse.favicon
       }

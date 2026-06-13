@@ -246,7 +246,7 @@ onMounted(async () => {
 // Fungsi untuk mengambil daftar kategori
 const fetchCategories = async () => {
   try {
-    const response = await client('/api/categories');
+    const response = await client('/categories');
     categories.value = response; // Pastikan respons adalah array
   } catch (error) {
     console.error('Error fetching categories:', error);
@@ -256,7 +256,7 @@ const fetchCategories = async () => {
 // Fungsi untuk mengambil data post berdasarkan ID
 const fetchPost = async (id) => {
   try {
-    const response = await client(`/api/posts/${id}`);
+    const response = await client(`/posts/${id}`);
     console.log("Response dari API:", response);
 
     // Pastikan respons adalah objek dengan properti yang sesuai
@@ -292,13 +292,13 @@ const savePost = async () => {
 
   try {
     if (isEdit.value) {
-      await client(`/api/posts/${route.params.id}`, {
+      await client(`/posts/${route.params.id}`, {
         method: 'PUT',
         body: formData,
       });
       toast.add({ severity: 'success', summary: 'Success', detail: 'Update post berhasil!', life: 3000 });
     } else {
-      await client('/api/posts', {
+      await client('/posts', {
         method: 'POST',
         body: formData,
       });
@@ -317,7 +317,7 @@ const addCategory = async () => {
   if (!newCategory.value.trim()) return;
 
   try {
-    const response = await client('/api/categories', {
+    const response = await client('/categories', {
       method: 'POST',
       body: { name: newCategory.value },
     });

@@ -340,7 +340,7 @@ const liststatus = ref([
 
 const fetchKaryawanData = async () => {
   try {
-    const res = await client("/api/karyawans/min?jobdesk_roles=true");
+    const res = await client("/karyawans/min?jobdesk_roles=true");
     const list = Array.isArray(res)
       ? res
       : Array.isArray((res as any)?.data)
@@ -364,7 +364,7 @@ const fetchKaryawanData = async () => {
 
 const fetchOrders = async () => {
   try {
-    const response = await client("/api/orders?paginate=false");
+    const response = await client("/orders?paginate=false");
     orders.value = Array.isArray(response) ? response : [];
     listOrder.value = orders.value.map((item: any) => ({
       id: item.id,
@@ -432,12 +432,12 @@ const handleSubmit = async ({ valid }: { valid: boolean }) => {
   try {
     if (draftDatas.value.id) {
       const responseUpdate = await client(
-        `/api/jobdesks/${draftDatas.value.id}`,
+        `/jobdesks/${draftDatas.value.id}`,
         { method: "PUT", body: draftDatas.value },
       );
       emits("updateData", responseUpdate);
     } else {
-      const response = await client("/api/jobdesks", {
+      const response = await client("/jobdesks", {
         method: "POST",
         body: draftDatas.value,
       });

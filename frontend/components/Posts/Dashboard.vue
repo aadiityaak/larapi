@@ -182,7 +182,7 @@ const handleImageError = (postId: string) => {
 const fetchData = async () => {
   try {
     const client = useSanctumClient();
-    const response = await client('/api/posts');
+    const response = await client('/posts');
     posts.value = response.data; // Simpan data post
   } catch (err) {
     console.error('Error fetching posts:', err);

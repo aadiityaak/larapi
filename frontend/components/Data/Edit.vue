@@ -187,7 +187,7 @@ const handleSubmit = async ({ valid }: { valid: boolean }) => {
   isLoading.value = true
   if(!draftDatas.value.id) {
       try {
-          const responseAdd = await client('/api/metas', {
+          const responseAdd = await client('/metas', {
               method: 'POST',
               body: draftDatas.value
           })
@@ -199,7 +199,7 @@ const handleSubmit = async ({ valid }: { valid: boolean }) => {
       }
   } else {
       try {
-          const responseUpdate = await client(`/api/metas/${draftDatas.value.id}`, {
+          const responseUpdate = await client(`/metas/${draftDatas.value.id}`, {
               method: 'PUT',
               body: draftDatas.value
           })

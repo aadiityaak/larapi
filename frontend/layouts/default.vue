@@ -33,7 +33,7 @@ useHead({
 
 onMounted(async () => {
   try {
-    const response = await client('/api/settings/background')
+    const response = await client('/settings/background')
     const { color, image } = response
     backgroundColor.value = color || ''
     if (image) {

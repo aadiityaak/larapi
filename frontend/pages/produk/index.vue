@@ -427,7 +427,7 @@ const closeActionMenu = () => {
 
 onMounted(async () => {
   try {
-    const response = await client('/api/metas?paginate=false')
+    const response = await client('/metas?paginate=false')
     selectMeta.value = response
   } catch (error) {
     console.log(error)
@@ -474,7 +474,7 @@ function fetchProduct() {
   if (nameFilter.value.length > 2) {
     query.append('name', nameFilter.value);
   }
-  return client(`/api/produk?page=${page.value}&${query.toString()}`);
+  return client(`/produk?page=${page.value}&${query.toString()}`);
 }
 
 const onError = ( error : string) => {
@@ -523,7 +523,7 @@ const confirmDelete = async () => {
   if (deleteItemId.value === null) return;
   
   try {
-    await client(`/api/produk/${deleteItemId.value}`, { method: 'DELETE' });
+    await client(`/produk/${deleteItemId.value}`, { method: 'DELETE' });
     toast.add({ severity: 'success', summary: 'Sukses', detail: 'Produk berhasil dihapus!', life: 3000 });
     await refresh();
   } catch (error) {
